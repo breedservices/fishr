@@ -1,0 +1,45 @@
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+eggs/
+*.whl
+
+# virtual environments
+.venv/
+venv/
+env/
+
+# uv
+uv.lock
+.python-version
+
+# ide
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# os
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# docs (no build artifacts)
+docs/node_modules/
+
+# mypy / type checkers
+.mypy_cache/
+.pytype/
+
+# pytest
+.pytest_cache/
+
+# coverage
+htmlcov/
+.coverage

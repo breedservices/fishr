@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fishr — Noxus Provider</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h2>fishr</h2>
+    </div>
+    <ul>
+        <li><a href="../index.html">← Back to Docs</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#models">Models</a></li>
+        <li><a href="#web-search">Web Search</a></li>
+        <li><a href="#images">Image Input</a></li>
+        <li><a href="#history">Conversation History</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section id="overview">
+        <h2>Noxus Provider</h2>
+        <p>Noxus provides free access to 8 models through a reverse-engineered API. It supports web search, image input, streaming, and conversation history.</p>
+        <p>All Noxus models are specified with the <code>noxus/</code> prefix — or omit it, as it's the default.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# these are equivalent
+response = client.chat.completions.create(
+    model="noxus/openai",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+response = client.chat.completions.create(
+    model="openai",
+    messages=[{"role": "user", "content": "Hello!"}],
+)</code></pre>
+        </div>
+    </section>
+
+    <section id="models">
+        <h2>Models</h2>
+
+        <div class="alert alert-warn">
+            <strong>⚠ Not all models support every feature.</strong> Check the table below. Using <code>web_search=True</code> or sending images with an unsupported model will silently fail or produce unexpected results.
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>History</th>
+                        <th>Web Search</th>
+                        <th>Image Input</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>noxus/openai</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>noxus/google</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>noxus/sonnet-4.6</code></td><td>✅</td><td>✅</td><td class="no">❌</td></tr>
+                    <tr><td><code>noxus/sonnet-3.5</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>noxus/grok-4.3</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>noxus/perplexity</code></td><td>✅</td><td class="no">❌</td><td>✅</td></tr>
+                    <tr><td><code>noxus/metaai</code></td><td>✅</td><td class="no">❌</td><td class="no">❌</td></tr>
+                    <tr><td><code>noxus/qwen</code></td><td>✅</td><td>✅</td><td class="no">❌</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="web-search">
+        <h2>Web Search</h2>
+        <p>6 out of 8 Noxus models support live web search. Pass <code>web_search=True</code> to enable it.</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Web Search</th></tr></thead>
+                <tbody>
+                    <tr><td><code>noxus/openai</code></td><td>✅</td></tr>
+                    <tr><td><code>noxus/google</code></td><td>✅</td></tr>
+                    <tr><td><code>noxus/sonnet-4.6</code></td><td>✅</td></tr>
+                    <tr><td><code>noxus/sonnet-3.5</code></td><td>✅</td></tr>
+                    <tr><td><code>noxus/grok-4.3</code></td><td>✅</td></tr>
+                    <tr><td><code>noxus/perplexity</code></td><td class="no">❌</td></tr>
+                    <tr><td><code>noxus/metaai</code></td><td class="no">❌</td></tr>
+                    <tr><td><code>noxus/qwen</code></td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="noxus/grok-4.3",
+    messages=[{"role": "user", "content": "Latest news on SpaceX"}],
+    web_search=True,
+)
+
+print(response.text)</code></pre>
+        </div>
+
+        <div class="alert alert-warn">
+            <strong>⚠ Web search is not supported by all models.</strong> Passing <code>web_search=True</code> to <code>noxus/perplexity</code> or <code>noxus/metaai</code> will have no effect.
+        </div>
+    </section>
+
+    <section id="images">
+        <h2>Image Input</h2>
+        <p>5 out of 8 Noxus models accept image attachments. Attach images to messages using the <code>image</code> key with <code>mime_type</code> and <code>base64_data</code>.</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Image Input</th></tr></thead>
+                <tbody>
+                    <tr><td><code>noxus/openai</code></td><td>✅</td></tr>
+                    <tr><td><code>noxus/google</code></td><td>✅</td></tr>
+                    <tr><td><code>noxus/sonnet-4.6</code></td><td class="no">❌</td></tr>
+                    <tr><td><code>noxus/sonnet-3.5</code></td><td>✅</td></tr>
+                    <tr><td><code>noxus/grok-4.3</code></td><td>✅</td></tr>
+                    <tr><td><code>noxus/perplexity</code></td><td>✅</td></tr>
+                    <tr><td><code>noxus/metaai</code></td><td class="no">❌</td></tr>
+                    <tr><td><code>noxus/qwen</code></td><td class="no">❌</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">import base64
+from fishr import Client
+
+client = Client()
+
+# read an image file and encode it
+with open("photo.png", "rb") as f:
+    encoded = base64.b64encode(f.read()).decode()
+
+response = client.chat.completions.create(
+    model="noxus/openai",
+    messages=[{
+        "role": "user",
+        "content": "What is in this image?",
+        "image": {
+            "mime_type": "image/png",
+            "base64_data": encoded,
+        },
+    }],
+)
+
+print(response.text)</code></pre>
+        </div>
+
+        <div class="alert alert-warn">
+            <strong>⚠ Image input is not supported by all models.</strong> Models marked with ❌ will ignore attached images. Noxus does not support <em>image generation</em> — use <a href="../index.html#images">DeepAI</a> for that.
+        </div>
+    </section>
+
+    <section id="history">
+        <h2>Conversation History</h2>
+        <p>All Noxus models support conversation history. The full message history is sent with each request so the model has context from previous turns.</p>
+
+        <div class="alert alert-info">
+            <strong>ℹ Context windows vary by model.</strong> Very long conversations may lose earlier context as the history exceeds the model's context limit. Use <code>conv.clear()</code> to reset when needed.
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+conv = client.conversation(model="noxus/openai")
+
+conv.system("You are a helpful assistant.")
+conv.ask("Remember: 42")
+reply = conv.ask("What number did I say?")
+print(reply)  # "You said 42."
+
+conv.clear()  # reset history</code></pre>
+        </div>
+    </section>
+
+    <section id="limitations">
+        <h2>Limitations</h2>
+        <div class="ref-card">
+            <ul class="limitations-list">
+                <li>Noxus is a <strong>reverse-engineered API</strong> — it may break if the upstream service changes.</li>
+                <li>There is <strong>no uptime guarantee</strong>. Availability depends on the upstream service.</li>
+                <li><strong>Rate limits</strong> may apply. Avoid rapid sequential requests.</li>
+                <li><strong>Image input</strong> is not supported by <code>noxus/sonnet-4.6</code>, <code>noxus/metaai</code>, and <code>noxus/qwen</code>.</li>
+                <li><strong>Web search</strong> is not supported by <code>noxus/perplexity</code> and <code>noxus/metaai</code>.</li>
+                <li><strong>Image generation</strong> is not available. Use DeepAI's <code>deepai/image</code> model instead.</li>
+                <li><strong>Streaming</strong> may occasionally drop chunks or include partial data on slow connections.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p><a href="../index.html">← Back to fishr Docs</a></p>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="../js/script.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

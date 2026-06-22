@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fishr — Quillbot Provider</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h2>fishr</h2>
+    </div>
+    <ul>
+        <li><a href="../index.html">← Back to Docs</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#models">Models</a></li>
+        <li><a href="#web-search">Web Search</a></li>
+        <li><a href="#history">Conversation History</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section id="overview">
+        <h2>Quillbot Provider</h2>
+        <p>Quillbot provides free access to 2 chat models through a reverse-engineered API. It supports streaming, web search, and conversation history.</p>
+        <p>Quillbot models use the <code>quillbot/</code> prefix.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="quillbot/quillbot",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.text)</code></pre>
+        </div>
+    </section>
+
+    <section id="models">
+        <h2>Models</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Web Search</th>
+                        <th>Image</th>
+                        <th>History</th>
+                        <th>System</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>quillbot/quillbot</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>quillbot/quillbot-search</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="web-search">
+        <h2>Web Search</h2>
+        <p>Use <code>quillbot/quillbot-search</code> for web search, or pass <code>web_search=True</code> with the standard model to enable it automatically.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# using the search model directly
+response = client.chat.completions.create(
+    model="quillbot/quillbot-search",
+    messages=[{"role": "user", "content": "What happened in tech today?"}],
+)
+
+print(response.text)</code></pre>
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# or enable web_search on the standard model
+response = client.chat.completions.create(
+    model="quillbot/quillbot",
+    messages=[{"role": "user", "content": "What happened in tech today?"}],
+    web_search=True,
+)
+
+print(response.text)</code></pre>
+        </div>
+    </section>
+
+    <section id="history">
+        <h2>Conversation History</h2>
+        <p>Quillbot supports conversation history. The full message history is formatted as a text prompt with <code>System:</code>, <code>Assistant:</code>, and <code>User:</code> prefixes.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+conv = client.conversation(model="quillbot/quillbot")
+
+conv.system("You are a helpful assistant.")
+conv.ask("Remember: 42")
+reply = conv.ask("What number did I say?")
+print(reply)
+
+conv.clear()  # reset history</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ History is formatted as text.</strong> Unlike other providers, Quillbot formats the entire conversation as a single text prompt rather than sending structured messages. Very long conversations may exceed context limits.
+        </div>
+    </section>
+
+    <section id="limitations">
+        <h2>Limitations</h2>
+        <div class="ref-card">
+            <ul class="limitations-list">
+                <li>Quillbot is a <strong>reverse-engineered API</strong> — it may break if the upstream service changes.</li>
+                <li>There is <strong>no uptime guarantee</strong>. Availability depends on the upstream service.</li>
+                <li><strong>No image support</strong> — neither image input nor image generation is available.</li>
+                <li><strong>Conversation history</strong> is formatted as plain text rather than structured messages, which may reduce quality on long conversations.</li>
+                <li><strong>Rate limits</strong> may apply. Avoid rapid sequential requests.</li>
+                <li><strong>Streaming</strong> uses SSE — some edge cases may produce partial output.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p><a href="../index.html">← Back to fishr Docs</a></p>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="../js/script.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

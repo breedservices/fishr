@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fishr — DeepAI Provider</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h2>fishr</h2>
+    </div>
+    <ul>
+        <li><a href="../index.html">← Back to Docs</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#models">Models</a></li>
+        <li><a href="#web-search">Web Search</a></li>
+        <li><a href="#image-gen">Image Generation</a></li>
+        <li><a href="#image-upload">Image Upload</a></li>
+        <li><a href="#history">Conversation History</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section id="overview">
+        <h2>DeepAI Provider</h2>
+        <p>DeepAI provides free access to chat models and <strong>image generation</strong> through a public API. It supports streaming, web search, and multiple models including online search.</p>
+        <p>DeepAI models use the <code>deepai/</code> prefix.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="deepai/standard",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.text)</code></pre>
+        </div>
+    </section>
+
+    <section id="models">
+        <h2>Models</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Web Search</th>
+                        <th>Image Gen</th>
+                        <th>History</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>deepai/standard</code></td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>deepai/online</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>deepai/gemma-4</code></td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>deepai/gemini-2.5-flash-lite</code></td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>deepai/deepseek-v3.2</code></td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>deepai/image</code></td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="web-search">
+        <h2>Web Search</h2>
+        <p>Only <code>deepai/online</code> supports web search. For other models, you can pass <code>web_search=True</code> and it will automatically use the <code>online</code> model.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="deepai/online",
+    messages=[{"role": "user", "content": "What happened in tech today?"}],
+    web_search=True,
+)
+
+print(response.text)</code></pre>
+        </div>
+    </section>
+
+    <section id="image-gen">
+        <h2>Image Generation</h2>
+        <p>DeepAI supports two ways to generate images:</p>
+
+        <h3>Direct image generation</h3>
+        <p>Use <code>client.images.generate()</code> with <code>deepai/image</code> for direct text-to-image generation. The response contains the image URL.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.images.generate(
+    model="deepai/image",
+    prompt="A cat riding a skateboard on Mars",
+)
+
+# the generated image URL
+print(result.data[0].url)</code></pre>
+        </div>
+
+        <h3>Via completions API</h3>
+        <p>You can also use <code>deepai/image</code> through the completions API for direct text-to-image generation. All DeepAI chat models can also trigger inline image generation during conversation via the built-in image generator tool.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="deepai/image",
+    messages=[{"role": "user", "content": "A cat riding a skateboard"}],
+)
+print(response.text)  # image URL</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Image generation mode.</strong> When using <code>deepai/image</code> via <code>client.images.generate()</code>, the model bypasses chat entirely and returns a direct image generation result. When using chat models, image generation is triggered by the model itself during conversation.
+        </div>
+    </section>
+
+    <section id="image-upload">
+        <h2>Image Upload</h2>
+        <p>DeepAI chat models support uploading images as attachments. Include a base64-encoded image in the <code>image</code> key of a message. The image is automatically uploaded to DeepAI's attachment API and referenced by UUID in the conversation.</p>
+
+        <div class="alert alert-info">
+            <strong>ℹ Image upload is handled automatically.</strong> When you include image data in messages, the DeepAI provider uploads it and attaches it to the conversation.
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">import base64
+from fishr import Client
+
+client = Client()
+
+# read an image file and encode it
+with open("photo.png", "rb") as f:
+    encoded = base64.b64encode(f.read()).decode()
+
+response = client.chat.completions.create(
+    model="deepai/standard",
+    messages=[{
+        "role": "user",
+        "content": "What is in this image?",
+        "image": {
+            "mime_type": "image/png",
+            "base64_data": encoded,
+        },
+    }],
+)
+
+print(response.text)</code></pre>
+        </div>
+
+        <h3>Streaming with images</h3>
+        <p>Image attachments also work with streaming. Set <code>stream=True</code> as usual.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">import base64
+from fishr import Client
+
+client = Client()
+
+with open("photo.png", "rb") as f:
+    encoded = base64.b64encode(f.read()).decode()
+
+response = client.chat.completions.create(
+    model="deepai/standard",
+    messages=[{
+        "role": "user",
+        "content": "Describe this image",
+        "image": {
+            "mime_type": "image/png",
+            "base64_data": encoded,
+        },
+    }],
+    stream=True,
+)
+
+for chunk in response:
+    print(chunk.choices[0].delta.content or "", end="")</code></pre>
+        </div>
+    </section>
+
+    <section id="history">
+        <h2>Conversation History</h2>
+        <p>All DeepAI models support conversation history. The full message history is sent with each request.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+conv = client.conversation(model="deepai/standard")
+
+conv.ask("Hello!")
+reply = conv.ask("What did I just say?")
+print(reply)
+
+conv.clear()  # reset history</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Context windows vary by model.</strong> Very long conversations may lose earlier context as the history exceeds the model's context limit.
+        </div>
+    </section>
+
+    <section id="limitations">
+        <h2>Limitations</h2>
+        <div class="ref-card">
+            <ul class="limitations-list">
+                <li>DeepAI uses a <strong>reverse-engineered API key generation</strong> — it may break if the upstream service changes.</li>
+                <li>There is <strong>no uptime guarantee</strong>. Availability depends on the upstream service.</li>
+                <li><strong>Web search</strong> is only available on <code>deepai/online</code>. Other models fall back to <code>online</code> when <code>web_search=True</code>.</li>
+                <li><strong>Image generation</strong> via <code>deepai/image</code> returns a URL, not inline image data.</li>
+                <li><strong>Streaming</strong> uses a custom separator protocol — some edge cases may produce partial output.</li>
+                <li><strong>Rate limits</strong> may apply. Avoid rapid sequential requests.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p><a href="../index.html">← Back to fishr Docs</a></p>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="../js/script.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

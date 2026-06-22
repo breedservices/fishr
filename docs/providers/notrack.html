@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fishr — NoTrack Provider</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h2>fishr</h2>
+    </div>
+    <ul>
+        <li><a href="../index.html">← Back to Docs</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#models">Models</a></li>
+        <li><a href="#streaming">Streaming</a></li>
+        <li><a href="#history">Conversation History</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section id="overview">
+        <h2>NoTrack Provider</h2>
+        <p>NoTrack provides free access to 3 chat models through a reverse-engineered API, including a <strong>reasoning model</strong>. It supports streaming and conversation history with chat ID tracking.</p>
+        <p>NoTrack models use the <code>notrack/</code> prefix.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="notrack/fast",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.text)</code></pre>
+        </div>
+    </section>
+
+    <section id="models">
+        <h2>Models</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Web Search</th>
+                        <th>Image</th>
+                        <th>History</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>notrack/fast</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
+                    <tr><td><code>notrack/standard</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
+                    <tr><td><code>notrack/reasoning</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="streaming">
+        <h2>Streaming</h2>
+        <p>Set <code>stream=True</code> to receive chunks as they arrive.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="notrack/standard",
+    messages=[{"role": "user", "content": "Tell me a story"}],
+    stream=True,
+)
+
+for chunk in response:
+    print(chunk.choices[0].delta.content or "", end="")</code></pre>
+        </div>
+    </section>
+
+    <section id="history">
+        <h2>Conversation History</h2>
+        <p>NoTrack supports conversation history by maintaining a <code>chat_id</code> across requests. This allows the model to reference previous messages in the same chat session.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+conv = client.conversation(model="notrack/standard")
+
+reply1 = conv.ask("Remember: the secret number is 7")
+print(reply1)
+
+reply2 = conv.ask("What is the secret number?")
+print(reply2)
+
+conv.clear()  # reset history and start a new chat</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Chat IDs are tracked automatically.</strong> The provider maintains a <code>chat_id</code> internally. Calling <code>conv.clear()</code> resets the chat ID, starting a fresh conversation on the server side.
+        </div>
+    </section>
+
+    <section id="limitations">
+        <h2>Limitations</h2>
+        <div class="ref-card">
+            <ul class="limitations-list">
+                <li>NoTrack is a <strong>reverse-engineered API</strong> — it may break if the upstream service changes.</li>
+                <li>There is <strong>no uptime guarantee</strong>. Availability depends on the upstream service.</li>
+                <li><strong>No image support</strong> — neither image input nor image generation is available.</li>
+                <li><strong>No web search</strong> — none of the NoTrack models support web search.</li>
+                <li><strong>No system message support</strong> — system messages in the conversation are ignored.</li>
+                <li><strong>Rate limits</strong> may apply. Avoid rapid sequential requests.</li>
+                <li><strong>Streaming</strong> uses SSE — some edge cases may produce partial output.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p><a href="../index.html">← Back to fishr Docs</a></p>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="../js/script.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

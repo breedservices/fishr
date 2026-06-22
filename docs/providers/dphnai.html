@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fishr — DphnAI Provider</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h2>fishr</h2>
+    </div>
+    <ul>
+        <li><a href="../index.html">← Back to Docs</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#models">Models</a></li>
+        <li><a href="#templates">Templates</a></li>
+        <li><a href="#streaming">Streaming</a></li>
+        <li><a href="#history">Conversation History</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section id="overview">
+        <h2>DphnAI Provider</h2>
+        <p>DphnAI provides free access to 2 Dolphin models through a reverse-engineered API. It supports streaming, conversation history, and configurable templates.</p>
+        <p>DphnAI models use the <code>dphnai/</code> prefix.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="dphnai/6b",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.text)</code></pre>
+        </div>
+    </section>
+
+    <section id="models">
+        <h2>Models</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Web Search</th>
+                        <th>Image</th>
+                        <th>History</th>
+                        <th>System</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>dphnai/24b</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>dphnai/6b</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="templates">
+        <h2>Templates</h2>
+        <p>DphnAI supports configurable templates that adjust the model's behavior and tone. Templates are passed as the <code>template</code> keyword argument.</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Template</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>logical</code></td><td>Logical and analytical responses</td></tr>
+                    <tr><td><code>creative</code></td><td>Creative and imaginative responses</td></tr>
+                    <tr><td><code>summarize</code></td><td>Summarization-focused responses</td></tr>
+                    <tr><td><code>code-beginner</code></td><td>Beginner-friendly coding help with step-by-step explanations</td></tr>
+                    <tr><td><code>code-advanced</code></td><td>Advanced coding assistance for experienced developers</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="dphnai/6b",
+    messages=[{"role": "user", "content": "How do I write a for loop in Python?"}],
+    template="code-beginner",
+)
+print(response.text)</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Templates are optional.</strong> If no template is specified, the model uses its default behavior. Templates only affect the model's response style — they don't change the underlying model.
+        </div>
+    </section>
+
+    <section id="streaming">
+        <h2>Streaming</h2>
+        <p>Set <code>stream=True</code> to receive chunks as they arrive. DphnAI uses standard OpenAI-compatible SSE format.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="dphnai/6b",
+    messages=[{"role": "user", "content": "Tell me a story"}],
+    stream=True,
+)
+
+for chunk in response:
+    print(chunk.choices[0].delta.content or "", end="")</code></pre>
+        </div>
+    </section>
+
+    <section id="history">
+        <h2>Conversation History</h2>
+        <p>DphnAI supports conversation history. The full message history is sent with each request so the model has context from previous turns.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+conv = client.conversation(model="dphnai/6b")
+
+conv.system("You are a helpful assistant.")
+conv.ask("Remember: 42")
+reply = conv.ask("What number did I say?")
+print(reply)
+
+conv.clear()  # reset history</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Context windows vary by model.</strong> The 6b model has a smaller context window (~1000 tokens) while the 24b model can handle more. Very long conversations may lose earlier context.
+        </div>
+    </section>
+
+    <section id="limitations">
+        <h2>Limitations</h2>
+        <div class="ref-card">
+            <ul class="limitations-list">
+                <li>DphnAI is a <strong>reverse-engineered API</strong> — it may break if the upstream service changes.</li>
+                <li>There is <strong>no uptime guarantee</strong>. Availability depends on the upstream service.</li>
+                <li><strong>No image support</strong> — neither image input nor image generation is available.</li>
+                <li><strong>No web search</strong> — none of the DphnAI models support web search.</li>
+                <li><strong>Small models</strong> — the largest model is 24B parameters, which is smaller than most other providers' models. Quality may be lower for complex tasks.</li>
+                <li><strong>Rate limits</strong> may apply. Avoid rapid sequential requests.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p><a href="../index.html">← Back to fishr Docs</a></p>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="../js/script.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

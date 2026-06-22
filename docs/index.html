@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fishr — Free LLM Access from Python</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h2>fishr</h2>
+    </div>
+    <ul>
+        <li><a href="#install">Installation</a></li>
+        <li><a href="#quickstart">Quickstart</a></li>
+        <li><a href="#providers">Providers</a></li>
+        <li><a href="#completions">Completions</a></li>
+        <li><a href="#streaming">Streaming</a></li>
+        <li><a href="#web-search">Web Search</a></li>
+        <li><a href="#images">Image Generation</a></li>
+        <li><a href="#image-input">Image Input</a></li>
+        <li><a href="#agents">Agents</a></li>
+        <li><a href="#async">Async</a></li>
+        <li><a href="#conversation">Conversation</a></li>
+        <li><a href="#models">All Models</a></li>
+        <li><a href="#types">Response Types</a></li>
+        <li><a href="#api-reference">API Reference</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section id="hero">
+        <h1>fishr</h1>
+        <p class="tagline">Free LLM access from Python. No keys. No cost. No limits.</p>
+        <div class="hero-install">
+            <code>uv add fishr</code>
+        </div>
+    </section>
+
+    <section id="install">
+        <h2>Installation</h2>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-bash">uv add fishr</code></pre>
+        </div>
+        <p>Requires Python 3.11+. On Linux/macOS, <code>uvloop</code> is automatically installed for better async performance.</p>
+    </section>
+
+    <section id="quickstart">
+        <h2>Quickstart</h2>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="noxus/openai",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.text)</code></pre>
+        </div>
+    </section>
+
+    <section id="providers">
+        <h2>Providers</h2>
+        <p>Models are specified as <code>provider/name</code>. Each provider offers different models and capabilities.</p>
+        <p>The <code>provider/</code> prefix is optional — <code>"openai"</code> resolves to <code>"noxus/openai"</code>.</p>
+
+        <div class="provider-grid">
+            <a href="providers/noxus.html" class="provider-card">
+                <h3>noxus</h3>
+                <p>8 models — GPT, Gemini, Sonnet, Grok, Perplexity, Llama, Qwen</p>
+                <div class="provider-tags">
+                    <span class="tag tag-green">Web Search</span>
+                    <span class="tag tag-blue">Images</span>
+                    <span class="tag tag-purple">Streaming</span>
+                </div>
+            </a>
+            <a href="providers/deepai.html" class="provider-card">
+                <h3>deepai</h3>
+                <p>6 models — Standard, Online, Gemma 4, Gemini Flash, DeepSeek, Image Gen</p>
+                <div class="provider-tags">
+                    <span class="tag tag-green">Web Search</span>
+                    <span class="tag tag-blue">Image Gen</span>
+                    <span class="tag tag-purple">Streaming</span>
+                </div>
+            </a>
+            <a href="providers/quillbot.html" class="provider-card">
+                <h3>quillbot</h3>
+                <p>2 models — Standard Chat, Web Search</p>
+                <div class="provider-tags">
+                    <span class="tag tag-green">Web Search</span>
+                    <span class="tag tag-purple">Streaming</span>
+                </div>
+            </a>
+            <a href="providers/notrack.html" class="provider-card">
+                <h3>notrack</h3>
+                <p>3 models — Fast, Standard, Reasoning</p>
+                <div class="provider-tags">
+                    <span class="tag tag-purple">Streaming</span>
+                </div>
+            </a>
+            <a href="providers/dphnai.html" class="provider-card">
+                <h3>dphnai</h3>
+                <p>2 models — Dolphin 24B, Dolphin 6B (with templates)</p>
+                <div class="provider-tags">
+                    <span class="tag tag-purple">Streaming</span>
+                </div>
+            </a>
+            <a href="providers/yqcloud.html" class="provider-card">
+                <h3>yqcloud</h3>
+                <p>1 model — GPT-4 chat</p>
+                <div class="provider-tags">
+                    <span class="tag tag-purple">Streaming</span>
+                </div>
+            </a>
+            <a href="providers/opera.html" class="provider-card">
+                <h3>opera</h3>
+                <p>1 model — Aria (image generation supported)</p>
+                <div class="provider-tags">
+                    <span class="tag tag-blue">Image Gen</span>
+                    <span class="tag tag-purple">Streaming</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="alert alert-warn">
+            <strong>⚠ Not all models support every feature.</strong> Check the provider pages for details on which models support web search, image input, and image generation.
+        </div>
+    </section>
+
+    <section id="completions">
+        <h2>Chat Completions</h2>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="noxus/openai",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What is Python?"},
+    ],
+)
+
+print(response.text)
+# or: print(response.choices[0].message.content)</code></pre>
+        </div>
+
+        <h3>Using different providers</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# Noxus (default)
+response = client.chat.completions.create(
+    model="noxus/openai",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+# DeepAI
+response = client.chat.completions.create(
+    model="deepai/standard",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+# Quillbot
+response = client.chat.completions.create(
+    model="quillbot/quillbot",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+# NoTrack
+response = client.chat.completions.create(
+    model="notrack/fast",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+# DphnAI
+response = client.chat.completions.create(
+    model="dphnai/6b",
+    messages=[{"role": "user", "content": "Hello!"}],
+)</code></pre>
+        </div>
+    </section>
+
+    <section id="streaming">
+        <h2>Streaming</h2>
+        <p>Set <code>stream=True</code> to receive chunks as they arrive. Works with all providers.</p>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="noxus/openai",
+    messages=[{"role": "user", "content": "Tell me a story"}],
+    stream=True,
+)
+
+for chunk in response:
+    print(chunk.choices[0].delta.content or "", end="")</code></pre>
+        </div>
+
+        <h3>DeepAI streaming</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="deepai/standard",
+    messages=[{"role": "user", "content": "Tell me a story"}],
+    stream=True,
+)
+
+for chunk in response:
+    print(chunk.choices[0].delta.content or "", end="")</code></pre>
+        </div>
+    </section>
+
+    <section id="web-search">
+        <h2>Web Search</h2>
+        <p>Pass <code>web_search=True</code> to enable live web search on supported models.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# Noxus
+response = client.chat.completions.create(
+    model="noxus/grok-4.3",
+    messages=[{"role": "user", "content": "Latest news on SpaceX"}],
+    web_search=True,
+)
+print(response.text)
+
+# DeepAI (uses deepai/online automatically)
+response = client.chat.completions.create(
+    model="deepai/standard",
+    messages=[{"role": "user", "content": "Latest news on SpaceX"}],
+    web_search=True,
+)
+print(response.text)
+
+# Quillbot
+response = client.chat.completions.create(
+    model="quillbot/quillbot",
+    messages=[{"role": "user", "content": "Latest news on SpaceX"}],
+    web_search=True,
+)
+print(response.text)</code></pre>
+        </div>
+
+        <div class="alert alert-warn">
+            <strong>⚠ Web search is not supported by all models.</strong> Noxus has 6 search-capable models, DeepAI routes to <code>deepai/online</code>, Quillbot enables it via <code>quillbot-search</code>, and NoTrack does not support web search at all.
+        </div>
+    </section>
+
+    <section id="images">
+        <h2>Image Generation</h2>
+        <p>Use <code>client.images.generate()</code> to generate images from text prompts. This uses DeepAI's text2img API.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.images.generate(
+    model="deepai/image",
+    prompt="A cat riding a skateboard on Mars",
+)
+
+# the generated image URL
+print(result.data[0].url)
+print(result.data[0].alt)  # the prompt used</code></pre>
+        </div>
+
+        <h3>Async</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import AsyncClient
+
+client = AsyncClient()
+
+result = await client.images.generate(
+    model="deepai/image",
+    prompt="A futuristic city at sunset",
+)
+print(result.data[0].url)</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Image generation is only available via <code>deepai/image</code>.</strong> Other DeepAI chat models can trigger inline image generation during conversation via the built-in image generator tool, but <code>client.images.generate()</code> is the recommended approach.
+        </div>
+
+        <h3>Via completions API</h3>
+        <p>You can also use <code>deepai/image</code> through the completions API. The response text will contain the generated image URL.</p>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="deepai/image",
+    messages=[{"role": "user", "content": "A cat riding a skateboard"}],
+)
+print(response.text)  # image URL</code></pre>
+        </div>
+    </section>
+
+    <section id="image-input">
+        <h2>Image Input</h2>
+        <p>Some models accept image attachments. Pass a base64-encoded image in the <code>image</code> key of a message with <code>mime_type</code> and <code>base64_data</code>.</p>
+
+        <div class="alert alert-info">
+            <strong>ℹ Image input works with both Noxus and DeepAI.</strong> Noxus sends images directly with the message. DeepAI uploads them to its attachment API and references them by UUID. See the <a href="providers/noxus.html#images">Noxus</a> and <a href="providers/deepai.html#image-upload">DeepAI</a> provider docs for details.
+        </div>
+
+        <h3>Noxus image input</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">import base64
+from fishr import Client
+
+client = Client()
+
+# read an image file and encode it
+with open("photo.png", "rb") as f:
+    encoded = base64.b64encode(f.read()).decode()
+
+response = client.chat.completions.create(
+    model="noxus/openai",
+    messages=[{
+        "role": "user",
+        "content": "What is in this image?",
+        "image": {
+            "mime_type": "image/png",
+            "base64_data": encoded,
+        },
+    }],
+)
+
+print(response.text)</code></pre>
+        </div>
+
+        <h3>DeepAI image upload</h3>
+        <p>DeepAI chat models also support image attachments. The image is automatically uploaded and attached to the conversation.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">import base64
+from fishr import Client
+
+client = Client()
+
+with open("photo.png", "rb") as f:
+    encoded = base64.b64encode(f.read()).decode()
+
+response = client.chat.completions.create(
+    model="deepai/standard",
+    messages=[{
+        "role": "user",
+        "content": "What is in this image?",
+        "image": {
+            "mime_type": "image/png",
+            "base64_data": encoded,
+        },
+    }],
+)
+
+print(response.text)</code></pre>
+        </div>
+
+        <div class="alert alert-warn">
+            <strong>⚠ Image input is not supported by all models.</strong> See <a href="providers/noxus.html#images">Noxus</a> and <a href="providers/deepai.html#image-upload">DeepAI</a> docs for supported models. Quillbot and NoTrack do not support image input. Models marked ❌ will ignore attached images.
+        </div>
+    </section>
+
+    <section id="agents">
+        <h2>Agents</h2>
+        <p>Use <code>client.agents.run()</code> to run a multi-step agent loop. The agent iteratively calls the LLM with tool results until it produces a final answer or reaches the step limit.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.agents.run(
+    model="noxus/openai",
+    instructions="You are a helpful research assistant.",
+    prompt="What are the latest developments in quantum computing?",
+    tools=[{"type": "web_search"}],
+    max_steps=5,
+)
+
+print(result.content)</code></pre>
+        </div>
+
+        <h3>Async</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import AsyncClient
+
+client = AsyncClient()
+
+result = await client.agents.run(
+    model="noxus/grok-4.3",
+    instructions="You are a helpful research assistant.",
+    prompt="What are the latest developments in quantum computing?",
+    tools=[{"type": "web_search"}],
+    max_steps=5,
+)
+
+print(result.content)</code></pre>
+        </div>
+
+        <h3>AgentStep</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>role</code></td><td><code>str</code></td><td>Always <code>"assistant"</code></td></tr>
+                    <tr><td><code>content</code></td><td><code>str</code></td><td>Final response text</td></tr>
+                    <tr><td><code>tool</code></td><td><code>str</code></td><td>Tool name if a tool was called</td></tr>
+                    <tr><td><code>tool_input</code></td><td><code>str</code></td><td>Tool input if a tool was called</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="async">
+        <h2>Async</h2>
+        <p>Use <code>AsyncClient</code> for non-blocking calls.</p>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">import asyncio
+from fishr import AsyncClient
+
+async def main():
+    client = AsyncClient()
+
+    response = await client.chat.completions.create(
+        model="noxus/openai",
+        messages=[{"role": "user", "content": "Hello!"}],
+    )
+    print(response.text)
+
+    # streaming
+    response = await client.chat.completions.create(
+        model="noxus/openai",
+        messages=[{"role": "user", "content": "Tell me a story"}],
+        stream=True,
+    )
+    async for chunk in response:
+        print(chunk.choices[0].delta.content or "", end="")
+
+asyncio.run(main())</code></pre>
+        </div>
+    </section>
+
+    <section id="conversation">
+        <h2>Multi-turn Conversation</h2>
+        <p>Conversations maintain history automatically. Works with all providers — Noxus, DeepAI, Quillbot, NoTrack, and DphnAI.</p>
+
+        <h3>Sync</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# noxus
+conv = client.conversation(model="noxus/openai")
+conv.system("You are a helpful assistant.")
+conv.ask("Remember: 42")
+reply = conv.ask("What number did I say?")
+print(reply)  # "You said 42."
+
+# deepai
+conv = client.conversation(model="deepai/standard")
+conv.ask("Hello!")
+
+# quillbot
+conv = client.conversation(model="quillbot/quillbot")
+conv.system("You are a helpful assistant.")
+conv.ask("Remember: 42")
+
+# notrack
+conv = client.conversation(model="notrack/standard")
+conv.ask("Hello!")
+
+# dphnai
+conv = client.conversation(model="dphnai/6b")
+conv.ask("Hello!")
+
+conv.clear()  # reset history</code></pre>
+        </div>
+
+        <h3>Async</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import AsyncClient
+
+client = AsyncClient()
+conv = client.conversation(model="noxus/openai")
+
+await conv.ask("Remember: 42")
+reply = await conv.ask("What number did I say?")
+print(reply)</code></pre>
+        </div>
+
+        <h3>Methods</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Method</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>ask(prompt, **kwargs)</code></td><td>Send a message and return the response</td></tr>
+                    <tr><td><code>system(content)</code></td><td>Add a system message to history</td></tr>
+                    <tr><td><code>clear()</code></td><td>Reset conversation history</td></tr>
+                    <tr><td><code>len(conv)</code></td><td>Number of messages in history</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="models">
+        <h2>All Models</h2>
+
+        <h3>Noxus</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>History</th></tr></thead>
+                <tbody>
+                    <tr><td><code>noxus/openai</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>noxus/google</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>noxus/sonnet-4.6</code></td><td>✅</td><td class="no">❌</td><td>✅</td></tr>
+                    <tr><td><code>noxus/sonnet-3.5</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>noxus/grok-4.3</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>noxus/perplexity</code></td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>noxus/metaai</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
+                    <tr><td><code>noxus/qwen</code></td><td>✅</td><td class="no">❌</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>DeepAI</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>Image Gen</th><th>History</th></tr></thead>
+                <tbody>
+                    <tr><td><code>deepai/standard</code></td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>deepai/online</code></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>deepai/gemma-4</code></td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>deepai/gemini-2.5-flash-lite</code></td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>deepai/deepseek-v3.2</code></td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>deepai/image</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td class="no">❌</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Quillbot</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>History</th></tr></thead>
+                <tbody>
+                    <tr><td><code>quillbot/quillbot</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
+                    <tr><td><code>quillbot/quillbot-search</code></td><td>✅</td><td class="no">❌</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>NoTrack</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>History</th></tr></thead>
+                <tbody>
+                    <tr><td><code>notrack/fast</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
+                    <tr><td><code>notrack/standard</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
+                    <tr><td><code>notrack/reasoning</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>DphnAI</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>History</th></tr></thead>
+                <tbody>
+                    <tr><td><code>dphnai/24b</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
+                    <tr><td><code>dphnai/6b</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Yqcloud</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>History</th></tr></thead>
+                <tbody>
+                    <tr><td><code>yqcloud/gpt-4</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Opera Aria</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Web Search</th><th>Image Gen</th><th>History</th></tr></thead>
+                <tbody>
+                    <tr><td><code>opera/aria</code></td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="types">
+        <h2>Response Types</h2>
+
+        <h3>ChatCompletion</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>id</code></td><td><code>str</code></td><td>Completion ID</td></tr>
+                    <tr><td><code>model</code></td><td><code>str</code></td><td>Model used</td></tr>
+                    <tr><td><code>choices</code></td><td><code>tuple[Choice, ...]</code></td><td>Response choices</td></tr>
+                    <tr><td><code>usage</code></td><td><code>Usage</code></td><td>Token usage info</td></tr>
+                    <tr><td><code>text</code></td><td><code>str</code></td><td>Shortcut for <code>choices[0].message.content</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>ImageResponse</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>created</code></td><td><code>int</code></td><td>Unix timestamp</td></tr>
+                    <tr><td><code>data</code></td><td><code>tuple[ImageUrl, ...]</code></td><td>Generated images</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>ImageUrl</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>url</code></td><td><code>str</code></td><td>URL of the generated image</td></tr>
+                    <tr><td><code>alt</code></td><td><code>str</code></td><td>Prompt used to generate</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>AgentStep</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>role</code></td><td><code>str</code></td><td>Always <code>"assistant"</code></td></tr>
+                    <tr><td><code>content</code></td><td><code>str</code></td><td>Final response text</td></tr>
+                    <tr><td><code>tool</code></td><td><code>str</code></td><td>Tool name if a tool was called</td></tr>
+                    <tr><td><code>tool_input</code></td><td><code>str</code></td><td>Tool input if a tool was called</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Choice</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th></tr></thead>
+                <tbody>
+                    <tr><td><code>index</code></td><td><code>int</code></td></tr>
+                    <tr><td><code>message</code></td><td><code>Message</code></td></tr>
+                    <tr><td><code>finish_reason</code></td><td><code>str</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Message</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th></tr></thead>
+                <tbody>
+                    <tr><td><code>role</code></td><td><code>str</code></td></tr>
+                    <tr><td><code>content</code></td><td><code>str</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>ChatCompletionChunk (streaming)</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th></tr></thead>
+                <tbody>
+                    <tr><td><code>id</code></td><td><code>str</code></td></tr>
+                    <tr><td><code>model</code></td><td><code>str</code></td></tr>
+                    <tr><td><code>choices</code></td><td><code>tuple[ChunkChoice, ...]</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>ChunkChoice</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th></tr></thead>
+                <tbody>
+                    <tr><td><code>index</code></td><td><code>int</code></td></tr>
+                    <tr><td><code>delta</code></td><td><code>Delta</code></td></tr>
+                    <tr><td><code>finish_reason</code></td><td><code>str</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Delta</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th></tr></thead>
+                <tbody>
+                    <tr><td><code>role</code></td><td><code>str</code></td></tr>
+                    <tr><td><code>content</code></td><td><code>str</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Usage</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th></tr></thead>
+                <tbody>
+                    <tr><td><code>prompt_tokens</code></td><td><code>int</code></td></tr>
+                    <tr><td><code>completion_tokens</code></td><td><code>int</code></td></tr>
+                    <tr><td><code>total_tokens</code></td><td><code>int</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="api-reference">
+        <h2>API Reference</h2>
+
+        <h3>Client</h3>
+        <div class="ref-card">
+            <code>Client()</code>
+            <p>Creates a synchronous fishr client.</p>
+        </div>
+
+        <h3>AsyncClient</h3>
+        <div class="ref-card">
+            <code>AsyncClient()</code>
+            <p>Creates an asynchronous fishr client. All <code>.create()</code> and <code>.generate()</code> calls must be awaited.</p>
+        </div>
+
+        <h3>client.chat.completions.create()</h3>
+        <div class="ref-card">
+            <div class="params">
+                <div class="param">
+                    <code>model</code> <span class="type">str</span> <span class="required">required</span>
+                    <p>Model name in <code>provider/name</code> format, e.g. <code>"noxus/openai"</code>, <code>"deepai/standard"</code>, <code>"quillbot/quillbot"</code>, <code>"notrack/fast"</code>, <code>"dphnai/6b"</code>. Noxus prefix is optional.</p>
+                </div>
+                <div class="param">
+                    <code>messages</code> <span class="type">list[dict]</span> <span class="required">required</span>
+                    <p>List of <code>{"role": ..., "content": ...}</code> dicts. Some providers support <code>"image"</code> with <code>{"mime_type": ..., "base64_data": ...}</code> — see <a href="#image-input">Image Input</a>.</p>
+                </div>
+                <div class="param">
+                    <code>web_search</code> <span class="type">bool</span> <span class="default">default: False</span>
+                    <p>Enable web search for supported models.</p>
+                </div>
+                <div class="param">
+                    <code>stream</code> <span class="type">bool</span> <span class="default">default: False</span>
+                    <p>Return an iterator of <code>ChatCompletionChunk</code> instead of a single <code>ChatCompletion</code>.</p>
+                </div>
+            </div>
+        </div>
+
+        <h3>client.images.generate()</h3>
+        <div class="ref-card">
+            <div class="params">
+                <div class="param">
+                    <code>model</code> <span class="type">str</span> <span class="default">default: "deepai/image"</span>
+                    <p>Image generation model. Currently only <code>deepai/image</code> is supported.</p>
+                </div>
+                <div class="param">
+                    <code>prompt</code> <span class="type">str</span> <span class="required">required</span>
+                    <p>Text prompt describing the image to generate.</p>
+                </div>
+            </div>
+            <p>Returns an <code>ImageResponse</code> with <code>data[0].url</code> containing the generated image URL.</p>
+        </div>
+
+        <h3>client.agents.run()</h3>
+        <div class="ref-card">
+            <div class="params">
+                <div class="param">
+                    <code>model</code> <span class="type">str</span> <span class="default">default: "noxus/openai"</span>
+                    <p>Model to use for the agent. Supports Noxus and DeepAI providers.</p>
+                </div>
+                <div class="param">
+                    <code>instructions</code> <span class="type">str</span> <span class="default">default: ""</span>
+                    <p>System instructions for the agent.</p>
+                </div>
+                <div class="param">
+                    <code>prompt</code> <span class="type">str</span> <span class="required">required</span>
+                    <p>The user prompt to start the agent loop.</p>
+                </div>
+                <div class="param">
+                    <code>tools</code> <span class="type">list[dict] | None</span> <span class="default">default: None</span>
+                    <p>List of tools the agent can use. Currently supports <code>{"type": "web_search"}</code>.</p>
+                </div>
+                <div class="param">
+                    <code>max_steps</code> <span class="type">int</span> <span class="default">default: 5</span>
+                    <p>Maximum number of agent iterations before returning.</p>
+                </div>
+            </div>
+            <p>Returns an <code>AgentStep</code> with the final response in <code>content</code>.</p>
+        </div>
+
+        <h3>client.conversation()</h3>
+        <div class="ref-card">
+            <div class="params">
+                <div class="param">
+                    <code>model</code> <span class="type">str</span> <span class="default">default: "noxus/openai"</span>
+                    <p>Model to use for the conversation. Works with all providers — Noxus, DeepAI, Quillbot, NoTrack, and DphnAI.</p>
+                </div>
+            </div>
+            <p>Returns a <code>Conversation</code> (sync) or <code>AsyncConversation</code> (async) instance.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>fishr — Free LLM access from Python</p>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="js/script.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>
