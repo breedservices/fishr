@@ -292,8 +292,15 @@ class OperaAriaSyncStream:
         return self
 
     def __next__(self) -> ChatCompletionChunk:
-        content = next(self.inner)
-        delta = Delta(role="assistant", content=content)
+        item = next(self.inner)
+        if isinstance(item, tuple):
+            content, is_thinking = item
+        else:
+            content, is_thinking = item, False
+        if is_thinking:
+            delta = Delta(role="assistant", thinking=content)
+        else:
+            delta = Delta(role="assistant", content=content)
         choice = ChunkChoice(index=0, delta=delta)
         return ChatCompletionChunk(
             id="",
@@ -314,10 +321,17 @@ class OperaAriaAsyncStream:
 
     async def __anext__(self) -> ChatCompletionChunk:
         try:
-            content = await self.inner.__anext__()
+            item = await self.inner.__anext__()
         except StopAsyncIteration:
             raise
-        delta = Delta(role="assistant", content=content)
+        if isinstance(item, tuple):
+            content, is_thinking = item
+        else:
+            content, is_thinking = item, False
+        if is_thinking:
+            delta = Delta(role="assistant", thinking=content)
+        else:
+            delta = Delta(role="assistant", content=content)
         choice = ChunkChoice(index=0, delta=delta)
         return ChatCompletionChunk(
             id="",

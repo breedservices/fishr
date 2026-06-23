@@ -95,11 +95,14 @@ def _upload_file(client, headers: dict, file_data: bytes, filename: str) -> str:
     raise RuntimeError(f"DeepAI upload failed: {resp.text}")
 
 
+ALLOWED_IMAGE_MIMES = frozenset({"image/webp", "image/png", "image/jpeg", "image/jpg"})
+
+
 def _extract_images(messages: list[dict]) -> list[tuple[bytes, str]]:
     images: list[tuple[bytes, str]] = []
     for m in messages:
         img = m.get("image")
-        if isinstance(img, dict):
+        if isinstance(img, dict) and img.get("mime_type") in ALLOWED_IMAGE_MIMES:
             raw = img.get("base64_data", "")
             file_data = b64decode(raw)
             mime = img.get("mime_type", "image/png")

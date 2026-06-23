@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>fishr chat</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{
+  bg:'#09090d',bg2:'#0f0f15',bg3:'#16161f',bg4:'#1c1c28',
+  txt:'#dfe0ec',txt2:'#8888a0',txt3:'#55556a',
+  acc:'#7b6aff',acc2:'#a08cff',
+  brd:'#1e1e30',grn:'#4ade80'
+},fontFamily:{sans:['Inter','-apple-system','BlinkMacSystemFont','Segoe UI','sans-serif'],mono:['SF Mono','Fira Code','Consolas','monospace']}}}}
+</script>
+<style>
+/* tailwind can't do these */
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce-dot{to{opacity:.2;transform:translateY(-3px)}}
+@keyframes tdot{to{opacity:.2;transform:translateY(-2px)}}
+.animate-fadein{animation:fadein .18s ease}
+.chat-scroll::-webkit-scrollbar{width:5px}
+.chat-scroll::-webkit-scrollbar-thumb{background:#1c1c28;border-radius:3px}
+/* code blocks (highlight.js + custom) */
+.code-hdr button:hover{border-color:#7b6aff;color:#a08cff}
+.msg-text pre{background:#0d1117;border:1px solid #1e1e30;border-radius:8px;margin:.5em 0;overflow:hidden;white-space:pre}
+.msg-text pre code{display:block;padding:12px;font-size:12.5px;font-family:'SF Mono','Fira Code',Consolas,monospace;line-height:1.55;overflow-x:auto;white-space:pre;background:none}
+.msg-text code{background:#1c1c28;padding:1px 5px;border-radius:4px;font-size:12.5px;font-family:'SF Mono','Fira Code',Consolas,monospace;white-space:pre-wrap}
+/* think collapse transition */
+.think-body{max-height:0;overflow:hidden;transition:max-height .2s ease}
+.think-body.open{max-height:2000px}
+/* markdown prose */
+.msg-text h1{font-size:1.5em;font-weight:700;margin:.6em 0 .3em}
+.msg-text h2{font-size:1.3em;font-weight:700;margin:.5em 0 .25em}
+.msg-text h3{font-size:1.15em;font-weight:600;margin:.4em 0 .2em}
+.msg-text h4{font-size:1em;font-weight:600;margin:.3em 0 .15em}
+.msg-text p{margin:.3em 0}
+.msg-text ul,.msg-text ol{margin:.3em 0;padding-left:1.5em}
+.msg-text ul{list-style:disc}
+.msg-text ol{list-style:decimal}
+.msg-text li{margin:.15em 0}
+.msg-text blockquote{border-left:3px solid #1e1e30;padding:.3em .8em;margin:.4em 0;color:#8888a0;background:#0f0f15;border-radius:0 6px 6px 0}
+.msg-text hr{border:none;border-top:1px solid #1e1e30;margin:.6em 0}
+.msg-text table{border-collapse:collapse;margin:.4em 0;width:100%}
+.msg-text th,.msg-text td{border:1px solid #1e1e30;padding:4px 8px;text-align:left}
+.msg-text th{background:#16161f;font-weight:600}
+.msg-text img{max-width:100%;border-radius:8px;margin:.4em 0}
+</style>
+</head>
+<body class="bg-bg text-txt font-sans h-screen flex flex-col overflow-hidden">
+<!-- Tailwind safelist: force compilation of dynamic classes used in JS -->
+<div class="hidden bg-bg3 bg-bg4 bg-bg2 bg-bg text-txt text-txt2 text-txt3 text-acc2 text-acc text-grn border-brd border-acc bg-acc bg-acc2 bg-[rgba(123,106,255,.08)] bg-[rgba(74,222,128,.07)] bg-[rgba(74,222,128,.12)] bg-[rgba(251,146,60,.12)] bg-[rgba(96,165,250,.12)] text-[#fb923c] text-[#60a5fa] border-[rgba(74,222,128,.25)] border-[rgba(251,146,60,.25)] border-[rgba(96,165,250,.25)] bg-[#ef4444] w-7 h-7 rounded-lg flex items-center justify-center shrink-0 gap-2.5 max-w-[760px] w-full mx-auto animate-fadein h-12 rounded-md border border-brd h-16 rounded-lg my-1 max-w-full w-[5px] h-[5px] rounded-full bg-txt3 relative absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full text-white border-0 text-[9px] leading-none text-[10px] text-txt3 font-semibold uppercase tracking-wide text-sm leading-relaxed break-words text-[11px] cursor-pointer bg-transparent border border-brd rounded-md px-2 py-0.5 whitespace-nowrap hover:border-txt3 hover:text-txt2 border-acc text-acc2"></div>
+
+<!-- header -->
+<div class="flex items-center px-4 py-2.5 border-b border-brd bg-bg2 shrink-0 gap-2">
+  <div class="flex items-center gap-2 font-bold text-[15px] bg-gradient-to-br from-acc to-acc2 bg-clip-text text-transparent select-none">
+    <svg class="w-5 h-5 text-acc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+    fishr
+  </div>
+</div>
+
+<!-- chat -->
+<div class="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-4 scroll-smooth chat-scroll" id="chat">
+  <div class="m-auto text-center py-10 px-5" id="welcome">
+    <h2 class="text-2xl font-bold mb-1">fishr chat</h2>
+    <p class="text-txt2 text-[13px] mb-4 max-w-[380px] mx-auto">Free LLM access. No keys, no auth. Pick a model and start chatting.</p>
+    <div class="flex gap-1.5 flex-wrap justify-center" id="chips"></div>
+  </div>
+</div>
+
+<!-- bottom -->
+<div class="px-4 pt-2.5 pb-3.5 border-t border-brd bg-bg2 shrink-0">
+  <div class="max-w-[760px] mx-auto flex flex-col gap-1.5">
+
+    <!-- system prompt row -->
+    <div class="flex gap-1.5 items-center" id="sys-row">
+      <button class="text-[11px] text-txt3 cursor-pointer bg-transparent border border-brd rounded-md px-2 py-0.5 font-sans transition-all whitespace-nowrap hover:border-txt3 hover:text-txt2" id="sys-toggle">System</button>
+      <input class="flex-1 bg-bg3 border border-brd rounded-md px-2 py-1 text-xs font-sans text-txt outline-none transition-colors focus:border-acc placeholder:text-txt3 hidden" id="sys-input" type="text" placeholder="System prompt (e.g. You are a helpful coding assistant)">
+    </div>
+
+    <!-- feature row -->
+    <div class="flex items-center gap-1.5 flex-wrap" id="feat-row">
+      <button class="flex items-center gap-0.5 px-2 py-0.5 rounded-md border border-brd bg-bg3 text-txt2 text-[10.5px] cursor-pointer transition-all font-sans whitespace-nowrap hover:not-disabled:border-txt3 hover:not-disabled:text-txt disabled:opacity-30 disabled:cursor-not-allowed [&.on]:border-acc [&.on]:text-acc2 [&.on]:bg-[rgba(123,106,255,.08)]" id="btn-ws" disabled>
+        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Web Search
+      </button>
+      <button class="flex items-center gap-0.5 px-2 py-0.5 rounded-md border border-brd bg-bg3 text-txt2 text-[10.5px] cursor-pointer transition-all font-sans whitespace-nowrap hover:not-disabled:border-txt3 hover:not-disabled:text-txt disabled:opacity-30 disabled:cursor-not-allowed [&.on]:border-acc [&.on]:text-acc2 [&.on]:bg-[rgba(123,106,255,.08)]" id="btn-th" disabled>
+        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 3.36 2.07 6.24 5 7.42V22h6v-4.58c2.93-1.18 5-4.06 5-7.42a8 8 0 0 0-8-8z"/><line x1="10" y1="22" x2="14" y2="22"/></svg>
+        Think Harder
+      </button>
+      <button class="flex items-center gap-0.5 px-2 py-0.5 rounded-md border border-brd bg-bg3 text-txt2 text-[10.5px] cursor-pointer transition-all font-sans whitespace-nowrap hover:not-disabled:border-txt3 hover:not-disabled:text-txt disabled:opacity-30 disabled:cursor-not-allowed [&.on]:border-acc [&.on]:text-acc2 [&.on]:bg-[rgba(123,106,255,.08)]" id="btn-img" disabled>
+        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Generate Image
+      </button>
+      <button class="flex items-center gap-0.5 px-2 py-0.5 rounded-md border border-brd bg-bg3 text-txt2 text-[10.5px] cursor-pointer transition-all font-sans whitespace-nowrap hover:not-disabled:border-txt3 hover:not-disabled:text-txt disabled:opacity-30 disabled:cursor-not-allowed [&.on]:border-acc [&.on]:text-acc2 [&.on]:bg-[rgba(123,106,255,.08)]" id="btn-att" title="Attach image" disabled>
+        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        Attach
+      </button>
+      <select class="bg-bg3 text-txt border border-brd rounded-md px-1.5 py-0.5 text-[10.5px] font-sans cursor-pointer outline-none max-w-[170px] ml-auto focus:border-acc" id="model-sel"><option value="">Loading...</option></select>
+      <span class="flex gap-0.5 items-center ml-1" id="caps-badges"></span>
+    </div>
+
+    <!-- attachments preview -->
+    <div class="flex gap-1.5 flex-wrap" id="att-row"></div>
+
+    <!-- input bar -->
+    <div class="flex items-end gap-1 bg-bg3 border border-brd rounded-[10px] px-1.5 py-1.5 transition-colors focus-within:border-acc">
+      <textarea class="flex-1 bg-transparent border-0 text-txt text-[13.5px] resize-none min-h-[22px] max-h-[140px] outline-none font-sans leading-normal px-1 py-0.5 placeholder:text-txt3" id="inp" placeholder="Message fishr..." rows="1"></textarea>
+      <button class="w-8 h-8 rounded-lg border-0 bg-acc text-white cursor-pointer flex items-center justify-center shrink-0 transition-all hover:bg-acc2 disabled:opacity-30 disabled:cursor-not-allowed" id="btn-send" title="Send" disabled>
+        <svg class="w-[17px] h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+
+    <!-- status -->
+    <div class="flex items-center justify-between px-0.5">
+      <span></span>
+      <span class="text-[10px] text-txt3 font-mono" id="token-count">0 tokens</span>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="f-inp" accept="image/webp,image/png,image/jpeg,image/jpg" multiple hidden>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+const S={messages:[],attachments:[],streaming:false,web_search:false,think_harder:false,image_gen:false,models:[],system_prompt:''};
+const $=s=>document.querySelector(s);
+const chatEl=$('#chat'),inp=$('#inp'),modelSel=$('#model-sel'),btnSend=$('#btn-send'),
+  btnWs=$('#btn-ws'),btnTh=$('#btn-th'),btnImg=$('#btn-img'),btnAtt=$('#btn-att'),
+  fInp=$('#f-inp'),attRow=$('#att-row'),chipsEl=$('#chips'),welcome=$('#welcome'),
+  sysToggle=$('#sys-toggle'),sysInput=$('#sys-input'),tokenCount=$('#token-count');
+
+// ── token estimation ──
+function estimateTokens(messages){
+  let total=0;
+  messages.forEach(m=>{total+=Math.ceil((m.content||'').length/4)});
+  if(S.system_prompt)total+=Math.ceil(S.system_prompt.length/4);
+  return total;
+}
+function updateTokenCount(){
+  const t=estimateTokens(S.messages);
+  tokenCount.textContent=t.toLocaleString()+' tokens';
+}
+
+// ── models ──
+async function loadModels(){
+  try{
+    const r=await fetch('/api/models');S.models=await r.json();
+    modelSel.innerHTML='';
+    const gr={};
+    S.models.forEach(m=>{const p=m.id.split('/')[0];if(!gr[p])gr[p]=[];gr[p].push(m)});
+    for(const[p,ms]of Object.entries(gr)){
+      const og=document.createElement('optgroup');og.label=p;
+      ms.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.id;og.appendChild(o)});
+      modelSel.appendChild(og);
+    }
+    chipsEl.innerHTML='';
+    ['noxus/openai','noxus/grok-4.3','opera/aria','deepai/standard','yqcloud/gpt-4','notrack/reasoning'].forEach(id=>{
+      const c=document.createElement('span');c.className='chip';
+      c.className='bg-bg3 border border-brd rounded-md px-2.5 py-0.5 text-[11px] text-txt2 cursor-pointer transition-all hover:border-acc hover:text-acc2';
+      c.textContent=id;
+      c.onclick=()=>{modelSel.value=id;onModelChange()};chipsEl.appendChild(c);
+    });
+    onModelChange();
+  }catch(e){modelSel.innerHTML='<option value="">Failed to load</option>'}
+}
+
+function getModelCaps(id){
+  return S.models.find(x=>x.id===id)||{web_search:false,image:false,file_attach:false,history:false,system:false};
+}
+
+function onModelChange(){
+  const model=modelSel.value;
+  const caps=getModelCaps(model);
+  btnWs.disabled=!caps.web_search;
+  btnImg.disabled=!caps.image;
+  btnTh.disabled=!model.startsWith('opera/');
+  btnAtt.disabled=!caps.file_attach;
+  if(!caps.web_search){S.web_search=false;btnWs.classList.remove('on')}
+  if(!caps.image){S.image_gen=false;btnImg.classList.remove('on')}
+  if(!model.startsWith('opera/')){S.think_harder=false;btnTh.classList.remove('on')}
+  renderCapsBadges(caps);
+  btnSend.disabled=false;
+}
+
+function renderCapsBadges(caps){
+  const el=$('#caps-badges');
+  if(!el)return;
+  let h='';
+  if(caps.web_search)h+='<span class="text-[8px] font-bold w-[15px] h-[15px] rounded-[3px] flex items-center justify-center bg-[rgba(74,222,128,.12)] text-grn border border-[rgba(74,222,128,.25)]" title="Web Search">W</span>';
+  if(caps.image)h+='<span class="text-[8px] font-bold w-[15px] h-[15px] rounded-[3px] flex items-center justify-center bg-[rgba(251,146,60,.12)] text-[#fb923c] border border-[rgba(251,146,60,.25)]" title="Image Generation">I</span>';
+  if(caps.file_attach)h+='<span class="text-[8px] font-bold w-[15px] h-[15px] rounded-[3px] flex items-center justify-center bg-[rgba(96,165,250,.12)] text-[#60a5fa] border border-[rgba(96,165,250,.25)]" title="File Attach">A</span>';
+  el.innerHTML=h;
+}
+
+modelSel.addEventListener('change',onModelChange);
+
+// ── system prompt ──
+sysToggle.onclick=()=>{
+  const hidden=sysInput.classList.contains('hidden');
+  sysInput.classList.toggle('hidden',!hidden);
+  sysToggle.classList.toggle('border-acc',hidden);
+  sysToggle.classList.toggle('text-acc2',hidden);
+  if(hidden)sysInput.focus();
+};
+sysInput.addEventListener('input',()=>{S.system_prompt=sysInput.value;updateTokenCount()});
+
+// ── toggles ──
+btnWs.onclick=()=>{S.web_search=!S.web_search;btnWs.classList.toggle('on',S.web_search)};
+btnTh.onclick=()=>{S.think_harder=!S.think_harder;btnTh.classList.toggle('on',S.think_harder)};
+btnImg.onclick=()=>{S.image_gen=!S.image_gen;btnImg.classList.toggle('on',S.image_gen)};
+
+// ── attachments ──
+btnAtt.onclick=()=>fInp.click();
+fInp.onchange=()=>{
+  [...fInp.files].forEach(f=>{
+    const r=new FileReader();
+    r.onload=()=>{
+      const b64=r.result.split(',')[1];
+      S.attachments.push({name:f.name,mime_type:f.type,base64_data:b64,preview_url:r.result});
+      renderAtts();
+    };
+    r.readAsDataURL(f);
+  });
+  fInp.value='';
+};
+function renderAtts(){
+  attRow.innerHTML='';
+  S.attachments.forEach((a,i)=>{
+    const d=document.createElement('div');d.className='relative';
+    d.innerHTML=`<img src="${a.preview_url}" class="h-12 rounded-md border border-brd"><button class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#ef4444] text-white border-0 text-[9px] cursor-pointer flex items-center justify-center leading-none" data-i="${i}">✕</button>`;
+    attRow.appendChild(d);
+  });
+  attRow.querySelectorAll('button').forEach(b=>{b.onclick=()=>{S.attachments.splice(+b.dataset.i,1);renderAtts()}});
+}
+
+// ── textarea ──
+inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,140)+'px'});
+inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+btnSend.onclick=send;
+
+// ── markdown renderer (marked + highlight.js) ──
+const mdRenderer=new marked.Renderer();
+mdRenderer.code=function({text,lang}){
+  const id='cb'+Math.random().toString(36).slice(2,8);
+  const language=lang||'plaintext';
+  let highlighted;
+  try{highlighted=hljs.highlight(text,{language}).value}catch{highlighted=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  return `<div class="code-block"><div class="code-hdr flex items-center justify-between px-2.5 py-1 bg-bg3 border-b border-brd text-[10px] text-txt3 font-mono"><span>${language}</span><button onclick="copyBlock('${id}')" class="bg-transparent border border-brd rounded text-txt2 text-[10px] px-1.5 py-px cursor-pointer font-mono">Copy</button></div><pre><code id="${id}" class="hljs language-${language}">${highlighted}</code></pre></div>`;
+};
+marked.setOptions({renderer:mdRenderer,breaks:true,gfm:true});
+
+function renderMd(text){return marked.parse(text)}
+
+function renderImageUrls(urls){
+  return urls.map(u=>`<img class="max-w-full rounded-lg my-1 border border-brd" src="${u}" alt="Generated image">`).join('');
+}
+
+function renderWithImages(text,imageUrls){
+  let html=renderMd(text);
+  if(imageUrls&&imageUrls.length)html+=renderImageUrls(imageUrls);
+  html=html.replace(/(^|[\s<>])((https?:\/\/[^\s"'<]+\.(?:png|jpg|jpeg|gif|webp|svg))(?:\?[^\s"'<]*)?)(?=$|[\s<>])/gi,
+    '$1<img class="max-w-full rounded-lg my-1 border border-brd" src="$2" alt="Image">');
+  return html;
+}
+
+window.copyBlock=function(id){
+  const el=document.getElementById(id);
+  if(el)navigator.clipboard.writeText(el.textContent);
+};
+
+// ── thinking block helpers ──
+const thinkSvg='<svg class="w-3.5 h-3.5 text-acc2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 3.36 2.07 6.24 5 7.42V22h6v-4.58c2.93-1.18 5-4.06 5-7.42a8 8 0 0 0-8-8z"/><line x1="10" y1="22" x2="14" y2="22"/></svg>';
+const thinkId=()=>"tb"+Math.random().toString(36).slice(2,8);
+
+function ensureThinkBlock(msgEl){
+  if(msgEl.querySelector('.think-block'))return;
+  const body=msgEl.querySelector('.msg-body');
+  const textEl=body.querySelector('.msg-text');
+  const tb=document.createElement('div');
+  tb.className='think-block my-1 border border-brd rounded-lg overflow-hidden';
+  tb.style.display='none';
+  tb.dataset.thinkId=thinkId();
+  tb.innerHTML=`<div class="think-header flex items-center gap-1.5 px-2.5 py-1.5 bg-bg3 cursor-pointer select-none text-xs text-txt2 transition-colors hover:text-txt" onclick="toggleThink(this)">${thinkSvg}<span class="think-label">Thinking</span><span class="dots inline-flex gap-0.5 ml-0.5"><span class="w-[3px] h-[3px] rounded-full bg-acc2" style="animation:tdot .6s infinite alternate"></span><span class="w-[3px] h-[3px] rounded-full bg-acc2" style="animation:tdot .6s infinite alternate;animation-delay:.15s"></span><span class="w-[3px] h-[3px] rounded-full bg-acc2" style="animation:tdot .6s infinite alternate;animation-delay:.3s"></span></span><span class="chevron ml-auto text-[10px] transition-transform">▶</span></div><div class="think-body"><div class="think-content px-3 py-2 text-xs leading-relaxed text-txt2 font-mono whitespace-pre-wrap break-words bg-bg"></div></div>`;
+  body.insertBefore(tb,textEl);
+}
+
+function updateThinkBlock(msgEl,thinkingText,isStillThinking){
+  const tb=msgEl.querySelector('.think-block');
+  if(!tb)return;
+  if(!thinkingText){tb.style.display='none';return}
+  tb.style.display='';
+  const header=tb.querySelector('.think-header');
+  const content=tb.querySelector('.think-content');
+  const dots=tb.querySelector('.dots');
+  content.textContent=thinkingText;
+  if(isStillThinking){
+    header.classList.remove('open');
+    header.parentElement.querySelector('.think-body').classList.remove('open');
+    if(dots)dots.style.display='inline-flex';
+    header.querySelector('.think-label').textContent='Thinking';
+  }else{
+    if(dots)dots.style.display='none';
+    header.querySelector('.think-label').textContent='Thought for a moment';
+  }
+  chatEl.scrollTop=chatEl.scrollHeight;
+}
+
+window.toggleThink=function(headerEl){
+  headerEl.classList.toggle('open');
+  headerEl.parentElement.querySelector('.think-body').classList.toggle('open');
+  const chevron=headerEl.querySelector('.chevron');
+  if(chevron)chevron.style.transform=headerEl.classList.contains('open')?'rotate(90deg)':'';
+};
+
+// ── send ──
+async function send(){
+  const text=inp.value.trim();
+  if(!text&&!S.attachments.length)return;
+  if(S.streaming)return;
+  if(welcome)welcome.remove();
+
+  const model=modelSel.value||'noxus/openai';
+
+  // image generation mode
+  if(S.image_gen){
+    S.streaming=true;btnSend.disabled=true;
+    appendMsg('user',text,null);
+    const assistantEl=appendMsg('assistant','',null,true);
+    try{
+      const r=await fetch('/api/images',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model,prompt:text}),
+      });
+      const data=await r.json();
+      if(data.urls&&data.urls.length){
+        assistantEl.querySelector('.msg-text').innerHTML=renderImageUrls(data.urls);
+        S.messages.push({role:'user',content:text},{role:'assistant',content:'[generated image]'});
+      }else if(data.error){
+        assistantEl.querySelector('.msg-text').textContent='Error: '+data.error;
+      }else{
+        assistantEl.querySelector('.msg-text').textContent='No image was generated.';
+      }
+    }catch(err){
+      assistantEl.querySelector('.msg-text').textContent='Error: '+err.message;
+    }finally{
+      S.streaming=false;btnSend.disabled=false;
+      const ti=assistantEl.querySelector('.typing');if(ti)ti.remove();
+      updateTokenCount();
+    }
+    inp.value='';inp.style.height='auto';S.attachments=[];renderAtts();
+    return;
+  }
+
+  const userMsg={role:'user',content:text};
+  if(S.attachments.length){
+    userMsg.content=[{type:'text',text:text}];
+    S.attachments.forEach(a=>{
+      userMsg.content.push({type:'image_url',image_url:{url:`data:${a.mime_type};base64,${a.base64_data}`}});
+    });
+  }
+  S.messages.push(userMsg);
+  appendMsg('user',text,S.attachments);
+
+  inp.value='';inp.style.height='auto';S.attachments=[];renderAtts();
+
+  const apiMsgs=[];
+  if(S.system_prompt)apiMsgs.push({role:'system',content:S.system_prompt});
+  S.messages.forEach(m=>{const msg={role:m.role,content:m.content};apiMsgs.push(msg)});
+
+  S.streaming=true;btnSend.disabled=true;
+  const assistantEl=appendMsg('assistant','',null,true);
+  ensureThinkBlock(assistantEl);
+
+  try{
+    const res=await fetch('/api/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model,messages:apiMsgs,web_search:S.web_search,think_harder:S.think_harder,stream:true}),
+    });
+
+    const reader=res.body.getReader();
+    const dec=new TextDecoder();
+    let full='',thinkingFull='',buf='';
+    let isCurrentlyThinking=false;
+
+    while(true){
+      const{done,value}=await reader.read();
+      if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop()||'';
+      for(const line of lines){
+        const t=line.trim();
+        if(!t.startsWith('data: '))continue;
+        const p=t.slice(6);
+        if(p==='[DONE]')break;
+        try{
+          const o=JSON.parse(p);
+          if(o.type==='thinking'&&o.content){
+            thinkingFull+=o.content;
+            isCurrentlyThinking=true;
+            updateThinkBlock(assistantEl,thinkingFull,true);
+          }else if(o.type==='content'&&o.content){
+            if(isCurrentlyThinking){
+              isCurrentlyThinking=false;
+              updateThinkBlock(assistantEl,thinkingFull,false);
+            }
+            full+=o.content;
+          }else if(o.content){
+            full+=o.content;
+          }
+        }catch{}
+      }
+      const contentEl=assistantEl.querySelector('.msg-text');
+      contentEl.innerHTML=renderWithImages(full,null);
+      chatEl.scrollTop=chatEl.scrollHeight;
+    }
+
+    if(isCurrentlyThinking){
+      isCurrentlyThinking=false;
+      updateThinkBlock(assistantEl,thinkingFull,false);
+    }
+    const imgRegex=/(https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s]*)?)/gi;
+    const foundUrls=full.match(imgRegex)||[];
+    const contentEl=assistantEl.querySelector('.msg-text');
+    contentEl.innerHTML=renderWithImages(full,foundUrls);
+    chatEl.scrollTop=chatEl.scrollHeight;
+
+    S.messages.push({role:'assistant',content:full});
+  }catch(err){
+    assistantEl.querySelector('.msg-text').textContent='Error: '+err.message;
+  }finally{
+    S.streaming=false;btnSend.disabled=false;
+    const ti=assistantEl.querySelector('.typing');if(ti)ti.remove();
+    updateTokenCount();
+  }
+}
+
+// ── append message ──
+function appendMsg(role,content,attachments,showTyping=false){
+  const div=document.createElement('div');
+  div.className=`msg flex gap-2.5 max-w-[760px] w-full mx-auto animate-fadein ${role}`;
+  const avSvg=role==='user'
+    ?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+    :'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>';
+  const label=role==='user'?'You':'fishr';
+  const avBg=role==='user'?'bg-[rgba(123,106,255,.08)] text-acc2':'bg-[rgba(74,222,128,.07)] text-grn';
+  let attHTML='';
+  if(attachments&&attachments.length){
+    attHTML='<div class="flex gap-1.5 flex-wrap mb-1">'+attachments.map(a=>`<img src="${a.preview_url}" class="h-16 rounded-md border border-brd">`).join('')+'</div>';
+  }
+  const typingHTML=showTyping?'<div class="typing flex gap-0.5 py-0.5"><span class="w-[5px] h-[5px] rounded-full bg-txt3" style="animation:bounce-dot .5s infinite alternate"></span><span class="w-[5px] h-[5px] rounded-full bg-txt3" style="animation:bounce-dot .5s infinite alternate;animation-delay:.1s"></span><span class="w-[5px] h-[5px] rounded-full bg-txt3" style="animation:bounce-dot .5s infinite alternate;animation-delay:.2s"></span></div>':'';
+  div.innerHTML=`<div class="msg-av w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${avBg}">${avSvg}</div><div class="msg-body flex-1 min-w-0"><div class="msg-role text-[10px] font-semibold text-txt3 mb-0.5 uppercase tracking-wide">${label}</div>${attHTML}<div class="msg-text text-sm leading-relaxed text-txt break-words">${content?renderMd(content):typingHTML}</div></div>`;
+  chatEl.appendChild(div);
+  chatEl.scrollTop=chatEl.scrollHeight;
+  updateTokenCount();
+  return div;
+}
+
+// ── init ──
+loadModels();inp.focus();
+</script>
+</body>
+</html>

@@ -130,18 +130,19 @@ def _parse_sse_line(line: str) -> tuple[str | None, dict | None]:
     return None, None
 
 
-def _extract_content(data: dict) -> tuple[str | None, str | None]:
-    """Extract (text, image_url) from response data."""
+def _extract_content(data: dict) -> tuple[str | None, str | None, bool]:
+    """Extract (text, image_url, is_thinking) from response data."""
     response = data.get("response", {})
     if not isinstance(response, dict):
-        return None, None
+        return None, None, False
 
     content_type = response.get("content_type")
     if content_type == "image":
-        return None, response.get("image_url")
+        return None, response.get("image_url"), False
 
+    is_thinking = content_type == "thinking"
     text = response.get("message") if isinstance(response.get("message"), str) else None
-    return text, None
+    return text, None, is_thinking
 
 
 def _extract_conversation_id(data: dict) -> str | None:
@@ -150,39 +151,44 @@ def _extract_conversation_id(data: dict) -> str | None:
     return metadata.get("conversation_id") if isinstance(metadata, dict) else None
 
 
-def _parse_sse_text(raw: str) -> tuple[str, list[str], str | None]:
-    """Parse SSE text into (content, image_urls, conversation_id)."""
+def _parse_sse_text(raw: str) -> tuple[str, list[str], str | None, str]:
+    """Parse SSE text into (content, image_urls, conversation_id, thinking)."""
     out: list[str] = []
+    thinking_parts: list[str] = []
     image_urls: list[str] = []
     conv_id = None
-    skip_next = False
+    in_thinking = False
 
     for line in raw.splitlines():
         evt, data = _parse_sse_line(line)
 
         if evt:
             if evt == "thinking_status":
-                skip_next = True
+                in_thinking = True
             continue
 
         if data is None:
             continue
 
-        if skip_next:
-            skip_next = False
-            continue
+        content, image_url, is_thinking = _extract_content(data)
 
-        content, image_url = _extract_content(data)
-        if content:
-            out.append(content)
+        if is_thinking:
+            in_thinking = True
+        elif in_thinking:
+            in_thinking = False
+
         if image_url:
             image_urls.append(image_url)
+        if content and in_thinking:
+            thinking_parts.append(content)
+        elif content:
+            out.append(content)
 
         cid = _extract_conversation_id(data)
         if cid:
             conv_id = cid
 
-    return "".join(out), image_urls, conv_id
+    return "".join(out), image_urls, conv_id, "".join(thinking_parts)
 
 
 # ==================== Headers & Payload ====================
@@ -230,6 +236,7 @@ class OperaAriaResponse(Struct, frozen=True):
     content: str
     model: str
     image_urls: tuple[str, ...] = ()
+    thinking: str = ""
 
 
 class OperaAriaStream:
@@ -242,47 +249,49 @@ class OperaAriaStream:
         self._conv_id: str | None = None
 
     def __iter__(self):
-        skip_next = False
+        in_thinking = False
         for line in self.resp.iter_lines():
             text = line.decode(errors="ignore") if isinstance(line, bytes) else line
             evt, data = _parse_sse_line(text)
             if evt:
                 if evt == "thinking_status":
-                    skip_next = True
+                    in_thinking = True
                 continue
             if data is None:
                 continue
-            if skip_next:
-                skip_next = False
-                continue
-            content, image_url = _extract_content(data)
+            content, image_url, is_thinking = _extract_content(data)
+            if is_thinking:
+                in_thinking = True
+            elif in_thinking:
+                in_thinking = False
             if image_url:
                 self.image_urls.append(image_url)
             if content:
-                yield content
+                yield content, in_thinking
             cid = _extract_conversation_id(data)
             if cid:
                 self._conv_id = cid
         self.resp.close()
 
-    async def __aiter__(self) -> AsyncIterator[str]:
-        skip_next = False
+    async def __aiter__(self) -> AsyncIterator[tuple[str, bool]]:
+        in_thinking = False
         async for line in aiter_lines(self.resp):
             evt, data = _parse_sse_line(line)
             if evt:
                 if evt == "thinking_status":
-                    skip_next = True
+                    in_thinking = True
                 continue
             if data is None:
                 continue
-            if skip_next:
-                skip_next = False
-                continue
-            content, image_url = _extract_content(data)
+            content, image_url, is_thinking = _extract_content(data)
+            if is_thinking:
+                in_thinking = True
+            elif in_thinking:
+                in_thinking = False
             if image_url:
                 self.image_urls.append(image_url)
             if content:
-                yield content
+                yield content, in_thinking
             cid = _extract_conversation_id(data)
             if cid:
                 self._conv_id = cid
@@ -380,13 +389,13 @@ class OperaAria:
         raw = resp.text
         if resp.status_code >= 400:
             raise RuntimeError(f"OperaAria API error {resp.status_code}: {raw[:500]}")
-        content, image_urls, conv_id = _parse_sse_text(raw)
+        content, image_urls, conv_id, thinking = _parse_sse_text(raw)
         if not content and not image_urls:
             # Fallback: try parsing the raw text as a single JSON blob
             try:
                 data = json_decode.decode(raw)
                 if isinstance(data, dict):
-                    text, img = _extract_content(data)
+                    text, img, _ = _extract_content(data)
                     if text:
                         content = text
                     if img:
@@ -403,6 +412,7 @@ class OperaAria:
             content=content,
             model=resolved,
             image_urls=tuple(image_urls),
+            thinking=thinking,
         )
 
     async def chat_async(

@@ -10,7 +10,7 @@ from primp import Client as PrimpClient
 from fishr.Http import make_client
 from fishr.Loop import asyncio
 from fishr.Types import noxus_bot_ids
-from fishr.Utils import aiter_lines, build_multipart, json_decode
+from fishr.Utils import aiter_lines, build_multipart, json_decode, json_encode
 
 BASE = "https://chatgptfree.ai"
 AJAX = f"{BASE}/wp-admin/admin-ajax.php"
@@ -29,6 +29,8 @@ STREAM_HEADERS = {
 }
 
 ALLOWED_EVENTS = frozenset({"message", "delta", "token", "content"})
+
+ALLOWED_IMAGE_MIMES = frozenset({"image/webp", "image/png", "image/jpeg", "image/jpg"})
 
 
 def _gen_msg_id(bot_id: int) -> str:
@@ -236,7 +238,7 @@ class Noxus:
         self.nonce = _fetch_nonce(self.http_client, self.bot_id)
         return self.nonce
 
-    def _post_message(self, user_input: str) -> dict:
+    def _post_message(self, user_input: str, images: list[Image] | None = None) -> dict:
         if not self.nonce:
             self._refresh_nonce()
         fields = {
@@ -246,6 +248,15 @@ class Noxus:
             "bot_id": str(self.bot_id),
             "user_client_message_id": _gen_msg_id(self.bot_id),
         }
+        if images:
+            inputs = []
+            for img in images:
+                if img.mime_type in ALLOWED_IMAGE_MIMES:
+                    inputs.append(
+                        {"mime_type": img.mime_type, "base64_data": img.base64_data}
+                    )
+            if inputs:
+                fields["image_inputs"] = json_encode.encode(inputs).decode()
         data = _post_multipart(self.http_client, fields)
         if isinstance(data, dict) and data.get("success") is False:
             self.nonce = ""
@@ -295,7 +306,8 @@ class Noxus:
             self.bot_id = new_bot_id
             self.nonce = ""
         last_user = [m for m in messages if m.role == "user"][-1]
-        post_data = self._post_message(last_user.content)
+        images = [m.image for m in messages if m.role == "user" and m.image is not None]
+        post_data = self._post_message(last_user.content, images=images or None)
         cache_key = self._get_cache_key(post_data)
         url = self._build_stream_url(cache_key, web_search=web_search)
         resp = self.stream_client.get(url, stream=True)
@@ -316,6 +328,7 @@ class Noxus:
         *,
         model: str = "noxus/openai",
         web_search: bool = False,
+        images: list[Image] | None = None,
     ) -> str:
         messages = (NoxusMessage(role="user", content=prompt),)
         resp = self.chat(messages, model=model, web_search=web_search)
@@ -327,12 +340,14 @@ class Noxus:
         *,
         model: str = "noxus/openai",
         web_search: bool = False,
+        images: list[Image] | None = None,
     ) -> str:
         return await asyncio.to_thread(
             self.ask,
             prompt,
             model=model,
             web_search=web_search,
+            images=images,
         )
 
     async def chat_async(

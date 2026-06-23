@@ -3,7 +3,7 @@ from typing import AsyncIterator, Iterator
 from fishr.Base.DeepAI import DeepAI, DeepAIStream
 from fishr.Base.DphnAI import DphnAI, DphnAIStream
 from fishr.Base.NoTrack import NoTrack, NoTrackStream
-from fishr.Base.Noxus import Image, Noxus, NoxusMessage
+from fishr.Base.Noxus import Image, Noxus, NoxusMessage, NoxusResponse
 from fishr.Base.OperaAria import OperaAria, OperaAriaStream
 from fishr.Base.Quillbot import Quillbot, QuillbotStream
 from fishr.Base.Yqcloud import Yqcloud, YqcloudStream
@@ -31,6 +31,58 @@ from fishr.Types import (
     Delta,
     Message,
 )
+
+_ALLOWED_IMAGE_MIMES = frozenset({"image/webp", "image/png", "image/jpeg", "image/jpg"})
+
+
+def _normalize_messages(messages: list[dict]) -> list[dict]:
+    """Normalize OpenAI-style content arrays into the internal ``image`` dict format.
+
+    Accepts both:
+
+    - ``{"content": "text", "image": {"mime_type": ..., "base64_data": ...}}``
+    - ``{"content": [{"type": "text", ...}, {"type": "image_url", ...}]}``
+
+    and always produces the first form so providers don't need to handle arrays.
+
+    Only ``image/webp``, ``image/png``, ``image/jpeg``, and ``image/jpg`` are
+    accepted — ``image/gif`` and others are silently skipped.
+    """
+    out: list[dict] = []
+    for m in messages:
+        content = m.get("content")
+        if isinstance(content, list):
+            text_parts: list[str] = []
+            image = None
+            for part in content:
+                if not isinstance(part, dict):
+                    continue
+                ptype = part.get("type")
+                if ptype == "text":
+                    text_parts.append(part.get("text", ""))
+                elif ptype == "image_url":
+                    url = part.get("image_url", {}).get("url", "")
+                    if url.startswith("data:"):
+                        header, _, data = url.partition(",")
+                        mime = header[5:]  # strip "data:"
+                        if ";" in mime:
+                            mime = mime.split(";", 1)[0]
+                        if mime in _ALLOWED_IMAGE_MIMES:
+                            image = {"mime_type": mime, "base64_data": data}
+            new_m: dict = {"role": m["role"], "content": "\n".join(text_parts)}
+            if image:
+                new_m["image"] = image
+            out.append(new_m)
+        else:
+            # validate the legacy image dict format — strip unsupported mimes
+            img = m.get("image")
+            if (
+                isinstance(img, dict)
+                and img.get("mime_type") not in _ALLOWED_IMAGE_MIMES
+            ):
+                m = {k: v for k, v in m.items() if k != "image"}
+            out.append(m)
+    return out
 
 
 class Completions:
@@ -77,7 +129,6 @@ class Completions:
         stream: bool,
     ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
         noxus_msgs = self._build_messages(messages)
-        last_user = [m for m in messages if m.get("role") == "user"][-1]
 
         if stream:
             raw = self.noxus.chat(
@@ -88,12 +139,15 @@ class Completions:
             )
             return SyncStream(raw, resolved)
 
-        result = self.noxus.ask(
-            last_user["content"],
+        # non-streaming: use chat() so images are passed through
+        result = self.noxus.chat(
+            noxus_msgs,
             model=resolved,
             web_search=web_search,
+            stream=False,
         )
-        msg = Message(role="assistant", content=result)
+        content = result.content if isinstance(result, NoxusResponse) else str(result)
+        msg = Message(role="assistant", content=content)
         choice = Choice(index=0, message=msg)
         return ChatCompletion(id="", model=resolved, choices=(choice,))
 
@@ -299,6 +353,7 @@ class Completions:
         think_harder: bool = False,
     ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
         resolved = resolve_model(model)
+        messages = _normalize_messages(messages)
         provider = provider_of(resolved)
 
         if provider == "deepai":
@@ -352,7 +407,6 @@ class AsyncCompletions:
         from fishr.Loop import asyncio
 
         noxus_msgs = Completions._build_messages(messages)
-        last_user = [m for m in messages if m.get("role") == "user"][-1]
 
         if stream:
             raw = await asyncio.to_thread(
@@ -364,12 +418,16 @@ class AsyncCompletions:
             )
             return AsyncStream(raw, resolved)
 
-        result = await self.noxus.ask_async(
-            last_user["content"],
+        # non-streaming: use chat() so images are passed through
+        result = await asyncio.to_thread(
+            self.noxus.chat,
+            noxus_msgs,
             model=resolved,
             web_search=web_search,
+            stream=False,
         )
-        msg = Message(role="assistant", content=result)
+        content = result.content if isinstance(result, NoxusResponse) else str(result)
+        msg = Message(role="assistant", content=content)
         choice = Choice(index=0, message=msg)
         return ChatCompletion(id="", model=resolved, choices=(choice,))
 
@@ -600,6 +658,7 @@ class AsyncCompletions:
         think_harder: bool = False,
     ) -> ChatCompletion | AsyncIterator[ChatCompletionChunk]:
         resolved = resolve_model(model)
+        messages = _normalize_messages(messages)
         provider = provider_of(resolved)
 
         if provider == "deepai":

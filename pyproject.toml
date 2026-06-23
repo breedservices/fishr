@@ -10,5 +10,8 @@ dependencies = [
     "msgspec",
 ]
 
+[project.scripts]
+fishr = "fishr.__main__:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]

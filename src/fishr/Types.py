@@ -4,6 +4,7 @@ from msgspec import Struct
 class ModelDef(Struct, frozen=True):
     web_search: bool
     image: bool
+    file_attach: bool = False
     history: bool = True
     system: bool = True
 
@@ -42,6 +43,7 @@ class ChatCompletion(Struct, frozen=True):
 class Delta(Struct, frozen=True):
     role: str = ""
     content: str = ""
+    thinking: str = ""
 
 
 class ChunkChoice(Struct, frozen=True):
@@ -79,36 +81,49 @@ noxus_bot_ids = {
 
 models = {
     # noxus
-    "noxus/openai": ModelDef(web_search=True, image=True, history=True, system=True),
-    "noxus/google": ModelDef(web_search=True, image=True, history=True, system=True),
+    "noxus/openai": ModelDef(
+        web_search=True, image=False, file_attach=True, history=True, system=True
+    ),
+    "noxus/google": ModelDef(
+        web_search=True, image=False, file_attach=True, history=True, system=True
+    ),
     "noxus/sonnet-4.6": ModelDef(
-        web_search=True, image=False, history=True, system=True
+        web_search=True, image=False, file_attach=True, history=True, system=True
     ),
     "noxus/sonnet-3.5": ModelDef(
-        web_search=True, image=True, history=True, system=True
+        web_search=True, image=False, file_attach=True, history=True, system=True
     ),
-    "noxus/grok-4.3": ModelDef(web_search=True, image=True, history=True, system=True),
+    "noxus/grok-4.3": ModelDef(
+        web_search=True, image=False, file_attach=True, history=True, system=True
+    ),
     "noxus/perplexity": ModelDef(
-        web_search=False, image=True, history=True, system=True
+        web_search=False, image=False, file_attach=True, history=True, system=True
     ),
     "noxus/metaai": ModelDef(web_search=False, image=False, history=True, system=True),
     "noxus/qwen": ModelDef(web_search=True, image=False, history=True, system=True),
     # deepai
     "deepai/standard": ModelDef(
-        web_search=False, image=True, history=True, system=True
+        web_search=False, image=True, file_attach=True, history=True, system=True
     ),
-    "deepai/online": ModelDef(web_search=True, image=True, history=True, system=True),
-    "deepai/gemma-4": ModelDef(web_search=False, image=True, history=True, system=True),
+    "deepai/online": ModelDef(
+        web_search=True, image=True, file_attach=True, history=True, system=True
+    ),
+    "deepai/gemma-4": ModelDef(
+        web_search=False, image=True, file_attach=True, history=True, system=True
+    ),
     "deepai/gemini-2.5-flash-lite": ModelDef(
         web_search=False,
         image=True,
+        file_attach=True,
         history=True,
         system=True,
     ),
     "deepai/deepseek-v3.2": ModelDef(
-        web_search=False, image=True, history=True, system=True
+        web_search=False, image=True, file_attach=True, history=True, system=True
     ),
-    "deepai/image": ModelDef(web_search=False, image=True, history=True, system=False),
+    "deepai/image": ModelDef(
+        web_search=False, image=True, file_attach=False, history=True, system=False
+    ),
     # quillbot
     "quillbot/quillbot": ModelDef(
         web_search=False, image=False, history=True, system=True
@@ -130,7 +145,9 @@ models = {
     # yqcloud
     "yqcloud/gpt-4": ModelDef(web_search=False, image=False, history=True, system=True),
     # opera
-    "opera/aria": ModelDef(web_search=False, image=True, history=True, system=True),
+    "opera/aria": ModelDef(
+        web_search=False, image=True, file_attach=True, history=True, system=True
+    ),
 }
 
 __all__ = [
