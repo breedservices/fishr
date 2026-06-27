@@ -69,6 +69,7 @@ def _build_headers() -> dict[str, str]:
         "user-agent": USER_AGENT,
         "origin": "https://deepai.org",
         "referer": "https://deepai.org/chat",
+        "cookie": "user_sees_ads=true",
     }
 
 

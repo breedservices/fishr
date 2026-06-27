@@ -1,6 +1,6 @@
 [project]
 name = "fishr"
-version = "0.0.1"
+version = "0.0.2
 description = "A python library for free LLMs & usable in your python projects. (Grok, Sonnet, GPT)"
 readme = "README.md"
 requires-python = ">=3.11"
