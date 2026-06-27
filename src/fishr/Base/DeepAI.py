@@ -1,3 +1,4 @@
+import logging
 import mimetypes
 from base64 import b64decode
 from hashlib import md5
@@ -12,6 +13,8 @@ from fishr.Loop import asyncio
 from fishr.Utils import aiter_lines, build_multipart, json_decode, json_encode
 
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+
+Log = logging.getLogger("fishr.deepai")
 
 CHAT_URL = "https://api.deepai.org/hacking_is_a_serious_crime"
 IMAGE_URL = "https://api.deepai.org/api/text2img"
@@ -92,7 +95,8 @@ def _upload_file(client, headers: dict, file_data: bytes, filename: str) -> str:
     result = json_decode.decode(resp.text)
     if isinstance(result, dict) and result.get("success"):
         return result["attachment"]["uuid"]
-    raise RuntimeError(f"DeepAI upload failed: {resp.text}")
+    Log.warning("DeepAI upload failed: %s", resp.text[:200])
+    return ""
 
 
 ALLOWED_IMAGE_MIMES = frozenset({"image/webp", "image/png", "image/jpeg", "image/jpg"})

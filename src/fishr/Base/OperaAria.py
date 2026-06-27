@@ -1,4 +1,5 @@
 import base64
+import logging
 import os
 import time
 from typing import AsyncIterator
@@ -9,6 +10,8 @@ from msgspec import Struct
 from fishr.Http import make_client
 from fishr.Loop import asyncio
 from fishr.Utils import aiter_lines, json_decode, json_encode
+
+Log = logging.getLogger("fishr.opera")
 
 # Endpoints
 API_V2 = "https://composer.opera-api.com/api/v2/a-chat"
@@ -388,7 +391,17 @@ class OperaAria:
         resp = self.http_client.post(API_V2, content=body, headers=headers)
         raw = resp.text
         if resp.status_code >= 400:
-            raise RuntimeError(f"OperaAria API error {resp.status_code}: {raw[:500]}")
+            Log.warning(
+                "OperaAria API error %s: %s",
+                resp.status_code,
+                raw[:500],
+            )
+            return OperaAriaResponse(
+                content="",
+                model=resolved,
+                image_urls=(),
+                thinking="",
+            )
         content, image_urls, conv_id, thinking = _parse_sse_text(raw)
         if not content and not image_urls:
             # Fallback: try parsing the raw text as a single JSON blob

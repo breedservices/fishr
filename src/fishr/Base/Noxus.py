@@ -1,3 +1,4 @@
+import logging
 from random import choices
 from string import ascii_letters, ascii_lowercase, digits
 from time import time
@@ -13,6 +14,8 @@ from fishr.Types import noxus_bot_ids
 from fishr.Utils import aiter_lines, build_multipart, json_decode, json_encode
 
 BASE = "https://chatgptfree.ai"
+
+Log = logging.getLogger("fishr.noxus")
 AJAX = f"{BASE}/wp-admin/admin-ajax.php"
 DATA_PREFIX = "data: "
 
@@ -77,7 +80,8 @@ def _fetch_nonce(client: PrimpClient, bot_id: int) -> str:
         nonce = data["data"].get("nonce")
         if nonce:
             return nonce
-    raise RuntimeError("Noxus: nonce refresh failed")
+    Log.warning("Noxus: nonce refresh failed")
+    return ""
 
 
 def _extract_content(data) -> str:

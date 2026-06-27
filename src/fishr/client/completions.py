@@ -2,10 +2,12 @@ from typing import AsyncIterator, Iterator
 
 from fishr.Base.DeepAI import DeepAI, DeepAIStream
 from fishr.Base.DphnAI import DphnAI, DphnAIStream
+from fishr.Base.Eris import Eris, ErisStream
 from fishr.Base.NoTrack import NoTrack, NoTrackStream
 from fishr.Base.Noxus import Image, Noxus, NoxusMessage, NoxusResponse
 from fishr.Base.OperaAria import OperaAria, OperaAriaStream
 from fishr.Base.Quillbot import Quillbot, QuillbotStream
+from fishr.Base.Telnyx import Telnyx, TelnyxStream
 from fishr.Base.Yqcloud import Yqcloud, YqcloudStream
 from fishr.client.routing import provider_of, resolve_model
 from fishr.client.streams import (
@@ -14,6 +16,8 @@ from fishr.client.streams import (
     DeepAISyncStream,
     DphnAIAsyncStream,
     DphnAISyncStream,
+    ErisAsyncStream,
+    ErisSyncStream,
     NoTrackAsyncStream,
     NoTrackSyncStream,
     OperaAriaAsyncStream,
@@ -21,6 +25,8 @@ from fishr.client.streams import (
     QuillbotAsyncStream,
     QuillbotSyncStream,
     SyncStream,
+    TelnyxAsyncStream,
+    TelnyxSyncStream,
     YqcloudAsyncStream,
     YqcloudSyncStream,
 )
@@ -88,7 +94,17 @@ def _normalize_messages(messages: list[dict]) -> list[dict]:
 class Completions:
     """Create chat completions via ``client.chat.completions.create(...)``."""
 
-    __slots__ = ("noxus", "deepai", "quillbot", "notrack", "dphnai", "yqcloud", "opera")
+    __slots__ = (
+        "noxus",
+        "deepai",
+        "quillbot",
+        "notrack",
+        "dphnai",
+        "yqcloud",
+        "opera",
+        "eris",
+        "telnyx",
+    )
 
     def __init__(
         self,
@@ -99,6 +115,8 @@ class Completions:
         dphnai: DphnAI,
         yqcloud: Yqcloud,
         opera: OperaAria,
+        eris: Eris,
+        telnyx: Telnyx,
     ) -> None:
         self.noxus = noxus
         self.deepai = deepai
@@ -107,6 +125,8 @@ class Completions:
         self.dphnai = dphnai
         self.yqcloud = yqcloud
         self.opera = opera
+        self.eris = eris
+        self.telnyx = telnyx
 
     @staticmethod
     def _build_messages(messages: list[dict]) -> tuple[NoxusMessage, ...]:
@@ -343,6 +363,70 @@ class Completions:
         choice = Choice(index=0, message=msg)
         return ChatCompletion(id="", model=resolved, choices=(choice,))
 
+    def _eris_create(
+        self,
+        resolved: str,
+        messages: list[dict],
+        web_search: bool,
+        stream: bool,
+        think_harder: bool = False,
+    ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
+        if stream:
+            raw = self.eris.chat(
+                messages,
+                model=resolved,
+                stream=True,
+                enable_thinking=think_harder,
+            )
+            if isinstance(raw, ErisStream):
+                return ErisSyncStream(raw, resolved)
+            return SyncStream(iter([raw.content]), resolved)
+
+        result = self.eris.chat(
+            messages,
+            model=resolved,
+            enable_thinking=think_harder,
+        )
+        if isinstance(result, ErisStream):
+            content = "".join(c for c, _ in result if not isinstance(c, tuple))
+        else:
+            content = result.content
+        msg = Message(role="assistant", content=content)
+        choice = Choice(index=0, message=msg)
+        return ChatCompletion(id="", model=resolved, choices=(choice,))
+
+    def _telnyx_create(
+        self,
+        resolved: str,
+        messages: list[dict],
+        web_search: bool,
+        stream: bool,
+        think_harder: bool = False,
+    ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
+        if stream:
+            raw = self.telnyx.chat(
+                messages,
+                model=resolved,
+                stream=True,
+                enable_thinking=think_harder,
+            )
+            if isinstance(raw, TelnyxStream):
+                return TelnyxSyncStream(raw, resolved)
+            return SyncStream(iter([raw.content]), resolved)
+
+        result = self.telnyx.chat(
+            messages,
+            model=resolved,
+            enable_thinking=think_harder,
+        )
+        if isinstance(result, TelnyxStream):
+            content = "".join(c for c, _ in result if not isinstance(c, tuple))
+        else:
+            content = result.content
+        msg = Message(role="assistant", content=content)
+        choice = Choice(index=0, message=msg)
+        return ChatCompletion(id="", model=resolved, choices=(choice,))
+
     def create(
         self,
         *,
@@ -370,6 +454,14 @@ class Completions:
             return self._opera_create(
                 resolved, messages, web_search, stream, think_harder=think_harder
             )
+        if provider == "eris":
+            return self._eris_create(
+                resolved, messages, web_search, stream, think_harder=think_harder
+            )
+        if provider == "telnyx":
+            return self._telnyx_create(
+                resolved, messages, web_search, stream, think_harder=think_harder
+            )
 
         return self._noxus_create(resolved, messages, web_search, stream)
 
@@ -377,7 +469,17 @@ class Completions:
 class AsyncCompletions:
     """Async version of :class:`Completions`."""
 
-    __slots__ = ("noxus", "deepai", "quillbot", "notrack", "dphnai", "yqcloud", "opera")
+    __slots__ = (
+        "noxus",
+        "deepai",
+        "quillbot",
+        "notrack",
+        "dphnai",
+        "yqcloud",
+        "opera",
+        "eris",
+        "telnyx",
+    )
 
     def __init__(
         self,
@@ -388,6 +490,8 @@ class AsyncCompletions:
         dphnai: DphnAI,
         yqcloud: Yqcloud,
         opera: OperaAria,
+        eris: Eris,
+        telnyx: Telnyx,
     ) -> None:
         self.noxus = noxus
         self.deepai = deepai
@@ -396,6 +500,8 @@ class AsyncCompletions:
         self.dphnai = dphnai
         self.yqcloud = yqcloud
         self.opera = opera
+        self.eris = eris
+        self.telnyx = telnyx
 
     async def _noxus_create(
         self,
@@ -648,6 +754,78 @@ class AsyncCompletions:
         choice = Choice(index=0, message=msg)
         return ChatCompletion(id="", model=resolved, choices=(choice,))
 
+    async def _eris_create(
+        self,
+        resolved: str,
+        messages: list[dict],
+        web_search: bool,
+        stream: bool,
+        think_harder: bool = False,
+    ) -> ChatCompletion | AsyncIterator[ChatCompletionChunk]:
+        from fishr.Loop import asyncio
+
+        if stream:
+            raw = await asyncio.to_thread(
+                self.eris.chat,
+                messages,
+                model=resolved,
+                stream=True,
+                enable_thinking=think_harder,
+            )
+            if isinstance(raw, ErisStream):
+                return ErisAsyncStream(raw, resolved)
+            return AsyncStream(iter([raw.content]), resolved)
+
+        result = await asyncio.to_thread(
+            self.eris.chat,
+            messages,
+            model=resolved,
+            enable_thinking=think_harder,
+        )
+        if isinstance(result, ErisStream):
+            content = "".join(c for c, _ in result if not isinstance(c, tuple))
+        else:
+            content = result.content
+        msg = Message(role="assistant", content=content)
+        choice = Choice(index=0, message=msg)
+        return ChatCompletion(id="", model=resolved, choices=(choice,))
+
+    async def _telnyx_create(
+        self,
+        resolved: str,
+        messages: list[dict],
+        web_search: bool,
+        stream: bool,
+        think_harder: bool = False,
+    ) -> ChatCompletion | AsyncIterator[ChatCompletionChunk]:
+        from fishr.Loop import asyncio
+
+        if stream:
+            raw = await asyncio.to_thread(
+                self.telnyx.chat,
+                messages,
+                model=resolved,
+                stream=True,
+                enable_thinking=think_harder,
+            )
+            if isinstance(raw, TelnyxStream):
+                return TelnyxAsyncStream(raw, resolved)
+            return AsyncStream(iter([raw.content]), resolved)
+
+        result = await asyncio.to_thread(
+            self.telnyx.chat,
+            messages,
+            model=resolved,
+            enable_thinking=think_harder,
+        )
+        if isinstance(result, TelnyxStream):
+            content = "".join(c for c, _ in result if not isinstance(c, tuple))
+        else:
+            content = result.content
+        msg = Message(role="assistant", content=content)
+        choice = Choice(index=0, message=msg)
+        return ChatCompletion(id="", model=resolved, choices=(choice,))
+
     async def create(
         self,
         *,
@@ -675,6 +853,14 @@ class AsyncCompletions:
             return await self._opera_create(
                 resolved, messages, web_search, stream, think_harder=think_harder
             )
+        if provider == "eris":
+            return await self._eris_create(
+                resolved, messages, web_search, stream, think_harder=think_harder
+            )
+        if provider == "telnyx":
+            return await self._telnyx_create(
+                resolved, messages, web_search, stream, think_harder=think_harder
+            )
 
         return await self._noxus_create(resolved, messages, web_search, stream)
 
@@ -691,9 +877,11 @@ class Chat:
         dphnai: DphnAI,
         yqcloud: Yqcloud,
         opera: OperaAria,
+        eris: Eris,
+        telnyx: Telnyx,
     ) -> None:
         self.completions = Completions(
-            noxus, deepai, quillbot, notrack, dphnai, yqcloud, opera
+            noxus, deepai, quillbot, notrack, dphnai, yqcloud, opera, eris, telnyx
         )
 
 
@@ -709,9 +897,11 @@ class AsyncChat:
         dphnai: DphnAI,
         yqcloud: Yqcloud,
         opera: OperaAria,
+        eris: Eris,
+        telnyx: Telnyx,
     ) -> None:
         self.completions = AsyncCompletions(
-            noxus, deepai, quillbot, notrack, dphnai, yqcloud, opera
+            noxus, deepai, quillbot, notrack, dphnai, yqcloud, opera, eris, telnyx
         )
 
 

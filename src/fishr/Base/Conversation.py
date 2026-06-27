@@ -1,9 +1,11 @@
 from fishr.Base.DeepAI import DeepAI
 from fishr.Base.DphnAI import DphnAI
+from fishr.Base.Eris import Eris
 from fishr.Base.NoTrack import NoTrack
 from fishr.Base.Noxus import NoxusMessage
 from fishr.Base.OperaAria import OperaAria
 from fishr.Base.Quillbot import Quillbot
+from fishr.Base.Telnyx import Telnyx
 from fishr.Base.Yqcloud import Yqcloud
 from fishr.Types import models as model_registry
 
@@ -52,6 +54,10 @@ class Conversation:
             self.provider_type = "yqcloud"
         elif isinstance(provider, OperaAria):
             self.provider_type = "opera"
+        elif isinstance(provider, Telnyx):
+            self.provider_type = "telnyx"
+        elif isinstance(provider, Eris):
+            self.provider_type = "eris"
         else:
             self.provider_type = "noxus"
         self.model = model
@@ -72,6 +78,10 @@ class Conversation:
             return self._ask_yqcloud(prompt, **kwargs)
         if self.provider_type == "opera":
             return self._ask_opera(prompt, **kwargs)
+        if self.provider_type == "telnyx":
+            return self._ask_telnyx(prompt, **kwargs)
+        if self.provider_type == "eris":
+            return self._ask_eris(prompt, **kwargs)
         return self._ask_noxus(prompt, **kwargs)
 
     def _ask_noxus(self, prompt: str, **kwargs) -> str:
@@ -139,6 +149,24 @@ class Conversation:
         self.history.append(NoxusMessage(role="assistant", content=content))
         return content
 
+    def _ask_telnyx(self, prompt: str, **kwargs) -> str:
+        messages = [{"role": m.role, "content": m.content} for m in self.history]
+        messages.append({"role": "user", "content": prompt})
+        result = self.provider.chat(messages, model=self.model, **kwargs)
+        content = result.content
+        self.history.append(NoxusMessage(role="user", content=prompt))
+        self.history.append(NoxusMessage(role="assistant", content=content))
+        return content
+
+    def _ask_eris(self, prompt: str, **kwargs) -> str:
+        messages = [{"role": m.role, "content": m.content} for m in self.history]
+        messages.append({"role": "user", "content": prompt})
+        result = self.provider.chat(messages, model=self.model, **kwargs)
+        content = result.content
+        self.history.append(NoxusMessage(role="user", content=prompt))
+        self.history.append(NoxusMessage(role="assistant", content=content))
+        return content
+
     def system(self, content: str) -> None:
         self.history.append(NoxusMessage(role="system", content=content))
 
@@ -194,6 +222,10 @@ class AsyncConversation:
             self.provider_type = "yqcloud"
         elif isinstance(provider, OperaAria):
             self.provider_type = "opera"
+        elif isinstance(provider, Telnyx):
+            self.provider_type = "telnyx"
+        elif isinstance(provider, Eris):
+            self.provider_type = "eris"
         else:
             self.provider_type = "noxus"
         self.model = model
@@ -214,6 +246,10 @@ class AsyncConversation:
             return await self._ask_yqcloud(prompt, **kwargs)
         if self.provider_type == "opera":
             return await self._ask_opera(prompt, **kwargs)
+        if self.provider_type == "telnyx":
+            return await self._ask_telnyx(prompt, **kwargs)
+        if self.provider_type == "eris":
+            return await self._ask_eris(prompt, **kwargs)
         return await self._ask_noxus(prompt, **kwargs)
 
     async def _ask_noxus(self, prompt: str, **kwargs) -> str:
@@ -305,6 +341,32 @@ class AsyncConversation:
         content = result.content
         if result.image_urls:
             content += "\n" + "\n".join(result.image_urls)
+        self.history.append(NoxusMessage(role="user", content=prompt))
+        self.history.append(NoxusMessage(role="assistant", content=content))
+        return content
+
+    async def _ask_telnyx(self, prompt: str, **kwargs) -> str:
+        messages = [{"role": m.role, "content": m.content} for m in self.history]
+        messages.append({"role": "user", "content": prompt})
+        result = await self.provider.chat_async(
+            messages,
+            model=self.model,
+            **kwargs,
+        )
+        content = result.content
+        self.history.append(NoxusMessage(role="user", content=prompt))
+        self.history.append(NoxusMessage(role="assistant", content=content))
+        return content
+
+    async def _ask_eris(self, prompt: str, **kwargs) -> str:
+        messages = [{"role": m.role, "content": m.content} for m in self.history]
+        messages.append({"role": "user", "content": prompt})
+        result = await self.provider.chat_async(
+            messages,
+            model=self.model,
+            **kwargs,
+        )
+        content = result.content
         self.history.append(NoxusMessage(role="user", content=prompt))
         self.history.append(NoxusMessage(role="assistant", content=content))
         return content

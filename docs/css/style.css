@@ -460,6 +460,11 @@ td.no {
     color: var(--accent2);
     border: 1px solid #8b5cf625;
 }
+.tag-orange {
+    background: #f9731612;
+    color: #f97316;
+    border: 1px solid #f9731625;
+}
 
 /* ── api reference cards ─────────────────────────── */
 

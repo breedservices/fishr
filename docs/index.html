@@ -22,9 +22,12 @@
         <li><a href="#web-search">Web Search</a></li>
         <li><a href="#images">Image Generation</a></li>
         <li><a href="#image-input">Image Input</a></li>
+        <li><a href="#audio">Audio Generation</a></li>
         <li><a href="#agents">Agents</a></li>
+        <li><a href="#think-harder">Think Harder</a></li>
         <li><a href="#async">Async</a></li>
         <li><a href="#conversation">Conversation</a></li>
+        <li><a href="#chat-ui">Chat UI</a></li>
         <li><a href="#models">All Models</a></li>
         <li><a href="#types">Response Types</a></li>
         <li><a href="#api-reference">API Reference</a></li>
@@ -124,6 +127,36 @@ print(response.text)</code></pre>
                 <div class="provider-tags">
                     <span class="tag tag-blue">Image Gen</span>
                     <span class="tag tag-purple">Streaming</span>
+                </div>
+            </a>
+            <a href="providers/eris.html" class="provider-card">
+                <h3>eris</h3>
+                <p>5 models — DeepSeek V4 Flash/Pro, GLM 5.1, MiniMax M3, Kimi K2.6 (thinking mode)</p>
+                <div class="provider-tags">
+                    <span class="tag tag-orange">Thinking</span>
+                    <span class="tag tag-purple">Streaming</span>
+                </div>
+            </a>
+            <a href="providers/telnyx.html" class="provider-card">
+                <h3>telnyx</h3>
+                <p>4 models — GLM 5.2, GLM 5.1, Kimi K2.6, MiniMax M3 (no-auth fast-path, thinking mode)</p>
+                <div class="provider-tags">
+                    <span class="tag tag-orange">Thinking</span>
+                    <span class="tag tag-purple">Streaming</span>
+                </div>
+            </a>
+            <a href="providers/telnyx-tts.html" class="provider-card">
+                <h3>telnyx-tts</h3>
+                <p>5 models — NaturalHD TTS voices via no-auth fast-path (astra, luna, sol, nova, orion)</p>
+                <div class="provider-tags">
+                    <span class="tag tag-blue">Audio Gen</span>
+                </div>
+            </a>
+            <a href="providers/fm.html" class="provider-card">
+                <h3>fm</h3>
+                <p>17 models — OpenAI.fm TTS (11 voices + 6 styles, transcoding)</p>
+                <div class="provider-tags">
+                    <span class="tag tag-blue">Audio Gen</span>
                 </div>
             </a>
         </div>
@@ -391,6 +424,152 @@ print(response.text)</code></pre>
         </div>
     </section>
 
+    <section id="audio">
+        <h2>Audio Generation</h2>
+        <p>Use <code>client.audio.speech.create(...)</code> to generate speech from text. fishr supports two TTS providers: <strong>fm</strong> (OpenAI.fm) and <strong>telnyx-tts</strong> (Telnyx NaturalHD via the no-auth fast-path demo). Both mirror the OpenAI text-to-speech API and return raw audio bytes in <code>result.data[0].audio</code>.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# OpenAI.fm
+result = client.audio.speech.create(
+    model="fm/coral",
+    input="Hello from fishr.",
+)
+
+# Telnyx TTS (no-auth fast-path)
+result = client.audio.speech.create(
+    model="telnyx-tts/astra",
+    input="Hello from Telnyx.",
+)
+
+# result.data[0].audio is raw MP3 bytes
+with open("out.mp3", "wb") as fh:
+    fh.write(result.data[0].audio)</code></pre>
+        </div>
+
+        <h3>fm — voices &amp; styles</h3>
+        <p>FM offers 11 voices and 6 preset styles. Voices (e.g. <code>fm/coral</code>) only select the voice. Styles (e.g. <code>fm/cowboy</code>) fill in <code>instructions</code> for you and use the default voice unless you override <code>voice=...</code>.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# explicit voice
+result = client.audio.speech.create(
+    model="fm/coral",
+    input="Hello from nova.",
+    voice="nova",
+)
+
+# style model (instructions come from the style)
+result = client.audio.speech.create(
+    model="fm/noir_detective",
+    input="The package went missing at midnight.",
+)
+
+# custom instructions
+result = client.audio.speech.create(
+    model="fm/coral",
+    input="Hello world.",
+    instructions="Speak softly and slowly.",
+)</code></pre>
+        </div>
+
+        <h3>telnyx-tts — voice-as-model</h3>
+        <p>Telnyx TTS exposes five NaturalHD voices. Each model id <em>is</em> a voice — there is no separate style layer. You can still override the voice on top of any model with <code>voice=...</code>. Voices: <code>telnyx-tts/astra</code> (default), <code>telnyx-tts/luna</code>, <code>telnyx-tts/sol</code>, <code>telnyx-tts/nova</code>, <code>telnyx-tts/orion</code>.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# default voice (astra)
+result = client.audio.speech.create(
+    model="telnyx-tts/astra",
+    input="Hello from astra.",
+)
+
+# different voice via model
+result = client.audio.speech.create(
+    model="telnyx-tts/luna",
+    input="Hello from luna.",
+)
+
+# override the voice on top of any model
+result = client.audio.speech.create(
+    model="telnyx-tts/astra",
+    input="Hello from orion via override.",
+    voice="orion",
+)
+
+# explicit BCP-47 language (defaults to en-US)
+result = client.audio.speech.create(
+    model="telnyx-tts/astra",
+    input="Bonjour.",
+    voice="astra",
+)</code></pre>
+        </div>
+
+        <h3>Formats &amp; transcoding</h3>
+        <p>Both providers only emit MP3. Pass <code>format=...</code> to transcode to other formats using the bundled <code>static-ffmpeg</code> binary — no system ffmpeg install needed. Supported formats: <code>mp3</code>, <code>ogg</code>, <code>wav</code>, <code>flac</code>, <code>opus</code>, <code>aac</code>, <code>m4a</code>.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.audio.speech.create(
+    model="telnyx-tts/astra",
+    input="Transcode me to WAV.",
+    format="wav",
+)
+print(result.data[0].mime_type)  # audio/wav</code></pre>
+        </div>
+
+        <h3>Async</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import AsyncClient
+
+client = AsyncClient()
+
+result = await client.audio.speech.create(
+    model="telnyx-tts/sol",
+    input="Hello from the async high level client.",
+)
+print(result.data[0].voice)</code></pre>
+        </div>
+
+        <h3>Direct usage</h3>
+        <p>You can also use either provider directly without the <code>Client</code> wrapper. The low-level <code>speak()</code> methods return raw MP3 bytes — use the high-level client if you need <code>format=</code> transcoding.</p>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import OpenAIFM, TelnyxAudio
+
+fm = OpenAIFM()
+result = fm.speak("Hello world.")
+print(result.voice, len(result.audio))
+
+ta = TelnyxAudio()
+result = ta.speak("Hello from Telnyx.", model="telnyx-tts/luna")
+print(result.model, result.voice, len(result.audio))</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ See the provider pages for full details:</strong>
+            <a href="providers/fm.html">FM (OpenAI.fm)</a> ·
+            <a href="providers/telnyx-tts.html">Telnyx TTS</a>.
+        </div>
+    </section>
+
     <section id="agents">
         <h2>Agents</h2>
         <p>Use <code>client.agents.run()</code> to run a multi-step agent loop. The agent iteratively calls the LLM with tool results until it produces a final answer or reaches the step limit.</p>
@@ -444,6 +623,55 @@ print(result.content)</code></pre>
         </div>
     </section>
 
+    <section id="think-harder">
+        <h2>Think Harder</h2>
+        <p>Use <code>think_harder=True</code> with Eris or Opera Aria to enable reasoning mode. When streaming, reasoning tokens appear in <code>chunk.choices[0].delta.thinking</code>.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# Eris — DeepSeek thinking mode
+response = client.chat.completions.create(
+    model="eris/deepseek-v4-flash",
+    messages=[{"role": "user", "content": "What is 17 * 23?"}],
+    think_harder=True,
+)
+print(response.text)
+
+# Opera Aria
+response = client.chat.completions.create(
+    model="opera/aria",
+    messages=[{"role": "user", "content": "What is 17 * 23?"}],
+    think_harder=True,
+)
+print(response.text)</code></pre>
+        </div>
+
+        <h3>Streaming with thinking</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="eris/deepseek-v4-flash",
+    messages=[{"role": "user", "content": "Solve: 17 * 23"}],
+    stream=True,
+    think_harder=True,
+)
+
+for chunk in response:
+    if chunk.choices[0].delta.thinking:
+        print(chunk.choices[0].delta.thinking, end="")
+    elif chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="")</code></pre>
+        </div>
+    </section>
+
     <section id="async">
         <h2>Async</h2>
         <p>Use <code>AsyncClient</code> for non-blocking calls.</p>
@@ -476,7 +704,7 @@ asyncio.run(main())</code></pre>
 
     <section id="conversation">
         <h2>Multi-turn Conversation</h2>
-        <p>Conversations maintain history automatically. Works with all providers — Noxus, DeepAI, Quillbot, NoTrack, and DphnAI.</p>
+        <p>Conversations maintain history automatically. Works with all providers — Noxus, DeepAI, Quillbot, NoTrack, DphnAI, Opera Aria, and Eris.</p>
 
         <h3>Sync</h3>
         <div class="code-block">
@@ -509,6 +737,10 @@ conv.ask("Hello!")
 conv = client.conversation(model="dphnai/6b")
 conv.ask("Hello!")
 
+# eris
+conv = client.conversation(model="eris/deepseek-v4-flash")
+conv.ask("Hello!")
+
 conv.clear()  # reset history</code></pre>
         </div>
 
@@ -539,6 +771,68 @@ print(reply)</code></pre>
                 </tbody>
             </table>
         </div>
+    </section>
+
+    <section id="chat-ui">
+        <h2>Built-in Chat UI</h2>
+        <p>fishr ships with a built-in web chat UI for testing models interactively. It's a single-page app served from <code>fishr.chat</code> that streams responses over SSE, with no separate frontend build step.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-python">from fishr.chat import Run
+
+Run(host="127.0.0.1", port=8000)</code></pre>
+        </div>
+
+        <p>Then open <code>http://127.0.0.1:8000</code> in your browser.</p>
+
+        <h3>Features</h3>
+        <ul style="margin: 10px 0; padding-left: 1.4em; color: var(--text2); font-size: 14px; line-height: 1.9;">
+            <li><strong>Model selector</strong> — grouped by provider prefix (e.g. <code>noxus/</code>, <code>eris/</code>).</li>
+            <li><strong>Streaming</strong> — responses stream token-by-token over SSE.</li>
+            <li><strong>Thinking blocks</strong> — collapsible reasoning output for Eris and Opera Aria when <em>Think Harder</em> is on.</li>
+            <li><strong>Web search</strong> toggle for models that support it.</li>
+            <li><strong>Image generation</strong> for DeepAI and Opera Aria models.</li>
+            <li><strong>File attachments</strong> for vision-capable models.</li>
+            <li><strong>System prompts</strong> — optional per-conversation.</li>
+            <li><strong>Markdown rendering</strong> with syntax highlighting (highlight.js) and inline image URLs.</li>
+            <li><strong>Multi-provider Compare</strong> — send the same prompt to 2–4 models at once and view responses side-by-side.</li>
+        </ul>
+
+        <h3>Compare Mode</h3>
+        <p>Toggle <strong>Compare</strong> in the header to switch into comparison mode. Pick 2–4 models from the dropdowns (use the <code>2→3→4</code> button to cycle the column count), type one prompt, and hit send. A full-screen grid opens with each model streaming into its own panel. Per-panel status indicators (<code>⏳ ✍️ ❌ ✅</code>) track each stream.</p>
+
+        <div class="alert alert-info">
+            <strong>ℹ How it works.</strong> The UI POSTs the prompt to <code>/api/chat/compare</code>, which runs each model concurrently on the server via <code>asyncio.gather</code> and multiplexes their chunks into a single SSE stream tagged with a panel index. No browser-side concurrency limits are hit because it's one HTTP connection.
+        </div>
+
+        <h3>HTTP Endpoints</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>GET</code></td><td><code>/</code></td><td>Serves the single-page chat UI (<code>ui.html</code>)</td></tr>
+                    <tr><td><code>GET</code></td><td><code>/api/models</code></td><td>Lists all registered models from <code>fishr.Types.models</code></td></tr>
+                    <tr><td><code>POST</code></td><td><code>/api/chat</code></td><td>Stream a single-model completion (SSE)</td></tr>
+                    <tr><td><code>POST</code></td><td><code>/api/chat/compare</code></td><td>Stream 2–4 models concurrently into one multiplexed SSE stream</td></tr>
+                    <tr><td><code>POST</code></td><td><code>/api/images</code></td><td>Generate an image (DeepAI or Opera Aria)</td></tr>
+                    <tr><td><code>POST</code></td><td><code>/api/audio</code></td><td>Generate speech via FM (returns raw audio bytes)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Compare Request Body</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><code class="language-json">{
+  "models": ["noxus/openai", "eris/deepseek-v4-flash", "opera/aria"],
+  "messages": [{"role": "user", "content": "Hello!"}],
+  "web_search": false,
+  "think_harder": false
+}</code></pre>
+        </div>
+
+        <p>Each SSE <code>data:</code> frame is tagged with <code>idx</code> (the panel index) and a <code>type</code> of <code>thinking</code>, <code>content</code>, <code>error</code>, or <code>done</code>. The stream closes with <code>data: [DONE]</code> once all models finish.</p>
     </section>
 
     <section id="models">
@@ -629,6 +923,73 @@ print(reply)</code></pre>
                 </tbody>
             </table>
         </div>
+
+        <h3>Eris</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>Thinking</th><th>History</th></tr></thead>
+                <tbody>
+                    <tr><td><code>eris/deepseek-v4-flash</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>eris/deepseek-v4-pro</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>eris/glm-5.1</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>eris/minimax-m3</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>eris/kimi-k2.6</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Telnyx</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Context</th><th>Thinking</th><th>History</th></tr></thead>
+                <tbody>
+                    <tr><td><code>telnyx/glm-5.2</code></td><td>1M</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>telnyx/glm-5.1</code></td><td>202K</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>telnyx/kimi-k2.6</code></td><td>256K</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>telnyx/minimax-m3</code></td><td>1M</td><td>✅</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Telnyx TTS</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Voice</th><th>Notes</th></tr></thead>
+                <tbody>
+                    <tr><td><code>telnyx-tts/astra</code></td><td>astra</td><td>default voice</td></tr>
+                    <tr><td><code>telnyx-tts/luna</code></td><td>luna</td><td>—</td></tr>
+                    <tr><td><code>telnyx-tts/sol</code></td><td>sol</td><td>—</td></tr>
+                    <tr><td><code>telnyx-tts/nova</code></td><td>nova</td><td>—</td></tr>
+                    <tr><td><code>telnyx-tts/orion</code></td><td>orion</td><td>—</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>FM (OpenAI.fm TTS)</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Type</th><th>Notes</th></tr></thead>
+                <tbody>
+                    <tr><td><code>fm/alloy</code></td><td>voice</td><td>—</td></tr>
+                    <tr><td><code>fm/ash</code></td><td>voice</td><td>—</td></tr>
+                    <tr><td><code>fm/ballad</code></td><td>voice</td><td>—</td></tr>
+                    <tr><td><code>fm/cedar</code></td><td>voice</td><td>—</td></tr>
+                    <tr><td><code>fm/coral</code></td><td>voice</td><td>default voice</td></tr>
+                    <tr><td><code>fm/fable</code></td><td>voice</td><td>—</td></tr>
+                    <tr><td><code>fm/marin</code></td><td>voice</td><td>—</td></tr>
+                    <tr><td><code>fm/nova</code></td><td>voice</td><td>—</td></tr>
+                    <tr><td><code>fm/onyx</code></td><td>voice</td><td>—</td></tr>
+                    <tr><td><code>fm/sage</code></td><td>voice</td><td>—</td></tr>
+                    <tr><td><code>fm/verse</code></td><td>voice</td><td>—</td></tr>
+                    <tr><td><code>fm/friendly</code></td><td>style</td><td>cheerful guide</td></tr>
+                    <tr><td><code>fm/patient_teacher</code></td><td>style</td><td>warm art instructor</td></tr>
+                    <tr><td><code>fm/noir_detective</code></td><td>style</td><td>noir detective</td></tr>
+                    <tr><td><code>fm/cowboy</code></td><td>style</td><td>laid-back cowboy</td></tr>
+                    <tr><td><code>fm/calm</code></td><td>style</td><td>calm, reassuring</td></tr>
+                    <tr><td><code>fm/scientific_style</code></td><td>style</td><td>academic, precise</td></tr>
+                </tbody>
+            </table>
+        </div>
     </section>
 
     <section id="types">
@@ -666,6 +1027,30 @@ print(reply)</code></pre>
                 <tbody>
                     <tr><td><code>url</code></td><td><code>str</code></td><td>URL of the generated image</td></tr>
                     <tr><td><code>alt</code></td><td><code>str</code></td><td>Prompt used to generate</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>AudioResponse</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>created</code></td><td><code>int</code></td><td>Unix timestamp</td></tr>
+                    <tr><td><code>data</code></td><td><code>tuple[AudioData, ...]</code></td><td>Generated audio (one item)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>AudioData</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>voice</code></td><td><code>str</code></td><td>Voice used</td></tr>
+                    <tr><td><code>model</code></td><td><code>str</code></td><td>Model name resolved (voice or style)</td></tr>
+                    <tr><td><code>audio</code></td><td><code>bytes</code></td><td>Raw audio bytes</td></tr>
+                    <tr><td><code>mime_type</code></td><td><code>str</code></td><td>MIME type, e.g. <code>audio/mpeg</code>, <code>audio/ogg</code></td></tr>
                 </tbody>
             </table>
         </div>
@@ -737,6 +1122,7 @@ print(reply)</code></pre>
                 <tbody>
                     <tr><td><code>role</code></td><td><code>str</code></td></tr>
                     <tr><td><code>content</code></td><td><code>str</code></td></tr>
+                    <tr><td><code>thinking</code></td><td><code>str</code></td></tr>
                 </tbody>
             </table>
         </div>
@@ -788,6 +1174,10 @@ print(reply)</code></pre>
                     <code>stream</code> <span class="type">bool</span> <span class="default">default: False</span>
                     <p>Return an iterator of <code>ChatCompletionChunk</code> instead of a single <code>ChatCompletion</code>.</p>
                 </div>
+                <div class="param">
+                    <code>think_harder</code> <span class="type">bool</span> <span class="default">default: False</span>
+                    <p>Enable reasoning mode for Eris and Opera Aria models. When streaming, reasoning tokens appear in <code>chunk.choices[0].delta.thinking</code>.</p>
+                </div>
             </div>
         </div>
 
@@ -804,6 +1194,33 @@ print(reply)</code></pre>
                 </div>
             </div>
             <p>Returns an <code>ImageResponse</code> with <code>data[0].url</code> containing the generated image URL.</p>
+        </div>
+
+        <h3>client.audio.speech.create()</h3>
+        <div class="ref-card">
+            <div class="params">
+                <div class="param">
+                    <code>model</code> <span class="type">str</span> <span class="default">default: "fm/coral"</span>
+                    <p>Audio model. <code>fm/*</code> routes to OpenAI.fm (voice or style). <code>telnyx-tts/*</code> routes to the Telnyx no-auth fast-path demo — each model id is a voice (e.g. <code>telnyx-tts/astra</code>, <code>telnyx-tts/luna</code>, <code>telnyx-tts/sol</code>, <code>telnyx-tts/nova</code>, <code>telnyx-tts/orion</code>).</p>
+                </div>
+                <div class="param">
+                    <code>input</code> <span class="type">str</span> <span class="required">required</span>
+                    <p>Text to synthesize.</p>
+                </div>
+                <div class="param">
+                    <code>voice</code> <span class="type">str | None</span> <span class="default">default: None</span>
+                    <p>Override the voice. For <code>fm/*</code>, falls back to the voice resolved from <code>model</code> (or <code>coral</code> for a style). For <code>telnyx-tts/*</code>, falls back to the voice embedded in the model id.</p>
+                </div>
+                <div class="param">
+                    <code>instructions</code> <span class="type">str | None</span> <span class="default">default: None</span>
+                    <p>Steer how the voice speaks (tone, pacing, emotion). <code>fm/*</code> only — ignored by <code>telnyx-tts/*</code>. Falls back to the style's preset instructions when <code>model</code> is a style.</p>
+                </div>
+                <div class="param">
+                    <code>format</code> <span class="type">str | None</span> <span class="default">default: None</span>
+                    <p>Output container: <code>mp3</code> (default, no transcoding), <code>ogg</code>, <code>wav</code>, <code>flac</code>, <code>opus</code>, <code>aac</code>, <code>m4a</code>. Non-MP3 formats are transcoded from the upstream MP3 via the bundled <code>static-ffmpeg</code> binary. Applies to both <code>fm/*</code> and <code>telnyx-tts/*</code>.</p>
+                </div>
+            </div>
+            <p>Returns an <code>AudioResponse</code> with <code>data[0].audio</code> containing the raw audio bytes and <code>data[0].mime_type</code> the MIME type.</p>
         </div>
 
         <h3>client.agents.run()</h3>

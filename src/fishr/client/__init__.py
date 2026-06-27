@@ -1,12 +1,17 @@
+from fishr.audio.OpenAIFM import OpenAIFM
+from fishr.audio.TelnyxAudio import TelnyxAudio
 from fishr.Base.Conversation import AsyncConversation, Conversation
 from fishr.Base.DeepAI import DeepAI
 from fishr.Base.DphnAI import DphnAI
+from fishr.Base.Eris import Eris
 from fishr.Base.NoTrack import NoTrack
 from fishr.Base.Noxus import Noxus
 from fishr.Base.OperaAria import OperaAria
 from fishr.Base.Quillbot import Quillbot
+from fishr.Base.Telnyx import Telnyx
 from fishr.Base.Yqcloud import Yqcloud
 from fishr.client.agents import AgentRun, AgentStep, AsyncAgentRun
+from fishr.client.audio import AsyncAudio, Audio
 from fishr.client.completions import (
     AsyncChat,
     AsyncCompletions,
@@ -19,6 +24,8 @@ from fishr.client.streams import (
     AsyncStream,
     DeepAIAsyncStream,
     DeepAISyncStream,
+    ErisAsyncStream,
+    ErisSyncStream,
     NoTrackAsyncStream,
     NoTrackSyncStream,
     OperaAriaAsyncStream,
@@ -26,6 +33,8 @@ from fishr.client.streams import (
     QuillbotAsyncStream,
     QuillbotSyncStream,
     SyncStream,
+    TelnyxAsyncStream,
+    TelnyxSyncStream,
     YqcloudAsyncStream,
     YqcloudSyncStream,
 )
@@ -79,6 +88,7 @@ class Client:
     __slots__ = (
         "chat",
         "images",
+        "audio",
         "agents",
         "noxus",
         "deepai",
@@ -87,6 +97,10 @@ class Client:
         "dphnai",
         "yqcloud",
         "opera",
+        "eris",
+        "telnyx",
+        "openai_fm",
+        "telnyx_audio",
     )
 
     def __init__(self) -> None:
@@ -97,6 +111,10 @@ class Client:
         self.dphnai = DphnAI()
         self.yqcloud = Yqcloud()
         self.opera = OperaAria()
+        self.eris = Eris()
+        self.telnyx = Telnyx()
+        self.openai_fm = OpenAIFM()
+        self.telnyx_audio = TelnyxAudio()
         self.chat = Chat(
             self.noxus,
             self.deepai,
@@ -105,8 +123,11 @@ class Client:
             self.dphnai,
             self.yqcloud,
             self.opera,
+            self.eris,
+            self.telnyx,
         )
         self.images = Images(self.deepai)
+        self.audio = Audio(self.openai_fm, self.telnyx_audio)
         self.agents = AgentRun(self.noxus, self.deepai)
 
     def conversation(self, model: str = "noxus/openai") -> Conversation:
@@ -123,6 +144,10 @@ class Client:
             return Conversation(self.yqcloud, model=model)
         if provider == "opera":
             return Conversation(self.opera, model=model)
+        if provider == "eris":
+            return Conversation(self.eris, model=model)
+        if provider == "telnyx":
+            return Conversation(self.telnyx, model=model)
         return Conversation(self.noxus, model=model)
 
     def __repr__(self) -> str:
@@ -161,6 +186,7 @@ class AsyncClient:
     __slots__ = (
         "chat",
         "images",
+        "audio",
         "agents",
         "noxus",
         "deepai",
@@ -169,6 +195,10 @@ class AsyncClient:
         "dphnai",
         "yqcloud",
         "opera",
+        "eris",
+        "telnyx",
+        "openai_fm",
+        "telnyx_audio",
     )
 
     def __init__(self) -> None:
@@ -179,6 +209,10 @@ class AsyncClient:
         self.dphnai = DphnAI()
         self.yqcloud = Yqcloud()
         self.opera = OperaAria()
+        self.eris = Eris()
+        self.telnyx = Telnyx()
+        self.openai_fm = OpenAIFM()
+        self.telnyx_audio = TelnyxAudio()
         self.chat = AsyncChat(
             self.noxus,
             self.deepai,
@@ -187,8 +221,11 @@ class AsyncClient:
             self.dphnai,
             self.yqcloud,
             self.opera,
+            self.eris,
+            self.telnyx,
         )
         self.images = AsyncImages(self.deepai)
+        self.audio = AsyncAudio(self.openai_fm, self.telnyx_audio)
         self.agents = AsyncAgentRun(self.noxus, self.deepai)
 
     def conversation(self, model: str = "noxus/openai") -> AsyncConversation:
@@ -205,6 +242,10 @@ class AsyncClient:
             return AsyncConversation(self.yqcloud, model=model)
         if provider == "opera":
             return AsyncConversation(self.opera, model=model)
+        if provider == "eris":
+            return AsyncConversation(self.eris, model=model)
+        if provider == "telnyx":
+            return AsyncConversation(self.telnyx, model=model)
         return AsyncConversation(self.noxus, model=model)
 
     def __repr__(self) -> str:
@@ -220,6 +261,8 @@ __all__ = [
     "AsyncCompletions",
     "Images",
     "AsyncImages",
+    "Audio",
+    "AsyncAudio",
     "AgentRun",
     "AsyncAgentRun",
     "AgentStep",
@@ -235,6 +278,10 @@ __all__ = [
     "YqcloudAsyncStream",
     "OperaAriaSyncStream",
     "OperaAriaAsyncStream",
+    "ErisSyncStream",
+    "ErisAsyncStream",
+    "TelnyxSyncStream",
+    "TelnyxAsyncStream",
     "resolve_model",
     "provider_of",
 ]

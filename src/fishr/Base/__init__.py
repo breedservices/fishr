@@ -1,6 +1,7 @@
 from fishr.Base.Conversation import AsyncConversation, Conversation
 from fishr.Base.DeepAI import DeepAI, DeepAIResponse, DeepAIStream
 from fishr.Base.DphnAI import DphnAI, DphnAIResponse, DphnAIStream
+from fishr.Base.Eris import Eris, ErisResponse, ErisStream
 from fishr.Base.NoTrack import NoTrack, NoTrackResponse, NoTrackStream
 from fishr.Base.Noxus import Image, Noxus, NoxusMessage, NoxusResponse, Stream
 from fishr.Base.OperaAria import OperaAria, OperaAriaResponse, OperaAriaStream
@@ -31,6 +32,9 @@ __all__ = [
     "Yqcloud",
     "YqcloudResponse",
     "YqcloudStream",
+    "Eris",
+    "ErisResponse",
+    "ErisStream",
     "Conversation",
     "AsyncConversation",
 ]

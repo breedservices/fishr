@@ -84,29 +84,51 @@ Models are specified as ``provider/name``:
     Opera Aria:
     - opera/aria
 
+    Eris:
+    - eris/deepseek-v4-flash, eris/deepseek-v4-pro, eris/glm-5.1, eris/minimax-m3, eris/kimi-k2.6
+
+    Telnyx:
+    - telnyx/glm-5.2, telnyx/glm-5.1, telnyx/kimi-k2.6, telnyx/minimax-m3
+
+    Telnyx TTS
+    - telnyx-tts/astra, telnyx-tts/luna, telnyx-tts/sol
+    - telnyx-tts/nova, telnyx-tts/orion
+
 The provider prefix is optional for noxus (default).
 """
 
+from fishr.audio.OpenAIFM import OpenAIFM, OpenAIFMResponse, OpenAIFMStream
+from fishr.audio.TelnyxAudio import (
+    TelnyxAudio,
+    TelnyxAudioResponse,
+    TelnyxAudioStream,
+)
 from fishr.Base.Conversation import AsyncConversation, Conversation
 from fishr.Base.DeepAI import DeepAI, DeepAIResponse, DeepAIStream
 from fishr.Base.DphnAI import DphnAI, DphnAIResponse, DphnAIStream
+from fishr.Base.Eris import Eris, ErisResponse, ErisStream
 from fishr.Base.NoTrack import NoTrack, NoTrackResponse, NoTrackStream
 from fishr.Base.Noxus import Noxus, NoxusMessage, NoxusResponse
 from fishr.Base.OperaAria import OperaAria, OperaAriaResponse, OperaAriaStream
 from fishr.Base.Quillbot import Quillbot, QuillbotResponse, QuillbotStream
+from fishr.Base.Telnyx import Telnyx, TelnyxResponse, TelnyxStream
 from fishr.Base.Yqcloud import Yqcloud, YqcloudResponse, YqcloudStream
 from fishr.client import (
     AgentRun,
     AgentStep,
     AsyncAgentRun,
+    AsyncAudio,
     AsyncClient,
     AsyncCompletions,
     AsyncImages,
+    Audio,
     Client,
     Completions,
     Images,
 )
 from fishr.Types import (
+    AudioData,
+    AudioResponse,
     ChatCompletion,
     ChatCompletionChunk,
     Choice,
@@ -129,12 +151,20 @@ __all__ = [
     "AsyncCompletions",
     "Images",
     "AsyncImages",
+    "Audio",
+    "AsyncAudio",
     "AgentRun",
     "AsyncAgentRun",
     "AgentStep",
     "Noxus",
     "NoxusResponse",
     "NoxusMessage",
+    "OpenAIFM",
+    "OpenAIFMResponse",
+    "OpenAIFMStream",
+    "TelnyxAudio",
+    "TelnyxAudioResponse",
+    "TelnyxAudioStream",
     "DeepAI",
     "DeepAIResponse",
     "DeepAIStream",
@@ -153,6 +183,12 @@ __all__ = [
     "OperaAria",
     "OperaAriaResponse",
     "OperaAriaStream",
+    "Eris",
+    "ErisResponse",
+    "ErisStream",
+    "Telnyx",
+    "TelnyxResponse",
+    "TelnyxStream",
     "ChatCompletion",
     "ChatCompletionChunk",
     "Choice",
@@ -163,5 +199,7 @@ __all__ = [
     "Usage",
     "ImageUrl",
     "ImageResponse",
+    "AudioData",
+    "AudioResponse",
     "models",
 ]

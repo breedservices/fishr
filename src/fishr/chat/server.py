@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import logging
 import os
 import re
+import traceback
 from typing import AsyncIterator
 
 from msgspec import Struct
@@ -13,6 +15,8 @@ from fishr.Loop import asyncio
 from fishr.Types import models as model_registry
 
 json_encode = JsonEncoder()
+
+log = logging.getLogger("fishr.chat")
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _HTML_PATH = os.path.join(_HERE, "ui.html")
@@ -29,9 +33,24 @@ class ChatRequest(Struct, frozen=True):
     stream: bool = True
 
 
+class CompareRequest(Struct, frozen=True):
+    models: list[str] = []
+    messages: list[dict] = []
+    web_search: bool = False
+    think_harder: bool = False
+
+
 class ImageRequest(Struct, frozen=True):
     model: str = "deepai/image"
     prompt: str = ""
+
+
+class AudioRequest(Struct, frozen=True):
+    model: str = "fm/coral"
+    input: str = ""
+    voice: str = ""
+    instructions: str = ""
+    format: str = ""
 
 
 class ModelEntry(Struct, frozen=True):
@@ -217,6 +236,137 @@ async def _handle_images(writer: asyncio.StreamWriter, body: bytes) -> None:
     await writer.drain()
 
 
+async def _handle_compare(writer: asyncio.StreamWriter, body: bytes) -> None:
+    try:
+        req = json_decode(body, type=CompareRequest)
+    except Exception:
+        _write_json(writer, 400, {"error": "invalid request"})
+        await writer.drain()
+        return
+
+    if not req.messages or not req.models:
+        _write_json(writer, 400, {"error": "messages and models are required"})
+        await writer.drain()
+        return
+
+    if len(req.models) > 4:
+        _write_json(writer, 400, {"error": "maximum 4 models for comparison"})
+        await writer.drain()
+        return
+
+    writer.write(
+        b"HTTP/1.1 200 OK\r\n"
+        b"Content-Type: text/event-stream\r\n"
+        b"Cache-Control: no-cache\r\n"
+        b"Connection: keep-alive\r\n"
+        b"Access-Control-Allow-Origin: *\r\n\r\n"
+    )
+    await writer.drain()
+
+    client = _get_client()
+    log.info("compare start: %s", req.models)
+
+    async def _stream_model(model_id: str, idx: int) -> None:
+        payload = json_encode.encode({"model": model_id, "idx": idx})
+        writer.write(b"data: " + payload + b"\n\n")
+        await writer.drain()
+
+        try:
+            response = await client.chat.completions.create(
+                model=model_id,
+                messages=req.messages,
+                web_search=req.web_search,
+                stream=True,
+                think_harder=req.think_harder,
+            )
+            chunk_count = 0
+            async for chunk in response:
+                if not chunk.choices:
+                    continue
+                chunk_count += 1
+                d = chunk.choices[0].delta
+                if d.thinking:
+                    payload = json_encode.encode(
+                        {"idx": idx, "type": "thinking", "content": d.thinking}
+                    )
+                else:
+                    payload = json_encode.encode(
+                        {"idx": idx, "type": "content", "content": d.content}
+                    )
+                writer.write(b"data: " + payload + b"\n\n")
+                await writer.drain()
+            log.info("compare[%d] %s done: %d chunks", idx, model_id, chunk_count)
+        except Exception as exc:
+            log.error(
+                "compare[%d] %s failed: %s\n%s",
+                idx,
+                model_id,
+                exc,
+                traceback.format_exc(),
+            )
+            payload = json_encode.encode(
+                {"idx": idx, "type": "error", "content": f"{type(exc).__name__}: {exc}"}
+            )
+            writer.write(b"data: " + payload + b"\n\n")
+            await writer.drain()
+
+        payload = json_encode.encode({"idx": idx, "type": "done"})
+        writer.write(b"data: " + payload + b"\n\n")
+        await writer.drain()
+
+    # Run all model streams concurrently
+    try:
+        await asyncio.gather(*[_stream_model(m, i) for i, m in enumerate(req.models)])
+    except Exception:
+        log.error("compare gather failed:\n%s", traceback.format_exc())
+
+    writer.write(b"data: [DONE]\n\n")
+    await writer.drain()
+    writer.close()
+
+
+async def _handle_audio(writer: asyncio.StreamWriter, body: bytes) -> None:
+    try:
+        req = json_decode(body, type=AudioRequest)
+    except Exception:
+        _write_json(writer, 400, {"error": "invalid request"})
+        await writer.drain()
+        return
+
+    if not req.input:
+        _write_json(writer, 400, {"error": "input is empty"})
+        await writer.drain()
+        return
+
+    client = _get_client()
+
+    kwargs: dict = {"model": req.model, "input": req.input}
+    if req.voice:
+        kwargs["voice"] = req.voice
+    if req.instructions:
+        kwargs["instructions"] = req.instructions
+    if req.format:
+        kwargs["format"] = req.format
+
+    try:
+        result = await client.audio.speech.create(**kwargs)
+    except Exception as exc:
+        log.error("audio failed: %s", exc)
+        _write_json(writer, 400, {"error": f"{type(exc).__name__}: {exc}"})
+        await writer.drain()
+        return
+
+    if not result.data:
+        _write_json(writer, 500, {"error": "no audio returned"})
+        await writer.drain()
+        return
+
+    item = result.data[0]
+    _write_response(writer, 200, item.mime_type, item.audio)
+    await writer.drain()
+    writer.close()
+
+
 async def _handle_models(writer: asyncio.StreamWriter) -> None:
     _write_json(writer, 200, _build_model_list())
     await writer.drain()
@@ -273,8 +423,12 @@ async def _handle_request(
 
         if path == "/api/chat" and method == "POST":
             await _handle_chat(writer, body)
+        elif path == "/api/chat/compare" and method == "POST":
+            await _handle_compare(writer, body)
         elif path == "/api/images" and method == "POST":
             await _handle_images(writer, body)
+        elif path == "/api/audio" and method == "POST":
+            await _handle_audio(writer, body)
         elif path == "/api/models" and method == "GET":
             await _handle_models(writer)
         elif path in ("/", "/index.html"):
@@ -291,6 +445,11 @@ async def _handle_request(
 
 
 async def Run(host: str = "127.0.0.1", port: int = 8000) -> None:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        datefmt="%H:%M:%S",
+    )
     server = await asyncio.start_server(_handle_request, host, port)
     addr = server.sockets[0].getsockname()
     print(f"  fishr chat  ->  http://{addr[0]}:{addr[1]}")

@@ -2,9 +2,11 @@ from typing import AsyncIterator, Iterator
 
 from fishr.Base.DeepAI import DeepAIStream
 from fishr.Base.DphnAI import DphnAIStream
+from fishr.Base.Eris import ErisStream
 from fishr.Base.NoTrack import NoTrackStream
 from fishr.Base.OperaAria import OperaAriaStream
 from fishr.Base.Quillbot import QuillbotStream
+from fishr.Base.Telnyx import TelnyxStream
 from fishr.Base.Yqcloud import YqcloudStream
 from fishr.Types import (
     ChatCompletionChunk,
@@ -340,6 +342,124 @@ class OperaAriaAsyncStream:
         )
 
 
+class ErisSyncStream:
+    __slots__ = ("inner", "model")
+
+    def __init__(self, raw: ErisStream, model: str) -> None:
+        self.inner = iter(raw)
+        self.model = model
+
+    def __iter__(self) -> Iterator[ChatCompletionChunk]:
+        return self
+
+    def __next__(self) -> ChatCompletionChunk:
+        item = next(self.inner)
+        if isinstance(item, tuple):
+            content, is_thinking = item
+        else:
+            content, is_thinking = item, False
+        if is_thinking:
+            delta = Delta(role="assistant", thinking=content)
+        else:
+            delta = Delta(role="assistant", content=content)
+        choice = ChunkChoice(index=0, delta=delta)
+        return ChatCompletionChunk(
+            id="",
+            model=self.model,
+            choices=(choice,),
+        )
+
+
+class TelnyxSyncStream:
+    __slots__ = ("inner", "model")
+
+    def __init__(self, raw: TelnyxStream, model: str) -> None:
+        self.inner = iter(raw)
+        self.model = model
+
+    def __iter__(self) -> Iterator[ChatCompletionChunk]:
+        return self
+
+    def __next__(self) -> ChatCompletionChunk:
+        item = next(self.inner)
+        if isinstance(item, tuple):
+            content, is_thinking = item
+        else:
+            content, is_thinking = item, False
+        if is_thinking:
+            delta = Delta(role="assistant", thinking=content)
+        else:
+            delta = Delta(role="assistant", content=content)
+        choice = ChunkChoice(index=0, delta=delta)
+        return ChatCompletionChunk(
+            id="",
+            model=self.model,
+            choices=(choice,),
+        )
+
+
+class ErisAsyncStream:
+    __slots__ = ("inner", "model")
+
+    def __init__(self, raw: ErisStream, model: str) -> None:
+        self.inner = raw.__aiter__() if hasattr(raw, "__aiter__") else raw
+        self.model = model
+
+    def __aiter__(self) -> AsyncIterator[ChatCompletionChunk]:
+        return self
+
+    async def __anext__(self) -> ChatCompletionChunk:
+        try:
+            item = await self.inner.__anext__()
+        except StopAsyncIteration:
+            raise
+        if isinstance(item, tuple):
+            content, is_thinking = item
+        else:
+            content, is_thinking = item, False
+        if is_thinking:
+            delta = Delta(role="assistant", thinking=content)
+        else:
+            delta = Delta(role="assistant", content=content)
+        choice = ChunkChoice(index=0, delta=delta)
+        return ChatCompletionChunk(
+            id="",
+            model=self.model,
+            choices=(choice,),
+        )
+
+
+class TelnyxAsyncStream:
+    __slots__ = ("inner", "model")
+
+    def __init__(self, raw: TelnyxStream, model: str) -> None:
+        self.inner = raw.__aiter__() if hasattr(raw, "__aiter__") else raw
+        self.model = model
+
+    def __aiter__(self) -> AsyncIterator[ChatCompletionChunk]:
+        return self
+
+    async def __anext__(self) -> ChatCompletionChunk:
+        try:
+            item = await self.inner.__anext__()
+        except StopAsyncIteration:
+            raise
+        if isinstance(item, tuple):
+            content, is_thinking = item
+        else:
+            content, is_thinking = item, False
+        if is_thinking:
+            delta = Delta(role="assistant", thinking=content)
+        else:
+            delta = Delta(role="assistant", content=content)
+        choice = ChunkChoice(index=0, delta=delta)
+        return ChatCompletionChunk(
+            id="",
+            model=self.model,
+            choices=(choice,),
+        )
+
+
 __all__ = [
     "SyncStream",
     "AsyncStream",
@@ -355,4 +475,8 @@ __all__ = [
     "YqcloudAsyncStream",
     "OperaAriaSyncStream",
     "OperaAriaAsyncStream",
+    "ErisSyncStream",
+    "ErisAsyncStream",
+    "TelnyxSyncStream",
+    "TelnyxAsyncStream",
 ]

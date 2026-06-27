@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>fishr — Opera Aria Provider</title>
+    <title>fishr — Eris Provider</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
 </head>
@@ -28,9 +28,9 @@
 
 <main>
     <section id="overview">
-        <h2>Opera Aria Provider</h2>
-        <p>Opera Aria provides free access to an AI chat model through Opera's API. It supports streaming, system messages, conversation history, and a unique <strong>think harder</strong> mode for more thoughtful responses.</p>
-        <p>Opera Aria models use the <code>opera/</code> prefix.</p>
+        <h2>Eris Provider</h2>
+        <p>Eris provides free access to DeepSeek models via the FreeAI API. It supports streaming, system messages, conversation history, and a <strong>thinking mode</strong> that surfaces the model's reasoning process. Two models are available: <strong>Flash</strong> (fast, efficient) and <strong>Pro</strong> (more capable).</p>
+        <p>Eris models use the <code>eris/</code> prefix.</p>
 
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
@@ -39,7 +39,7 @@
 client = Client()
 
 response = client.chat.completions.create(
-    model="opera/aria",
+    model="eris/deepseek-v4-flash",
     messages=[{"role": "user", "content": "Hello!"}],
 )
 print(response.text)</code></pre>
@@ -55,13 +55,18 @@ print(response.text)</code></pre>
                     <tr>
                         <th>Model</th>
                         <th>Web Search</th>
-                        <th>Image</th>
+                        <th>Image Input</th>
+                        <th>Thinking</th>
                         <th>History</th>
                         <th>System</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>opera/aria</code></td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>eris/deepseek-v4-flash</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>eris/deepseek-v4-pro</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>eris/glm-5.1</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>eris/minimax-m3</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>eris/kimi-k2.6</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
                 </tbody>
             </table>
         </div>
@@ -78,7 +83,7 @@ print(response.text)</code></pre>
 client = Client()
 
 response = client.chat.completions.create(
-    model="opera/aria",
+    model="eris/deepseek-v4-flash",
     messages=[{"role": "user", "content": "Count from 1 to 5"}],
     stream=True,
 )
@@ -90,7 +95,7 @@ for chunk in response:
 
     <section id="think-harder">
         <h2>Think Harder</h2>
-        <p>Opera Aria supports a <strong>think harder</strong> mode that prompts the model to reason more deeply before responding. This is useful for complex questions that require step-by-step thinking. Pass <code>think_harder=True</code> to enable it.</p>
+        <p>Eris supports a <strong>thinking mode</strong> via <code>think_harder=True</code> that enables the model's reasoning process. When streaming, reasoning tokens appear in <code>chunk.choices[0].delta.thinking</code>.</p>
 
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
@@ -98,22 +103,44 @@ for chunk in response:
 
 client = Client()
 
+# Non-streaming — reasoning is included in the response
 response = client.chat.completions.create(
-    model="opera/aria",
+    model="eris/deepseek-v4-flash",
     messages=[{"role": "user", "content": "What is 17 * 23?"}],
     think_harder=True,
 )
 print(response.text)</code></pre>
         </div>
 
+        <h3>Streaming with thinking</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="eris/deepseek-v4-flash",
+    messages=[{"role": "user", "content": "What is 17 * 23?"}],
+    stream=True,
+    think_harder=True,
+)
+
+for chunk in response:
+    if chunk.choices[0].delta.thinking:
+        print(chunk.choices[0].delta.thinking, end="", flush=True)
+    elif chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)</code></pre>
+        </div>
+
         <div class="alert alert-info">
-            <strong>ℹ Eris and Opera Aria.</strong> The <code>think_harder</code> parameter is supported by both Eris and Opera Aria providers. On Opera Aria, it prompts more deliberate responses. On Eris, it enables DeepSeek's native reasoning mode.
+            <strong>ℹ Eris and Opera Aria.</strong> The <code>think_harder</code> parameter is supported by both Eris and Opera Aria providers. On Eris, it enables DeepSeek's native reasoning mode. On Opera Aria, it prompts more deliberate responses.
         </div>
     </section>
 
     <section id="system-messages">
         <h2>System Messages</h2>
-        <p>Opera Aria supports system messages to set the model's behavior and persona.</p>
+        <p>Eris supports system messages to set the model's behavior and persona.</p>
 
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
@@ -122,9 +149,9 @@ print(response.text)</code></pre>
 client = Client()
 
 response = client.chat.completions.create(
-    model="opera/aria",
+    model="eris/deepseek-v4-flash",
     messages=[
-        {"role": "system", "content": "You are a robot. Always respond like a robot."},
+        {"role": "system", "content": "You are a pirate. Always respond in pirate speak."},
         {"role": "user", "content": "Say hello."},
     ],
 )
@@ -134,14 +161,14 @@ print(response.text)</code></pre>
 
     <section id="history">
         <h2>Conversation History</h2>
-        <p>Opera Aria supports conversation history. The full message history is sent with each request so the model has context from previous turns.</p>
+        <p>Eris supports conversation history. The full message history is sent with each request so the model has context from previous turns.</p>
 
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
             <pre><code class="language-python">from fishr import Client
 
 client = Client()
-conv = client.conversation(model="opera/aria")
+conv = client.conversation(model="eris/deepseek-v4-flash")
 
 conv.system("You are a helpful assistant. Be brief.")
 conv.ask("Remember the number 55.")
@@ -158,49 +185,50 @@ conv.clear()  # reset history</code></pre>
 
     <section id="direct-usage">
         <h2>Direct Usage</h2>
-        <p>You can use the Opera Aria provider directly without going through the <code>Client</code>.</p>
+        <p>You can use the Eris provider directly without going through the <code>Client</code>.</p>
 
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import OperaAria
+            <pre><code class="language-python">from fishr import Eris
 
-opera = OperaAria()
+eris = Eris()
 
 # Simple ask
-result = opera.ask("Say hello in one word.")
+result = eris.ask("Say hello in one word.")
 print(result.content)
 
 # Chat with messages
-result = opera.chat([
+result = eris.chat([
     {"role": "system", "content": "Be concise."},
     {"role": "user", "content": "What is 2+2?"},
 ])
 print(result.content)
 
 # Streaming
-stream = opera.chat(
+stream = eris.chat(
     [{"role": "user", "content": "Count to 5"}],
     stream=True,
 )
 for chunk in stream:
-    print(chunk, end="")</code></pre>
+    if isinstance(chunk, tuple):
+        content, is_thinking = chunk
+        if is_thinking:
+            print(f"[think] {content}", end="")
+        else:
+            print(content, end="")
+    else:
+        print(chunk, end="")</code></pre>
         </div>
 
-        <h3>Starting a new conversation</h3>
-        <p>Use <code>new_chat()</code> to reset the conversation state and start fresh.</p>
-
+        <h3>With thinking enabled</h3>
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import OperaAria
+            <pre><code class="language-python">from fishr import Eris
 
-opera = OperaAria()
+eris = Eris()
 
-result = opera.ask("Hello!")
-print(result.content)
-
-# Start a new, unrelated conversation
-opera.new_chat()
-result = opera.ask("What is Python?")
+# Enable reasoning mode
+result = eris.ask("Explain quantum entanglement.", enable_thinking=True)
 print(result.content)</code></pre>
         </div>
     </section>
@@ -209,12 +237,12 @@ print(result.content)</code></pre>
         <h2>Limitations</h2>
         <div class="ref-card">
             <ul class="limitations-list">
-                <li>Opera Aria uses a <strong>reverse-engineered API</strong> with anonymous authentication — it may break if the upstream service changes.</li>
+                <li>Eris uses a <strong>reverse-engineered API</strong> — it may break if the upstream service changes.</li>
                 <li>There is <strong>no uptime guarantee</strong>. Availability depends on the upstream service.</li>
-                <li><strong>No web search</strong> — Opera Aria does not support live web search.</li>
-                <li><strong>Think harder</strong> mode is available both via the direct <code>OperaAria</code> provider and through <code>Client.chat.completions.create(think_harder=True)</code>.</li>
+                <li><strong>No web search</strong> — Eris does not support live web search.</li>
+                <li><strong>No image input</strong> — Eris does not support image attachments or image generation.</li>
                 <li><strong>Rate limits</strong> may apply. Avoid rapid sequential requests.</li>
-                <li><strong>Authentication tokens</strong> are generated on-the-fly and may occasionally fail — retries are recommended.</li>
+                <li><strong>Five models</strong> are currently available: <code>eris/deepseek-v4-flash</code>, <code>eris/deepseek-v4-pro</code>, <code>eris/glm-5.1</code>, <code>eris/minimax-m3</code>, and <code>eris/kimi-k2.6</code>.</li>
             </ul>
         </div>
     </section>

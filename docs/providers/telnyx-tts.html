@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fishr — Telnyx TTS Provider</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h2>fishr</h2>
+    </div>
+    <ul>
+        <li><a href="../index.html">← Back to Docs</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#models">Voices</a></li>
+        <li><a href="#formats">Formats &amp; Transcoding</a></li>
+        <li><a href="#client-usage">Client Usage</a></li>
+        <li><a href="#direct-usage">Direct Usage</a></li>
+        <li><a href="#async">Async</a></li>
+        <li><a href="#streaming">Streaming</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section id="overview">
+        <h2>Telnyx TTS Provider</h2>
+        <p>Telnyx TTS is a free text-to-speech provider backed by the public <code>telnyx.com/api/tts-demo</code> no-auth fast-path demo endpoint. It serves the <code>Telnyx.NaturalHD</code> Rime Arcana voice set. No API key, no signup, no email required.</p>
+        <p>Telnyx TTS models use the <code>telnyx-tts/</code> prefix. Each model id is a <strong>voice</strong>: <code>telnyx-tts/astra</code> routes to <code>Telnyx.NaturalHD.astra</code> upstream. The response <code>model</code> field always reports <code>Telnyx.NaturalHD</code> so you know what actually ran.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.audio.speech.create(
+    model="telnyx-tts/astra",
+    input="Hello from fishr.",
+)
+
+# result.data[0].audio is raw MP3 bytes
+with open("out.mp3", "wb") as fh:
+    fh.write(result.data[0].audio)</code></pre>
+        </div>
+    </section>
+
+    <section id="models">
+        <h2>Voices</h2>
+        <p>Five NaturalHD voices are confirmed working on the no-auth demo endpoint. Pass any of these as the <code>model</code> argument.</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Voice</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>telnyx-tts/astra</code></td><td>astra (default)</td></tr>
+                    <tr><td><code>telnyx-tts/luna</code></td><td>luna</td></tr>
+                    <tr><td><code>telnyx-tts/sol</code></td><td>sol</td></tr>
+                    <tr><td><code>telnyx-tts/nova</code></td><td>nova</td></tr>
+                    <tr><td><code>telnyx-tts/orion</code></td><td>orion</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Model = voice.</strong> Unlike <code>fm/*</code>, there is no separate style layer — every <code>telnyx-tts/*</code> id is a voice. You can still override the voice on top of any model with <code>voice="..."</code>.
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# default voice (astra)
+result = client.audio.speech.create(
+    model="telnyx-tts/astra",
+    input="Hello from astra.",
+)
+
+# different voice via model
+result = client.audio.speech.create(
+    model="telnyx-tts/luna",
+    input="Hello from luna.",
+)
+
+# override the voice on top of any model
+result = client.audio.speech.create(
+    model="telnyx-tts/astra",
+    input="Hello from orion via override.",
+    voice="orion",
+)</code></pre>
+        </div>
+    </section>
+
+    <section id="formats">
+        <h2>Formats &amp; Transcoding</h2>
+        <p>The demo endpoint only emits MP3. fishr can transcode the response to other container/codec formats using the bundled <code>static-ffmpeg</code> binary — <strong>no system ffmpeg install required</strong>. Pass <code>format=...</code> to <code>speech.create</code>:</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>format</th><th>MIME</th><th>Codec</th></tr></thead>
+                <tbody>
+                    <tr><td><code>mp3</code></td><td>audio/mpeg</td><td>libmp3lame</td></tr>
+                    <tr><td><code>ogg</code></td><td>audio/ogg</td><td>libvorbis</td></tr>
+                    <tr><td><code>wav</code></td><td>audio/wav</td><td>pcm_s16le</td></tr>
+                    <tr><td><code>flac</code></td><td>audio/flac</td><td>flac</td></tr>
+                    <tr><td><code>opus</code></td><td>audio/opus</td><td>libopus</td></tr>
+                    <tr><td><code>aac</code></td><td>audio/aac</td><td>aac</td></tr>
+                    <tr><td><code>m4a</code></td><td>audio/mp4</td><td>aac</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# MP3 (default — no transcoding)
+result = client.audio.speech.create(
+    model="telnyx-tts/astra",
+    input="MP3 by default.",
+)
+
+# WAV (transcoded from MP3)
+result = client.audio.speech.create(
+    model="telnyx-tts/astra",
+    input="Transcode me to WAV.",
+    format="wav",
+)
+print(result.data[0].mime_type)  # audio/wav
+
+# OGG Vorbis (transcoded from MP3)
+result = client.audio.speech.create(
+    model="telnyx-tts/luna",
+    input="Transcode me to OGG.",
+    format="ogg",
+)
+print(result.data[0].mime_type)  # audio/ogg</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ The bundled ffmpeg binary is fetched on first transcode.</strong> <code>static-ffmpeg</code> downloads the platform binary once and caches it; subsequent calls reuse the cached executable. Transcoding is lazy — if you only ever request MP3, the binary is never loaded.
+        </div>
+    </section>
+
+    <section id="client-usage">
+        <h2>Client Usage</h2>
+        <p>The high-level <code>client.audio.speech.create(...)</code> API mirrors the OpenAI text-to-speech surface. It returns an <code>AudioResponse</code> with a single <code>AudioData</code> item in <code>data</code>.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.audio.speech.create(
+    model="telnyx-tts/astra",
+    input="Hello from the high level client.",
+)
+
+item = result.data[0]
+print(item.voice)      # Telnyx.NaturalHD.astra
+print(item.model)      # Telnyx.NaturalHD
+print(item.mime_type)  # audio/mpeg
+print(len(item.audio)) # byte count
+
+with open("out.mp3", "wb") as fh:
+    fh.write(item.audio)</code></pre>
+        </div>
+    </section>
+
+    <section id="direct-usage">
+        <h2>Direct Usage</h2>
+        <p>You can use the Telnyx TTS provider directly without the <code>Client</code>. The low-level <code>TelnyxAudio.speak()</code> returns raw MP3 bytes — it does not transcode. Use the high-level client if you need <code>format=</code>.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import TelnyxAudio
+
+ta = TelnyxAudio()
+
+# default model is telnyx-tts/astra
+result = ta.speak("Hello world.")
+print(result.model, result.voice, len(result.audio))
+
+# pick a voice by model
+result = ta.speak("Hello from luna.", model="telnyx-tts/luna")
+
+# override voice on top of any model
+result = ta.speak("Hello from orion.", model="telnyx-tts/astra", voice="orion")
+
+# pass an explicit BCP-47 language code (defaults to en-US)
+result = ta.speak("Bonjour.", model="telnyx-tts/astra", language="fr-FR")</code></pre>
+        </div>
+    </section>
+
+    <section id="async">
+        <h2>Async</h2>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import AsyncClient
+
+client = AsyncClient()
+
+result = await client.audio.speech.create(
+    model="telnyx-tts/sol",
+    input="Hello from the async high level client.",
+)
+print(result.data[0].voice)</code></pre>
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import TelnyxAudio
+
+ta = TelnyxAudio()
+result = await ta.speak_async("Hello from async.", model="telnyx-tts/nova")
+print(result.voice, len(result.audio))</code></pre>
+        </div>
+    </section>
+
+    <section id="streaming">
+        <h2>Streaming</h2>
+        <p>Pass <code>stream=True</code> to <code>ta.speak(...)</code> for an async iterator over the raw audio bytes. The whole response is fetched first (the upstream API does not expose chunked reads), then yielded.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">import asyncio
+from fishr import TelnyxAudio
+
+async def main():
+    ta = TelnyxAudio()
+    stream = ta.speak("Streaming this out.", model="telnyx-tts/astra", stream=True)
+    collected = b""
+    async for chunk in stream:
+        collected += chunk
+    print(len(collected))
+
+asyncio.run(main())</code></pre>
+        </div>
+    </section>
+
+    <section id="limitations">
+        <h2>Limitations</h2>
+        <div class="ref-card">
+            <ul class="limitations-list">
+                <li>Telnyx TTS uses the public <strong>fast-path demo endpoint</strong> — no API key required, but <strong>rate-limited</strong> (try to keep request volume modest).</li>
+                <li>There is <strong>no uptime guarantee</strong>. Availability depends on the upstream demo service.</li>
+                <li>Only the <code>Telnyx.NaturalHD</code> voice set is exposed on the demo endpoint. Other Telnyx TTS tiers (Natural, KokoroTTS, Qwen3TTS, Ultra, Grok) are documented by Telnyx but <strong>reject every voice</strong> on the no-auth demo endpoint, so they are not exposed by fishr.</li>
+                <li>The demo endpoint <strong>requires</strong> a non-empty <code>language</code> string. fishr defaults to <code>en-US</code> when you do not pass one.</li>
+                <li>The demo endpoint only emits <strong>MP3</strong>. Other formats are transcoded from MP3 via <code>static-ffmpeg</code>.</li>
+                <li>Upstream failures (rate limits, invalid voices, network errors) are <strong>logged as warnings and return empty audio</strong> rather than raising — long-running scripts will not crash on a 429 or 400.</li>
+                <li><strong>Five voices</strong> are available: <code>telnyx-tts/astra</code>, <code>telnyx-tts/luna</code>, <code>telnyx-tts/sol</code>, <code>telnyx-tts/nova</code>, <code>telnyx-tts/orion</code>.</li>
+                <li>Unknown <code>telnyx-tts/&lt;x&gt;</code> ids are passed through to the upstream (which will 400 and return empty audio) so the upstream stays the source of truth for the voice catalogue.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p><a href="../index.html">← Back to fishr Docs</a></p>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="../js/script.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

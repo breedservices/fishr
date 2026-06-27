@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>fishr — Opera Aria Provider</title>
+    <title>fishr — Telnyx Provider</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
 </head>
@@ -22,15 +22,16 @@
         <li><a href="#system-messages">System Messages</a></li>
         <li><a href="#history">Conversation History</a></li>
         <li><a href="#direct-usage">Direct Usage</a></li>
+        <li><a href="#async">Async</a></li>
         <li><a href="#limitations">Limitations</a></li>
     </ul>
 </nav>
 
 <main>
     <section id="overview">
-        <h2>Opera Aria Provider</h2>
-        <p>Opera Aria provides free access to an AI chat model through Opera's API. It supports streaming, system messages, conversation history, and a unique <strong>think harder</strong> mode for more thoughtful responses.</p>
-        <p>Opera Aria models use the <code>opera/</code> prefix.</p>
+        <h2>Telnyx Provider</h2>
+        <p>Telnyx provides free access to four chat models via the public <code>telnyx.com/api/inference</code> fast-path demo endpoint. It supports streaming, system messages, conversation history, and a <strong>thinking mode</strong> that surfaces the model's reasoning process. No API key, no signup, no email required.</p>
+        <p>Telnyx models use the <code>telnyx/</code> prefix.</p>
 
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
@@ -39,7 +40,7 @@
 client = Client()
 
 response = client.chat.completions.create(
-    model="opera/aria",
+    model="telnyx/glm-5.1",
     messages=[{"role": "user", "content": "Hello!"}],
 )
 print(response.text)</code></pre>
@@ -54,16 +55,23 @@ print(response.text)</code></pre>
                 <thead>
                     <tr>
                         <th>Model</th>
-                        <th>Web Search</th>
-                        <th>Image</th>
+                        <th>Context</th>
+                        <th>Thinking</th>
                         <th>History</th>
                         <th>System</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>opera/aria</code></td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>telnyx/glm-5.2</code></td><td>1M</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>telnyx/glm-5.1</code></td><td>202K</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>telnyx/kimi-k2.6</code></td><td>256K</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>telnyx/minimax-m3</code></td><td>1M</td><td>✅</td><td>✅</td><td>✅</td></tr>
                 </tbody>
             </table>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Default model.</strong> <code>telnyx/glm-5.1</code> is the default and is the most efficient for reasoning + function calling. <code>telnyx/glm-5.2</code> offers a 1M context window for long documents.
         </div>
     </section>
 
@@ -78,7 +86,7 @@ print(response.text)</code></pre>
 client = Client()
 
 response = client.chat.completions.create(
-    model="opera/aria",
+    model="telnyx/glm-5.1",
     messages=[{"role": "user", "content": "Count from 1 to 5"}],
     stream=True,
 )
@@ -90,7 +98,7 @@ for chunk in response:
 
     <section id="think-harder">
         <h2>Think Harder</h2>
-        <p>Opera Aria supports a <strong>think harder</strong> mode that prompts the model to reason more deeply before responding. This is useful for complex questions that require step-by-step thinking. Pass <code>think_harder=True</code> to enable it.</p>
+        <p>Telnyx supports a <strong>thinking mode</strong> via <code>think_harder=True</code> (mapped to <code>enable_thinking</code> on the upstream). When streaming, reasoning tokens appear in <code>chunk.choices[0].delta.thinking</code>.</p>
 
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
@@ -98,22 +106,40 @@ for chunk in response:
 
 client = Client()
 
+# Non-streaming — reasoning is captured separately
 response = client.chat.completions.create(
-    model="opera/aria",
+    model="telnyx/glm-5.1",
     messages=[{"role": "user", "content": "What is 17 * 23?"}],
     think_harder=True,
 )
 print(response.text)</code></pre>
         </div>
 
-        <div class="alert alert-info">
-            <strong>ℹ Eris and Opera Aria.</strong> The <code>think_harder</code> parameter is supported by both Eris and Opera Aria providers. On Opera Aria, it prompts more deliberate responses. On Eris, it enables DeepSeek's native reasoning mode.
+        <h3>Streaming with thinking</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="telnyx/glm-5.1",
+    messages=[{"role": "user", "content": "What is 17 * 23?"}],
+    stream=True,
+    think_harder=True,
+)
+
+for chunk in response:
+    if chunk.choices[0].delta.thinking:
+        print(chunk.choices[0].delta.thinking, end="", flush=True)
+    elif chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)</code></pre>
         </div>
     </section>
 
     <section id="system-messages">
         <h2>System Messages</h2>
-        <p>Opera Aria supports system messages to set the model's behavior and persona.</p>
+        <p>Telnyx supports system messages to set the model's behavior and persona.</p>
 
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
@@ -122,9 +148,9 @@ print(response.text)</code></pre>
 client = Client()
 
 response = client.chat.completions.create(
-    model="opera/aria",
+    model="telnyx/glm-5.1",
     messages=[
-        {"role": "system", "content": "You are a robot. Always respond like a robot."},
+        {"role": "system", "content": "You are a pirate. Always respond in pirate speak."},
         {"role": "user", "content": "Say hello."},
     ],
 )
@@ -134,14 +160,14 @@ print(response.text)</code></pre>
 
     <section id="history">
         <h2>Conversation History</h2>
-        <p>Opera Aria supports conversation history. The full message history is sent with each request so the model has context from previous turns.</p>
+        <p>Telnyx supports conversation history. The full message history is sent with each request so the model has context from previous turns.</p>
 
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
             <pre><code class="language-python">from fishr import Client
 
 client = Client()
-conv = client.conversation(model="opera/aria")
+conv = client.conversation(model="telnyx/glm-5.1")
 
 conv.system("You are a helpful assistant. Be brief.")
 conv.ask("Remember the number 55.")
@@ -158,50 +184,73 @@ conv.clear()  # reset history</code></pre>
 
     <section id="direct-usage">
         <h2>Direct Usage</h2>
-        <p>You can use the Opera Aria provider directly without going through the <code>Client</code>.</p>
+        <p>You can use the Telnyx provider directly without going through the <code>Client</code>.</p>
 
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import OperaAria
+            <pre><code class="language-python">from fishr import Telnyx
 
-opera = OperaAria()
+tx = Telnyx()
 
 # Simple ask
-result = opera.ask("Say hello in one word.")
+result = tx.ask("Say hello in one word.")
 print(result.content)
 
 # Chat with messages
-result = opera.chat([
+result = tx.chat([
     {"role": "system", "content": "Be concise."},
     {"role": "user", "content": "What is 2+2?"},
 ])
 print(result.content)
 
 # Streaming
-stream = opera.chat(
+stream = tx.chat(
     [{"role": "user", "content": "Count to 5"}],
     stream=True,
 )
 for chunk in stream:
-    print(chunk, end="")</code></pre>
+    if isinstance(chunk, tuple):
+        content, is_thinking = chunk
+        if is_thinking:
+            print(f"[think] {content}", end="")
+        else:
+            print(content, end="")
+    else:
+        print(chunk, end="")</code></pre>
         </div>
 
-        <h3>Starting a new conversation</h3>
-        <p>Use <code>new_chat()</code> to reset the conversation state and start fresh.</p>
+        <h3>With thinking enabled</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Telnyx
+
+tx = Telnyx()
+
+# Enable reasoning mode
+result = tx.ask("Explain quantum entanglement.", enable_thinking=True)
+print(result.content)
+print(result.thinking)</code></pre>
+        </div>
+    </section>
+
+    <section id="async">
+        <h2>Async</h2>
+        <p>Use <code>AsyncClient</code> or <code>ask_async</code> / <code>chat_async</code> for coroutine-based workflows.</p>
 
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import OperaAria
+            <pre><code class="language-python">import asyncio
+from fishr import AsyncClient
 
-opera = OperaAria()
+async def main():
+    client = AsyncClient()
+    response = await client.chat.completions.create(
+        model="telnyx/glm-5.1",
+        messages=[{"role": "user", "content": "Hello!"}],
+    )
+    print(response.text)
 
-result = opera.ask("Hello!")
-print(result.content)
-
-# Start a new, unrelated conversation
-opera.new_chat()
-result = opera.ask("What is Python?")
-print(result.content)</code></pre>
+asyncio.run(main())</code></pre>
         </div>
     </section>
 
@@ -209,12 +258,13 @@ print(result.content)</code></pre>
         <h2>Limitations</h2>
         <div class="ref-card">
             <ul class="limitations-list">
-                <li>Opera Aria uses a <strong>reverse-engineered API</strong> with anonymous authentication — it may break if the upstream service changes.</li>
-                <li>There is <strong>no uptime guarantee</strong>. Availability depends on the upstream service.</li>
-                <li><strong>No web search</strong> — Opera Aria does not support live web search.</li>
-                <li><strong>Think harder</strong> mode is available both via the direct <code>OperaAria</code> provider and through <code>Client.chat.completions.create(think_harder=True)</code>.</li>
-                <li><strong>Rate limits</strong> may apply. Avoid rapid sequential requests.</li>
-                <li><strong>Authentication tokens</strong> are generated on-the-fly and may occasionally fail — retries are recommended.</li>
+                <li>Telnyx uses the public <strong>fast-path demo endpoint</strong> — no API key required, but <strong>rate-limited to 10 requests/minute per IP</strong>.</li>
+                <li>There is <strong>no uptime guarantee</strong>. Availability depends on the upstream demo service.</li>
+                <li><strong>No web search</strong> — Telnyx does not support live web search.</li>
+                <li><strong>No image input</strong> — Telnyx does not support image attachments or image generation.</li>
+                <li>Upstream failures (rate limits, network errors) are <strong>logged as warnings and return empty content</strong> rather than raising — long-running scripts will not crash on a 429.</li>
+                <li><strong>Four chat models</strong> are currently available: <code>telnyx/glm-5.2</code>, <code>telnyx/glm-5.1</code>, <code>telnyx/kimi-k2.6</code>, and <code>telnyx/minimax-m3</code>.</li>
+                <li>Telnyx also exposes a <strong>no-auth TTS demo endpoint</strong> — see <a href="telnyx-tts.html">Telnyx TTS</a> for text-to-speech via the <code>telnyx-tts/</code> prefix.</li>
             </ul>
         </div>
     </section>

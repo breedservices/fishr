@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fishr — FM (OpenAI.fm) Provider</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h2>fishr</h2>
+    </div>
+    <ul>
+        <li><a href="../index.html">← Back to Docs</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#models">Voices &amp; Styles</a></li>
+        <li><a href="#instructions">Instructions</a></li>
+        <li><a href="#formats">Formats &amp; Transcoding</a></li>
+        <li><a href="#client-usage">Client Usage</a></li>
+        <li><a href="#direct-usage">Direct Usage</a></li>
+        <li><a href="#async">Async</a></li>
+        <li><a href="#streaming">Streaming</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section id="overview">
+        <h2>FM Provider (OpenAI.fm)</h2>
+        <p>FM is a free text-to-speech provider backed by <a href="https://www.openai.fm" target="_blank">OpenAI.fm</a>. It mirrors the OpenAI <code>audio.speech.create</code> API surface, returning raw audio bytes you can save, stream, or transcode. Eleven voices and six preset styles are available.</p>
+        <p>FM models use the <code>fm/</code> prefix. A model name is either a <strong>voice</strong> (e.g. <code>fm/coral</code>) or a <strong>style</strong> (e.g. <code>fm/cowboy</code>); a style sets the <code>instructions</code> for you and falls back to the default voice.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.audio.speech.create(
+    model="fm/coral",
+    input="Hello from fishr.",
+)
+
+# result.data[0].audio is raw MP3 bytes
+with open("out.mp3", "wb") as fh:
+    fh.write(result.data[0].audio)</code></pre>
+        </div>
+    </section>
+
+    <section id="models">
+        <h2>Voices &amp; Styles</h2>
+
+        <h3>Voices</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Voice</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>fm/alloy</code></td><td>alloy</td></tr>
+                    <tr><td><code>fm/ash</code></td><td>ash</td></tr>
+                    <tr><td><code>fm/ballad</code></td><td>ballad</td></tr>
+                    <tr><td><code>fm/cedar</code></td><td>cedar</td></tr>
+                    <tr><td><code>fm/coral</code></td><td>coral (default)</td></tr>
+                    <tr><td><code>fm/fable</code></td><td>fable</td></tr>
+                    <tr><td><code>fm/marin</code></td><td>marin</td></tr>
+                    <tr><td><code>fm/nova</code></td><td>nova</td></tr>
+                    <tr><td><code>fm/onyx</code></td><td>onyx</td></tr>
+                    <tr><td><code>fm/sage</code></td><td>sage</td></tr>
+                    <tr><td><code>fm/verse</code></td><td>verse</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Styles</h3>
+        <p>A <strong>style</strong> is a preset <code>instructions</code> prompt. Using a style model fills in <code>instructions</code> automatically and uses the default voice (<code>coral</code>) unless you pass <code>voice=...</code> explicitly.</p>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Style</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>fm/friendly</code></td><td>cheerful guide</td></tr>
+                    <tr><td><code>fm/patient_teacher</code></td><td>warm art instructor</td></tr>
+                    <tr><td><code>fm/noir_detective</code></td><td>noir detective</td></tr>
+                    <tr><td><code>fm/cowboy</code></td><td>laid-back cowboy</td></tr>
+                    <tr><td><code>fm/calm</code></td><td>calm, reassuring support</td></tr>
+                    <tr><td><code>fm/scientific_style</code></td><td>academic, precise</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Voice vs. style.</strong> A <em>voice</em> model name only selects the voice. A <em>style</em> model name only selects the instructions. You can mix and match by passing <code>model="fm/cowboy"</code> together with <code>voice="nova"</code>.
+        </div>
+    </section>
+
+    <section id="instructions">
+        <h2>Instructions</h2>
+        <p>The <code>instructions</code> parameter steers how the voice speaks — tone, pacing, pronunciation, pauses, emotion. It accepts free text. The six <a href="#models">styles</a> are just pre-written instructions.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.audio.speech.create(
+    model="fm/coral",
+    input="The package went missing at midnight.",
+    instructions="Speak slowly, with dramatic pauses. A noir detective vibe.",
+)
+
+with open("detective.mp3", "wb") as fh:
+    fh.write(result.data[0].audio)</code></pre>
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# style model — instructions come from the style
+result = client.audio.speech.create(
+    model="fm/cowboy",
+    input="Howdy partner.",
+)
+
+# style model + explicit voice override
+result = client.audio.speech.create(
+    model="fm/cowboy",
+    input="Howdy partner.",
+    voice="nova",
+)</code></pre>
+        </div>
+    </section>
+
+    <section id="formats">
+        <h2>Formats &amp; Transcoding</h2>
+        <p>OpenAI.fm only emits MP3. fishr can transcode the response to other container/codec formats using the bundled <code>static-ffmpeg</code> binary — <strong>no system ffmpeg install required</strong>. Pass <code>format=...</code> to <code>speech.create</code>:</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>format</th><th>MIME</th><th>Codec</th></tr></thead>
+                <tbody>
+                    <tr><td><code>mp3</code></td><td>audio/mpeg</td><td>libmp3lame</td></tr>
+                    <tr><td><code>ogg</code></td><td>audio/ogg</td><td>libvorbis</td></tr>
+                    <tr><td><code>wav</code></td><td>audio/wav</td><td>pcm_s16le</td></tr>
+                    <tr><td><code>flac</code></td><td>audio/flac</td><td>flac</td></tr>
+                    <tr><td><code>opus</code></td><td>audio/opus</td><td>libopus</td></tr>
+                    <tr><td><code>aac</code></td><td>audio/aac</td><td>aac</td></tr>
+                    <tr><td><code>m4a</code></td><td>audio/mp4</td><td>aac</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# MP3 (default — no transcoding)
+result = client.audio.speech.create(
+    model="fm/coral",
+    input="MP3 by default.",
+)
+
+# OGG Vorbis (transcoded from MP3)
+result = client.audio.speech.create(
+    model="fm/coral",
+    input="Transcode me to OGG.",
+    format="ogg",
+)
+print(result.data[0].mime_type)  # audio/ogg
+
+# WAV (transcoded from MP3)
+result = client.audio.speech.create(
+    model="fm/coral",
+    input="Transcode me to WAV.",
+    format="wav",
+)
+print(result.data[0].mime_type)  # audio/wav</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ The bundled ffmpeg binary is fetched on first transcode.</strong> <code>static-ffmpeg</code> downloads the platform binary once and caches it; subsequent calls reuse the cached executable. Transcoding is lazy — if you only ever request MP3, the binary is never loaded.
+        </div>
+    </section>
+
+    <section id="client-usage">
+        <h2>Client Usage</h2>
+        <p>The high-level <code>client.audio.speech.create(...)</code> API mirrors the OpenAI text-to-speech surface. It returns an <code>AudioResponse</code> with a single <code>AudioData</code> item in <code>data</code>.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.audio.speech.create(
+    model="fm/coral",
+    input="Hello from the high level client.",
+    voice="coral",
+)
+
+item = result.data[0]
+print(item.voice)      # coral
+print(item.model)      # coral
+print(item.mime_type)  # audio/mpeg
+print(len(item.audio)) # byte count
+
+with open("out.mp3", "wb") as fh:
+    fh.write(item.audio)</code></pre>
+        </div>
+
+        <h3>With a style</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.audio.speech.create(
+    model="fm/noir_detective",
+    input="The package went missing at midnight.",
+)
+
+print(result.data[0].voice)  # coral (default)
+print(result.data[0].model) # noir_detective</code></pre>
+        </div>
+    </section>
+
+    <section id="direct-usage">
+        <h2>Direct Usage</h2>
+        <p>You can use the FM provider directly without the <code>Client</code>.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import OpenAIFM
+
+fm = OpenAIFM()
+
+# default voice (coral)
+result = fm.speak("Hello world.")
+print(result.voice, len(result.audio))
+
+# explicit voice
+result = fm.speak("Hello from nova.", voice="nova")
+
+# style model (instructions come from the style)
+result = fm.speak("Howdy partner.", model="fm/cowboy")
+
+# custom instructions
+result = fm.speak(
+    "Hello world.",
+    voice="sage",
+    instructions="Speak softly and slowly.",
+)</code></pre>
+        </div>
+    </section>
+
+    <section id="async">
+        <h2>Async</h2>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import AsyncClient
+
+client = AsyncClient()
+
+result = await client.audio.speech.create(
+    model="fm/coral",
+    input="Hello from the async high level client.",
+    voice="onyx",
+)
+print(result.data[0].voice)</code></pre>
+        </div>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import OpenAIFM
+
+fm = OpenAIFM()
+result = await fm.speak_async("Hello from async.", voice="sage")
+print(result.voice, len(result.audio))</code></pre>
+        </div>
+    </section>
+
+    <section id="streaming">
+        <h2>Streaming</h2>
+        <p>Pass <code>stream=True</code> to <code>fm.speak(...)</code> for an async iterator over the raw audio bytes. The whole response is fetched first (the upstream API does not expose chunked reads), then yielded.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">import asyncio
+from fishr import OpenAIFM
+
+async def main():
+    fm = OpenAIFM()
+    stream = fm.speak("Streaming this out.", voice="echo", stream=True)
+    collected = b""
+    async for chunk in stream:
+        collected += chunk
+    print(len(collected))
+
+asyncio.run(main())</code></pre>
+        </div>
+    </section>
+
+    <section id="limitations">
+        <h2>Limitations</h2>
+        <div class="ref-card">
+            <ul class="limitations-list">
+                <li>FM uses a <strong>reverse-engineered API</strong> — it may break if OpenAI.fm changes.</li>
+                <li>There is <strong>no uptime guarantee</strong>. Availability depends on the upstream service.</li>
+                <li>OpenAI.fm only emits <strong>MP3</strong>. Other formats are transcoded from MP3 via <code>static-ffmpeg</code>.</li>
+                <li><strong>Rate limits</strong> may apply. Avoid rapid sequential requests.</li>
+                <li>Streaming fetches the full response before yielding — there is no real chunked upstream stream.</li>
+                <li><strong>Eleven voices</strong> and <strong>six styles</strong> are available; unknown voices are passed through to the upstream API (which may reject them).</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p><a href="../index.html">← Back to fishr Docs</a></p>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="../js/script.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

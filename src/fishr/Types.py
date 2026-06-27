@@ -68,6 +68,18 @@ class ImageResponse(Struct, frozen=True):
     data: tuple[ImageUrl, ...] = ()
 
 
+class AudioData(Struct, frozen=True):
+    voice: str = ""
+    model: str = ""
+    audio: bytes = b""
+    mime_type: str = "audio/mpeg"
+
+
+class AudioResponse(Struct, frozen=True):
+    created: int = 0
+    data: tuple[AudioData, ...] = ()
+
+
 noxus_bot_ids = {
     "noxus/openai": 25871,
     "noxus/google": 25874,
@@ -148,6 +160,74 @@ models = {
     "opera/aria": ModelDef(
         web_search=False, image=True, file_attach=True, history=True, system=True
     ),
+    # eris
+    "eris/deepseek-v4-flash": ModelDef(
+        web_search=False, image=False, history=True, system=True
+    ),
+    "eris/deepseek-v4-pro": ModelDef(
+        web_search=False, image=False, history=True, system=True
+    ),
+    "eris/glm-5.1": ModelDef(web_search=False, image=False, history=True, system=True),
+    "eris/minimax-m3": ModelDef(
+        web_search=False, image=False, history=True, system=True
+    ),
+    "eris/kimi-k2.6": ModelDef(
+        web_search=False, image=False, history=True, system=True
+    ),
+    # telnyx (anonymous fast-path inference)
+    "telnyx/glm-5.2": ModelDef(
+        web_search=False, image=False, history=True, system=True
+    ),
+    "telnyx/glm-5.1": ModelDef(
+        web_search=False, image=False, history=True, system=True
+    ),
+    "telnyx/kimi-k2.6": ModelDef(
+        web_search=False, image=False, history=True, system=True
+    ),
+    "telnyx/minimax-m3": ModelDef(
+        web_search=False, image=False, history=True, system=True
+    ),
+    # fm (text-to-speech)
+    "fm/coral": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/alloy": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/ash": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/ballad": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/cedar": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/marin": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/fable": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/onyx": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/nova": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/sage": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/verse": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/friendly": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/patient_teacher": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
+    "fm/noir_detective": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
+    "fm/cowboy": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/calm": ModelDef(web_search=False, image=False, history=False, system=False),
+    "fm/scientific_style": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
+    # telnyx-tts (no-auth fast-path TTS demo endpoint)
+    # Each model id is a voice: telnyx-tts/<voice> -> Telnyx.NaturalHD.<voice>
+    "telnyx-tts/astra": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
+    "telnyx-tts/luna": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
+    "telnyx-tts/sol": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
+    "telnyx-tts/nova": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
+    "telnyx-tts/orion": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
 }
 
 __all__ = [
@@ -161,6 +241,8 @@ __all__ = [
     "ChatCompletionChunk",
     "ImageUrl",
     "ImageResponse",
+    "AudioData",
+    "AudioResponse",
     "noxus_bot_ids",
     "models",
 ]
