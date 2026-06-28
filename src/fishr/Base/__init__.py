@@ -6,6 +6,7 @@ from fishr.Base.NoTrack import NoTrack, NoTrackResponse, NoTrackStream
 from fishr.Base.Noxus import Image, Noxus, NoxusMessage, NoxusResponse, Stream
 from fishr.Base.OperaAria import OperaAria, OperaAriaResponse, OperaAriaStream
 from fishr.Base.Quillbot import Quillbot, QuillbotResponse, QuillbotStream
+from fishr.Base.Raphael import Raphael, RaphaelResponse
 from fishr.Base.Yqcloud import Yqcloud, YqcloudResponse, YqcloudStream
 
 __all__ = [
@@ -35,6 +36,8 @@ __all__ = [
     "Eris",
     "ErisResponse",
     "ErisStream",
+    "Raphael",
+    "RaphaelResponse",
     "Conversation",
     "AsyncConversation",
 ]

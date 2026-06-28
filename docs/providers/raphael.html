@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fishr — Raphael Provider</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h2>fishr</h2>
+    </div>
+    <ul>
+        <li><a href="../index.html">← Back to Docs</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#models">Models</a></li>
+        <li><a href="#text2img">Text-to-Image</a></li>
+        <li><a href="#img2img">Image-to-Image</a></li>
+        <li><a href="#params">Parameters</a></li>
+        <li><a href="#async">Async</a></li>
+        <li><a href="#direct">Direct Usage</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section id="overview">
+        <h2>Raphael Provider</h2>
+        <p>Raphael provides free <strong>image generation</strong> via <a href="https://raphael.app">raphael.app</a>. It supports text-to-image and image-to-image (img2img) generation with configurable aspect ratio, resolution, and quality.</p>
+        <p>Raphael models use the <code>raphael/</code> prefix. The only model id is <code>raphael/image</code>, which maps to the upstream <code>raphael-basic</code> model.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.images.generate(
+    model="raphael/image",
+    prompt="A cat riding a skateboard on Mars",
+)
+
+print(result.data[0].url)</code></pre>
+        </div>
+    </section>
+
+    <section id="models">
+        <h2>Models</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Upstream</th>
+                        <th>Image Gen</th>
+                        <th>Img2Img</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>raphael/image</code></td><td>raphael-basic</td><td>✅</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="text2img">
+        <h2>Text-to-Image</h2>
+        <p>Generate images from a text prompt via <code>client.images.generate()</code>.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.images.generate(
+    model="raphael/image",
+    prompt="A serene mountain lake at sunset",
+    number_of_images=2,
+    aspect="1:1",
+    resolution="0.5k",
+    quality="low",
+)
+
+for img in result.data:
+    print(img.url)</code></pre>
+        </div>
+
+        <p>The response is an <code>ImageResponse</code> with <code>data</code> containing one <code>ImageUrl</code> per generated image. URLs are absolute (<code>https://raphael.app/api/proxy-image/&lt;uuid&gt;.webp</code>).</p>
+    </section>
+
+    <section id="img2img">
+        <h2>Image-to-Image (img2img)</h2>
+        <p>Pass an <code>image</code> dict to transform an existing image. The image must be base64-encoded with a supported MIME type (<code>image/webp</code>, <code>image/png</code>, <code>image/jpeg</code>, or <code>image/jpg</code>).</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">import base64
+from fishr import Client
+
+client = Client()
+
+with open("input.webp", "rb") as f:
+    encoded = base64.b64encode(f.read()).decode()
+
+result = client.images.generate(
+    model="raphael/image",
+    prompt="Make it to be black & red",
+    image={
+        "mime_type": "image/webp",
+        "base64_data": encoded,
+    },
+    aspect="auto",
+    resolution="1k",
+    quality="low",
+)
+
+print(result.data[0].url)</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ img2img requires a reference image.</strong> When <code>image</code> is provided, the upstream request is sent with <code>action: "img2img"</code> and the image embedded as a <code>data:</code> URI in <code>input_image</code> and <code>input_image_list</code>.
+        </div>
+    </section>
+
+    <section id="params">
+        <h2>Parameters</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>model</code></td><td><code>str</code></td><td><code>"raphael/image"</code></td><td>Model id. Only <code>raphael/image</code> is supported.</td></tr>
+                    <tr><td><code>prompt</code></td><td><code>str</code></td><td>—</td><td>Text prompt describing the image to generate.</td></tr>
+                    <tr><td><code>number_of_images</code></td><td><code>int</code></td><td><code>1</code></td><td>Number of images to generate (1+).</td></tr>
+                    <tr><td><code>aspect</code></td><td><code>str</code></td><td><code>"1:1"</code></td><td>Aspect ratio: <code>1:1</code>, <code>4:3</code>, <code>3:4</code>, <code>16:9</code>, <code>9:16</code>, or <code>auto</code>.</td></tr>
+                    <tr><td><code>resolution</code></td><td><code>str</code></td><td><code>"0.5k"</code></td><td>Resolution: <code>0.5k</code>, <code>1k</code>, or <code>2k</code>.</td></tr>
+                    <tr><td><code>quality</code></td><td><code>str</code></td><td><code>"low"</code></td><td>Quality: <code>low</code>, <code>medium</code>, or <code>high</code>.</td></tr>
+                    <tr><td><code>fast_mode</code></td><td><code>bool</code></td><td><code>False</code></td><td>Use fast generation mode.</td></tr>
+                    <tr><td><code>high_quality</code></td><td><code>bool</code></td><td><code>False</code></td><td>Request high-quality output.</td></tr>
+                    <tr><td><code>image</code></td><td><code>dict | None</code></td><td><code>None</code></td><td>Reference image for img2img. <code>{"mime_type": ..., "base64_data": ...}</code>.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Invalid values fall back to defaults.</strong> An unknown <code>aspect</code>, <code>resolution</code>, or <code>quality</code> silently falls back to <code>"1:1"</code>, <code>"0.5k"</code>, and <code>"low"</code> respectively.
+        </div>
+    </section>
+
+    <section id="async">
+        <h2>Async</h2>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import AsyncClient
+
+client = AsyncClient()
+
+result = await client.images.generate(
+    model="raphael/image",
+    prompt="A futuristic city at sunset",
+)
+print(result.data[0].url)</code></pre>
+        </div>
+    </section>
+
+    <section id="direct">
+        <h2>Direct Usage</h2>
+        <p>You can use the <code>Raphael</code> provider directly without the high-level client.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Raphael
+
+r = Raphael()
+
+# text-to-image
+result = r.generate("A cat riding a skateboard")
+print(result.images)
+
+# image-to-image
+import base64
+with open("input.webp", "rb") as f:
+    encoded = base64.b64encode(f.read()).decode()
+
+result = r.generate(
+    "Make it to be black & red",
+    image={"mime_type": "image/webp", "base64_data": encoded},
+    aspect="auto",
+    resolution="1k",
+)
+print(result.images)</code></pre>
+        </div>
+    </section>
+
+    <section id="limitations">
+        <h2>Limitations</h2>
+        <div class="ref-card">
+            <ul class="limitations-list">
+                <li>Raphael is a <strong>reverse-engineered public endpoint</strong> — it may break if the upstream service changes.</li>
+                <li>The endpoint is protected by <strong>Cloudflare</strong>. Requests use a Chrome-impersonating HTTP client (<code>primp</code>) to bypass it; a valid <code>cf_clearance</code> cookie is not required for the API path.</li>
+                <li><strong>Only <code>raphael-basic</code></strong> is available. Other upstream model ids (<code>raphael-pro</code>, etc.) are not exposed.</li>
+                <li><strong>No streaming.</strong> Image generation is a single request that returns NDJSON with one JSON object per image.</li>
+                <li><strong>Upstream failures return an empty result</strong> (no exception). Check <code>len(result.data)</code> or <code>len(result.images)</code> to detect failures.</li>
+                <li><strong>Rate limits</strong> may apply. Avoid rapid sequential requests.</li>
+                <li><strong>Image input</strong> for img2img must be base64-encoded <code>webp</code>, <code>png</code>, <code>jpeg</code>, or <code>jpg</code>. Other formats are silently ignored and the request falls back to text-to-image.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p><a href="../index.html">← Back to fishr Docs</a></p>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="../js/script.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

@@ -152,6 +152,14 @@ print(response.text)</code></pre>
                     <span class="tag tag-blue">Audio Gen</span>
                 </div>
             </a>
+            <a href="providers/raphael.html" class="provider-card">
+                <h3>raphael</h3>
+                <p>1 model — raphael.app image generation (text-to-image & image-to-image)</p>
+                <div class="provider-tags">
+                    <span class="tag tag-blue">Image Gen</span>
+                    <span class="tag tag-green">Img2Img</span>
+                </div>
+            </a>
             <a href="providers/fm.html" class="provider-card">
                 <h3>fm</h3>
                 <p>17 models — OpenAI.fm TTS (11 voices + 6 styles, transcoding)</p>
@@ -304,8 +312,13 @@ print(response.text)</code></pre>
 
     <section id="images">
         <h2>Image Generation</h2>
-        <p>Use <code>client.images.generate()</code> to generate images from text prompts. This uses DeepAI's text2img API.</p>
+        <p>Use <code>client.images.generate()</code> to generate images from text prompts. Two providers are available:</p>
+        <ul style="margin: 10px 0; padding-left: 1.4em; color: var(--text2); font-size: 14px; line-height: 1.9;">
+            <li><strong>DeepAI</strong> (<code>deepai/image</code>) — text-to-image via DeepAI's text2img API.</li>
+            <li><strong>Raphael</strong> (<code>raphael/image</code>) — text-to-image and image-to-image via raphael.app, with configurable aspect ratio, resolution, and quality.</li>
+        </ul>
 
+        <h3>DeepAI</h3>
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
             <pre><code class="language-python">from fishr import Client
@@ -322,6 +335,52 @@ print(result.data[0].url)
 print(result.data[0].alt)  # the prompt used</code></pre>
         </div>
 
+        <h3>Raphael (text-to-image)</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.images.generate(
+    model="raphael/image",
+    prompt="A serene mountain lake at sunset",
+    number_of_images=2,
+    aspect="1:1",
+    resolution="0.5k",
+    quality="low",
+)
+
+for img in result.data:
+    print(img.url)</code></pre>
+        </div>
+
+        <h3>Raphael (image-to-image / img2img)</h3>
+        <p>Pass an <code>image</code> dict to transform an existing image. Supported MIME types: <code>image/webp</code>, <code>image/png</code>, <code>image/jpeg</code>, <code>image/jpg</code>.</p>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">import base64
+from fishr import Client
+
+client = Client()
+
+with open("input.webp", "rb") as f:
+    encoded = base64.b64encode(f.read()).decode()
+
+result = client.images.generate(
+    model="raphael/image",
+    prompt="Make it to be black & red",
+    image={
+        "mime_type": "image/webp",
+        "base64_data": encoded,
+    },
+    aspect="auto",
+    resolution="1k",
+)
+
+print(result.data[0].url)</code></pre>
+        </div>
+
         <h3>Async</h3>
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
@@ -330,18 +389,18 @@ print(result.data[0].alt)  # the prompt used</code></pre>
 client = AsyncClient()
 
 result = await client.images.generate(
-    model="deepai/image",
+    model="raphael/image",
     prompt="A futuristic city at sunset",
 )
 print(result.data[0].url)</code></pre>
         </div>
 
         <div class="alert alert-info">
-            <strong>ℹ Image generation is only available via <code>deepai/image</code>.</strong> Other DeepAI chat models can trigger inline image generation during conversation via the built-in image generator tool, but <code>client.images.generate()</code> is the recommended approach.
+            <strong>ℹ Image generation is available via <code>deepai/image</code> and <code>raphael/image</code>.</strong> DeepAI returns a single image URL. Raphael can return multiple images and supports img2img. See the <a href="providers/deepai.html#image-gen">DeepAI</a> and <a href="providers/raphael.html">Raphael</a> provider docs for details.
         </div>
 
         <h3>Via completions API</h3>
-        <p>You can also use <code>deepai/image</code> through the completions API. The response text will contain the generated image URL.</p>
+        <p>You can also use <code>deepai/image</code> through the completions API. The response text will contain the generated image URL. (Raphael is only available via <code>client.images.generate()</code>.)</p>
         <div class="code-block">
             <button class="copy-btn" onclick="copyCode(this)">Copy</button>
             <pre><code class="language-python">from fishr import Client
@@ -361,7 +420,7 @@ print(response.text)  # image URL</code></pre>
         <p>Some models accept image attachments. Pass a base64-encoded image in the <code>image</code> key of a message with <code>mime_type</code> and <code>base64_data</code>.</p>
 
         <div class="alert alert-info">
-            <strong>ℹ Image input works with both Noxus and DeepAI.</strong> Noxus sends images directly with the message. DeepAI uploads them to its attachment API and references them by UUID. See the <a href="providers/noxus.html#images">Noxus</a> and <a href="providers/deepai.html#image-upload">DeepAI</a> provider docs for details.
+            <strong>ℹ Image input works with both Noxus and DeepAI.</strong> Noxus sends images directly with the message. DeepAI uploads them to its attachment API and references them by UUID. See the <a href="providers/noxus.html#images">Noxus</a> and <a href="providers/deepai.html#image-upload">DeepAI</a> provider docs for details. For image-to-image generation (img2img), use <a href="providers/raphael.html#img2img">Raphael</a> with the <code>image</code> parameter on <code>client.images.generate()</code>.
         </div>
 
         <h3>Noxus image input</h3>
@@ -990,6 +1049,16 @@ Run(host="127.0.0.1", port=8000)</code></pre>
                 </tbody>
             </table>
         </div>
+
+        <h3>Raphael</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Model</th><th>Upstream</th><th>Image Gen</th><th>Img2Img</th></tr></thead>
+                <tbody>
+                    <tr><td><code>raphael/image</code></td><td>raphael-basic</td><td>✅</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
     </section>
 
     <section id="types">
@@ -1186,14 +1255,42 @@ Run(host="127.0.0.1", port=8000)</code></pre>
             <div class="params">
                 <div class="param">
                     <code>model</code> <span class="type">str</span> <span class="default">default: "deepai/image"</span>
-                    <p>Image generation model. Currently only <code>deepai/image</code> is supported.</p>
+                    <p>Image generation model. <code>deepai/image</code> uses DeepAI's text2img API. <code>raphael/image</code> uses raphael.app (supports text-to-image and image-to-image via the <code>image</code> parameter).</p>
                 </div>
                 <div class="param">
                     <code>prompt</code> <span class="type">str</span> <span class="required">required</span>
                     <p>Text prompt describing the image to generate.</p>
                 </div>
+                <div class="param">
+                    <code>number_of_images</code> <span class="type">int</span> <span class="default">default: 1</span>
+                    <p>Number of images to generate. <strong>Raphael only.</strong> Ignored by DeepAI.</p>
+                </div>
+                <div class="param">
+                    <code>aspect</code> <span class="type">str</span> <span class="default">default: "1:1"</span>
+                    <p>Aspect ratio. <strong>Raphael only.</strong> One of <code>1:1</code>, <code>4:3</code>, <code>3:4</code>, <code>16:9</code>, <code>9:16</code>, <code>auto</code>.</p>
+                </div>
+                <div class="param">
+                    <code>resolution</code> <span class="type">str</span> <span class="default">default: "0.5k"</span>
+                    <p>Resolution. <strong>Raphael only.</strong> One of <code>0.5k</code>, <code>1k</code>, <code>2k</code>.</p>
+                </div>
+                <div class="param">
+                    <code>quality</code> <span class="type">str</span> <span class="default">default: "low"</span>
+                    <p>Quality. <strong>Raphael only.</strong> One of <code>low</code>, <code>medium</code>, <code>high</code>.</p>
+                </div>
+                <div class="param">
+                    <code>fast_mode</code> <span class="type">bool</span> <span class="default">default: False</span>
+                    <p>Fast generation mode. <strong>Raphael only.</strong></p>
+                </div>
+                <div class="param">
+                    <code>high_quality</code> <span class="type">bool</span> <span class="default">default: False</span>
+                    <p>Request high-quality output. <strong>Raphael only.</strong></p>
+                </div>
+                <div class="param">
+                    <code>image</code> <span class="type">dict | None</span> <span class="default">default: None</span>
+                    <p>Reference image for image-to-image (img2img). <strong>Raphael only.</strong> Dict with <code>mime_type</code> (<code>image/webp</code>, <code>image/png</code>, <code>image/jpeg</code>, <code>image/jpg</code>) and <code>base64_data</code>.</p>
+                </div>
             </div>
-            <p>Returns an <code>ImageResponse</code> with <code>data[0].url</code> containing the generated image URL.</p>
+            <p>Returns an <code>ImageResponse</code> with <code>data</code> containing <code>ImageUrl</code> objects (one per generated image). <code>data[i].url</code> is the image URL, <code>data[i].alt</code> is the prompt.</p>
         </div>
 
         <h3>client.audio.speech.create()</h3>

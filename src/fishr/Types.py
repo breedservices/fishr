@@ -228,6 +228,10 @@ models = {
     "telnyx-tts/orion": ModelDef(
         web_search=False, image=False, history=False, system=False
     ),
+    # raphael (image generation)
+    "raphael/image": ModelDef(
+        web_search=False, image=True, file_attach=False, history=False, system=False
+    ),
 }
 
 __all__ = [

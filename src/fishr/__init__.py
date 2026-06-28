@@ -94,6 +94,9 @@ Models are specified as ``provider/name``:
     - telnyx-tts/astra, telnyx-tts/luna, telnyx-tts/sol
     - telnyx-tts/nova, telnyx-tts/orion
 
+    Raphael
+    - raphael/image
+
 The provider prefix is optional for noxus (default).
 """
 
@@ -111,6 +114,7 @@ from fishr.Base.NoTrack import NoTrack, NoTrackResponse, NoTrackStream
 from fishr.Base.Noxus import Noxus, NoxusMessage, NoxusResponse
 from fishr.Base.OperaAria import OperaAria, OperaAriaResponse, OperaAriaStream
 from fishr.Base.Quillbot import Quillbot, QuillbotResponse, QuillbotStream
+from fishr.Base.Raphael import Raphael, RaphaelResponse
 from fishr.Base.Telnyx import Telnyx, TelnyxResponse, TelnyxStream
 from fishr.Base.Yqcloud import Yqcloud, YqcloudResponse, YqcloudStream
 from fishr.client import (
@@ -186,6 +190,8 @@ __all__ = [
     "Eris",
     "ErisResponse",
     "ErisStream",
+    "Raphael",
+    "RaphaelResponse",
     "Telnyx",
     "TelnyxResponse",
     "TelnyxStream",

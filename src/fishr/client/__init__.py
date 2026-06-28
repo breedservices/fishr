@@ -8,6 +8,7 @@ from fishr.Base.NoTrack import NoTrack
 from fishr.Base.Noxus import Noxus
 from fishr.Base.OperaAria import OperaAria
 from fishr.Base.Quillbot import Quillbot
+from fishr.Base.Raphael import Raphael
 from fishr.Base.Telnyx import Telnyx
 from fishr.Base.Yqcloud import Yqcloud
 from fishr.client.agents import AgentRun, AgentStep, AsyncAgentRun
@@ -99,6 +100,7 @@ class Client:
         "opera",
         "eris",
         "telnyx",
+        "raphael",
         "openai_fm",
         "telnyx_audio",
     )
@@ -113,6 +115,7 @@ class Client:
         self.opera = OperaAria()
         self.eris = Eris()
         self.telnyx = Telnyx()
+        self.raphael = Raphael()
         self.openai_fm = OpenAIFM()
         self.telnyx_audio = TelnyxAudio()
         self.chat = Chat(
@@ -126,7 +129,7 @@ class Client:
             self.eris,
             self.telnyx,
         )
-        self.images = Images(self.deepai)
+        self.images = Images(self.deepai, self.raphael)
         self.audio = Audio(self.openai_fm, self.telnyx_audio)
         self.agents = AgentRun(self.noxus, self.deepai)
 
@@ -197,6 +200,7 @@ class AsyncClient:
         "opera",
         "eris",
         "telnyx",
+        "raphael",
         "openai_fm",
         "telnyx_audio",
     )
@@ -211,6 +215,7 @@ class AsyncClient:
         self.opera = OperaAria()
         self.eris = Eris()
         self.telnyx = Telnyx()
+        self.raphael = Raphael()
         self.openai_fm = OpenAIFM()
         self.telnyx_audio = TelnyxAudio()
         self.chat = AsyncChat(
@@ -224,7 +229,7 @@ class AsyncClient:
             self.eris,
             self.telnyx,
         )
-        self.images = AsyncImages(self.deepai)
+        self.images = AsyncImages(self.deepai, self.raphael)
         self.audio = AsyncAudio(self.openai_fm, self.telnyx_audio)
         self.agents = AsyncAgentRun(self.noxus, self.deepai)
 
