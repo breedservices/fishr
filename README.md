@@ -46,6 +46,14 @@ result = client.images.generate(
 )
 print(result.data[0].url)
 
+# Text-to-speech (make/* models — 39 voices)
+result = client.audio.speech.create(
+    model="make/aura",
+    input="Hello from fishr.",
+)
+with open("out.wav", "wb") as f:
+    f.write(result.data[0].audio)
+
 # Agent
 result = client.agents.run(
     model="noxus/openai",
@@ -139,6 +147,7 @@ Models are specified as `provider/name`:
 | **Yqcloud** | `yqcloud/gpt-4` | History, system messages |
 | **Opera Aria** | `opera/aria` | Images, history, system messages |
 | **Kai** | `kai/auto`, `kai/m.1`, `kai/xs-2.1`, `kai/xs.2`, `kai/north-mini`, `kai/nemo3-ultra`, `kai/nemo3-super`, `kai/nemo3-nemo`, `kai/3.7-flash`, `kai/openfree` | **Tool calling**, history, system messages (some support images) |
+| **Make** | `make/aura`, `make/breeze`, `make/cypress`, `make/drift`, `make/echo`, `make/flare`, `make/gem`, `make/hazel`, `make/ivy`, `make/jazz`, `make/kite`, `make/lumen`, `make/mist`, `make/saffron`, `make/solstice`, `make/pearl`, `make/quartz`, `make/ripple`, `make/cobalt`, `make/tide`, `make/vale`, `make/wren`, `make/ash`, `make/brook`, `make/cedar`, `make/dawn`, `make/fern`, `make/glen`, `make/harbor`, `make/indigo`, `make/juniper`, `make/lotus`, `make/maple`, `make/nettle`, `make/opal`, `make/pine`, `make/river`, `make/slate`, `make/willow` | TTS (39 voices, WAV) |
 
 The provider prefix is optional for Noxus (default).
 

@@ -292,6 +292,54 @@ models = {
     "kai/openfree": ModelDef(
         web_search=False, image=True, history=True, system=True, tools=True
     ),
+    # musicmake (qwen3 tts — one model per voice)
+    "make/aura": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/breeze": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/cypress": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
+    "make/drift": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/echo": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/flare": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/gem": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/hazel": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/ivy": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/jazz": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/kite": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/lumen": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/mist": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/saffron": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
+    "make/solstice": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
+    "make/pearl": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/quartz": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/ripple": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/cobalt": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/tide": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/vale": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/wren": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/ash": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/brook": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/cedar": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/dawn": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/fern": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/glen": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/harbor": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/indigo": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/juniper": ModelDef(
+        web_search=False, image=False, history=False, system=False
+    ),
+    "make/lotus": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/maple": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/nettle": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/opal": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/pine": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/river": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/slate": ModelDef(web_search=False, image=False, history=False, system=False),
+    "make/willow": ModelDef(web_search=False, image=False, history=False, system=False),
 }
 
 __all__ = [

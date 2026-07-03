@@ -13,31 +13,93 @@ Log = logging.getLogger("fishr.audio.make")
 
 ApiUrl = "https://musicmake.ai/api/qwen3tts/generate"
 
-# Voices confirmed working on the Qwen3 TTS endpoint.
+# Public model ids. Each maps to an upstream voice; the real names are
+# kept private in ``_VOICE_MAP`` and never exposed.
 Voices = (
-    "Cherry",
-    "Amber",
-    "Bella",
-    "Clara",
-    "Daisy",
-    "Emma",
-    "Fiona",
-    "Grace",
-    "Hazel",
-    "Ivy",
-    "Jade",
-    "Kai",
-    "Lily",
-    "Mia",
-    "Nina",
-    "Olive",
-    "Pearl",
-    "Quinn",
-    "Rose",
-    "Skye",
+    "aura",
+    "breeze",
+    "cypress",
+    "drift",
+    "echo",
+    "flare",
+    "gem",
+    "hazel",
+    "ivy",
+    "jazz",
+    "kite",
+    "lumen",
+    "mist",
+    "saffron",
+    "solstice",
+    "pearl",
+    "quartz",
+    "ripple",
+    "cobalt",
+    "tide",
+    "vale",
+    "wren",
+    "ash",
+    "brook",
+    "cedar",
+    "dawn",
+    "fern",
+    "glen",
+    "harbor",
+    "indigo",
+    "juniper",
+    "lotus",
+    "maple",
+    "nettle",
+    "opal",
+    "pine",
+    "river",
+    "slate",
+    "willow",
 )
 
-DefaultVoice = "Cherry"
+_VOICE_MAP = {
+    "aura": "Cherry",
+    "breeze": "Serena",
+    "cypress": "Ethan",
+    "drift": "Chelsie",
+    "echo": "Momo",
+    "flare": "Vivian",
+    "gem": "Moon",
+    "hazel": "Maia",
+    "ivy": "Kai",
+    "jazz": "Nolish",
+    "kite": "Bella",
+    "lumen": "Jennifer",
+    "mist": "Ryan",
+    "saffron": "Katerina",
+    "solstice": "Aiden",
+    "pearl": "Eldric Sage",
+    "quartz": "Mia",
+    "ripple": "Mochi",
+    "cobalt": "Bellona",
+    "tide": "Vincent",
+    "vale": "Bunny",
+    "wren": "Neil",
+    "ash": "Elias",
+    "brook": "Arthur",
+    "cedar": "Nini",
+    "dawn": "Ebona",
+    "fern": "Soren",
+    "glen": "Pip",
+    "harbor": "Stella",
+    "indigo": "Bodega",
+    "juniper": "Sonrisa",
+    "lotus": "Alek",
+    "maple": "Dolce",
+    "nettle": "Suhee",
+    "opal": "Ono Anna",
+    "pine": "Lenn",
+    "river": "Emilien",
+    "slate": "Andre",
+    "willow": "Radio Gol",
+}
+
+DefaultVoice = "aura"
 DefaultMode = "system"
 
 Headers = {
@@ -49,12 +111,17 @@ Headers = {
 }
 
 
-def ResolveVoice(VoiceName: str, Default: str = DefaultVoice) -> str:
-    """Resolve a ``make/<voice>`` model string to a voice name."""
-    Base = VoiceName.split("/", 1)[-1] if "/" in VoiceName else VoiceName
-    if Base in Voices:
+def ResolveVoice(Model: str, Default: str = DefaultVoice) -> str:
+    """Resolve a ``make/<id>`` model string to a public voice id."""
+    Base = Model.split("/", 1)[-1] if "/" in Model else Model
+    if Base in _VOICE_MAP:
         return Base
-    return Base or Default
+    return Default
+
+
+def _upstream_voice(VoiceId: str) -> str:
+    """Map a public voice id to the upstream voice name."""
+    return _VOICE_MAP.get(VoiceId, _VOICE_MAP[DefaultVoice])
 
 
 class MusicMakeResponse(Struct, frozen=True):
@@ -86,14 +153,10 @@ class MusicMakeStream:
 
 
 class MusicMake:
-    """MusicMake.ai Qwen3 TTS provider.
+    """Qwen3 TTS provider.
 
-    Models are specified as ``make/<voice>``:
-
-    - voices: ``Cherry``, ``Amber``, ``Bella``, ``Clara``, ``Daisy``,
-      ``Emma``, ``Fiona``, ``Grace``, ``Hazel``, ``Ivy``, ``Jade``,
-      ``Kai``, ``Lily``, ``Mia``, ``Nina``, ``Olive``, ``Pearl``,
-      ``Quinn``, ``Rose``, ``Skye``
+    Models are specified as ``make/<voice>`` — 39 voices available:
+    ``make/aura``, ``make/breeze``, ``make/cypress``, ... ``make/willow``.
 
     Usage::
 
@@ -102,15 +165,12 @@ class MusicMake:
 
         mm = MusicMake()
 
-        # default voice (Cherry)
+        # default voice (aura)
         result = mm.speak("Hello world")
         print(result.voice, len(result.audio))
 
         # explicit voice
-        result = mm.speak("Hello world", voice="Amber")
-
-        # using model string
-        result = mm.speak("Hello world", model="make/Amber")
+        result = mm.speak("Hello world", model="make/breeze")
         ```
     """
 
@@ -123,14 +183,15 @@ class MusicMake:
         self,
         Prompt: str,
         *,
-        model: str = "make/Cherry",
+        model: str = "make/aura",
         voice: str | None = None,
         stream: bool = False,
     ) -> MusicMakeResponse | MusicMakeStream:
-        Voice = ResolveVoice(model if voice is None else voice)
+        VoiceId = ResolveVoice(model if voice is None else voice)
+        Upstream = _upstream_voice(VoiceId)
         Payload = {
             "text": Prompt,
-            "voice": Voice,
+            "voice": Upstream,
             "mode": DefaultMode,
         }
         Body = json_encode.encode(Payload)
@@ -143,18 +204,18 @@ class MusicMake:
                 Resp.text[:200] if hasattr(Resp, "text") else b"",
             )
             if stream:
-                return MusicMakeStream(b"", Voice, Voice)
-            return MusicMakeResponse(voice=Voice, model=Voice, audio=b"")
+                return MusicMakeStream(b"", VoiceId, VoiceId)
+            return MusicMakeResponse(voice=VoiceId, model=VoiceId, audio=b"")
         Audio = Resp.content if hasattr(Resp, "content") else b""
         if stream:
-            return MusicMakeStream(Audio, Voice, Voice)
-        return MusicMakeResponse(voice=Voice, model=Voice, audio=Audio)
+            return MusicMakeStream(Audio, VoiceId, VoiceId)
+        return MusicMakeResponse(voice=VoiceId, model=VoiceId, audio=Audio)
 
     async def speak_async(
         self,
         Prompt: str,
         *,
-        model: str = "make/Cherry",
+        model: str = "make/aura",
         voice: str | None = None,
         stream: bool = False,
     ) -> MusicMakeResponse | MusicMakeStream:

@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>fishr — Make Provider</title>
+        <link rel="stylesheet" href="../css/style.css" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css"
+        />
+    </head>
+    <body>
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h2>fishr</h2>
+            </div>
+            <ul>
+                <li><a href="../index.html">← Back to Docs</a></li>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#voices">Voices</a></li>
+                <li><a href="#client-usage">Client Usage</a></li>
+                <li><a href="#formats">Formats &amp; Transcoding</a></li>
+                <li><a href="#direct-usage">Direct Usage</a></li>
+                <li><a href="#async">Async</a></li>
+                <li><a href="#limitations">Limitations</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="overview">
+                <h2>Make Provider</h2>
+                <p>
+                    Make is a text-to-speech provider offering 39 voices via a
+                    Qwen3 TTS endpoint. It mirrors the OpenAI
+                    <code>audio.speech.create</code> API surface and returns raw
+                    WAV audio bytes. No API key required.
+                </p>
+                <p>
+                    Make models use the <code>make/</code> prefix. Each model id
+                    is a voice — pick one and pass text to
+                    <code>create()</code>.
+                </p>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+result = client.audio.speech.create(
+    model="make/aura",
+    input="Hello from fishr.",
+)
+
+# result.data[0].audio is raw WAV bytes
+with open("out.wav", "wb") as fh:
+    fh.write(result.data[0].audio)</code></pre>
+                </div>
+            </section>
+
+            <section id="voices">
+                <h2>Voices</h2>
+                <p>
+                    39 voices are available, each named after a natural element
+                    or texture. The default voice is <code>make/aura</code>.
+                </p>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Default</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>make/aura</code></td>
+                                <td>✅ default</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/breeze</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/cypress</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/drift</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/echo</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/flare</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/gem</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/hazel</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/ivy</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/jazz</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/kite</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/lumen</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/mist</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/saffron</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/solstice</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/pearl</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/quartz</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/ripple</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/cobalt</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/tide</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/vale</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/wren</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/ash</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/brook</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/cedar</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/dawn</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/fern</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/glen</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/harbor</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/indigo</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/juniper</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/lotus</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/maple</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/nettle</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/opal</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/pine</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/river</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/slate</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/willow</code></td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="client-usage">
+                <h2>Client Usage</h2>
+                <p>
+                    Use <code>client.audio.speech.create()</code> with a
+                    <code>make/*</code> model. The <code>voice</code> parameter
+                    overrides the model's voice.
+                </p>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# default voice (aura)
+result = client.audio.speech.create(
+    model="make/aura",
+    input="Hello world.",
+)
+print(result.data[0].voice)  # "aura"
+
+# different voice via model
+result = client.audio.speech.create(
+    model="make/breeze",
+    input="Hello from breeze.",
+)
+
+# override voice on top of any model
+result = client.audio.speech.create(
+    model="make/aura",
+    input="Hello from mist via override.",
+    voice="mist",
+)</code></pre>
+                </div>
+            </section>
+
+            <section id="formats">
+                <h2>Formats &amp; Transcoding</h2>
+                <p>
+                    Make emits <strong>WAV</strong> natively. Pass
+                    <code>format=...</code> to
+                    <code>client.audio.speech.create()</code> to transcode to
+                    any of these containers using the bundled
+                    <code>static-ffmpeg</code> binary — no system ffmpeg install
+                    needed:
+                </p>
+                <ul
+                    style="
+                        margin: 10px 0;
+                        padding-left: 1.4em;
+                        color: var(--text2);
+                        font-size: 14px;
+                        line-height: 1.9;
+                    "
+                >
+                    <li>
+                        <code>mp3</code> — MPEG-1 Audio Layer III
+                        (<code>audio/mpeg</code>)
+                    </li>
+                    <li>
+                        <code>ogg</code> — Ogg Vorbis (<code>audio/ogg</code>)
+                    </li>
+                    <li>
+                        <code>wav</code> — PCM 16-bit (<code>audio/wav</code>) —
+                        native, no transcoding
+                    </li>
+                    <li>
+                        <code>flac</code> — Free Lossless Audio
+                        (<code>audio/flac</code>)
+                    </li>
+                    <li>
+                        <code>opus</code> — Opus in Ogg
+                        (<code>audio/opus</code>)
+                    </li>
+                    <li>
+                        <code>aac</code> — Advanced Audio Coding
+                        (<code>audio/aac</code>)
+                    </li>
+                    <li>
+                        <code>m4a</code> — AAC in MP4 container
+                        (<code>audio/mp4</code>)
+                    </li>
+                </ul>
+                <p>
+                    The <code>mime_type</code> on the returned
+                    <code>AudioData</code> reflects the output format.
+                </p>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# native WAV (no transcoding)
+result = client.audio.speech.create(
+    model="make/aura",
+    input="Native WAV.",
+)
+print(result.data[0].mime_type)  # audio/wav
+
+# transcode WAV -> MP3
+result = client.audio.speech.create(
+    model="make/aura",
+    input="Transcode me to MP3.",
+    format="mp3",
+)
+print(result.data[0].mime_type)  # audio/mpeg
+
+# transcode WAV -> Opus
+result = client.audio.speech.create(
+    model="make/breeze",
+    input="Transcode me to Opus.",
+    format="opus",
+)
+print(result.data[0].mime_type)  # audio/opus</code></pre>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong
+                        >ℹ Direct <code>MusicMake.speak()</code> always returns
+                        WAV.</strong
+                    >
+                    Transcoding is only available through the high-level
+                    <code>client.audio.speech.create()</code> with
+                    <code>format=...</code>.
+                </div>
+            </section>
+
+            <section id="direct-usage">
+                <h2>Direct Usage</h2>
+                <p>
+                    You can use the Make provider directly without the
+                    <code>Client</code> wrapper. The low-level
+                    <code>speak()</code> method returns raw WAV bytes — use the
+                    high-level client if you need
+                    <code>format=</code> transcoding.
+                </p>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import MusicMake
+
+mm = MusicMake()
+
+# default voice (aura)
+result = mm.speak("Hello world.")
+print(result.voice, len(result.audio))
+
+# explicit voice
+result = mm.speak("Hello from breeze.", model="make/breeze")
+print(result.voice, len(result.audio))
+
+# streaming
+stream = mm.speak("Hello from mist.", model="make/mist", stream=True)
+async for chunk in stream:
+    ...</code></pre>
+                </div>
+            </section>
+
+            <section id="async">
+                <h2>Async</h2>
+                <p>
+                    Use <code>AsyncClient</code> or <code>speak_async</code> for
+                    coroutine-based workflows.
+                </p>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import AsyncClient
+
+client = AsyncClient()
+
+result = await client.audio.speech.create(
+    model="make/mist",
+    input="Hello from the async client.",
+)
+print(result.data[0].voice)</code></pre>
+                </div>
+            </section>
+
+            <section id="limitations">
+                <h2>Limitations</h2>
+                <div class="ref-card">
+                    <ul class="limitations-list">
+                        <li>
+                            Make uses a
+                            <strong>reverse-engineered API</strong> — it may
+                            break if the upstream service changes.
+                        </li>
+                        <li>
+                            There is <strong>no uptime guarantee</strong>.
+                            Availability depends on the upstream service.
+                        </li>
+                        <li>
+                            <strong>WAV only</strong> by default — use
+                            <code>format=...</code> with the high-level client
+                            to transcode.
+                        </li>
+                        <li>
+                            <strong>No instructions/styles</strong> — unlike
+                            <code>fm/*</code>, Make does not support voice
+                            styling or prompt-based instructions.
+                        </li>
+                        <li>
+                            <strong>Rate limits</strong> may apply on the
+                            upstream endpoint.
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <footer>
+                <p><a href="../index.html">← Back to fishr Docs</a></p>
+            </footer>
+        </main>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+        <script src="../js/script.js"></script>
+        <script>
+            hljs.highlightAll();
+        </script>
+    </body>
+</html>

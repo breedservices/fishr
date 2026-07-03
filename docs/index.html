@@ -1,63 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>fishr — Free LLM Access from Python</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>fishr — Free LLM Access from Python</title>
+        <link rel="stylesheet" href="css/style.css" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css"
+        />
+    </head>
+    <body>
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h2>fishr</h2>
+            </div>
+            <ul>
+                <li><a href="#install">Installation</a></li>
+                <li><a href="#quickstart">Quickstart</a></li>
+                <li><a href="#providers">Providers</a></li>
+                <li><a href="#completions">Completions</a></li>
+                <li><a href="#streaming">Streaming</a></li>
+                <li><a href="#web-search">Web Search</a></li>
+                <li><a href="#images">Image Generation</a></li>
+                <li><a href="#image-input">Image Input</a></li>
+                <li><a href="#audio">Audio Generation</a></li>
+                <li><a href="#agents">Agents</a></li>
+                <li><a href="#tool-calling">Tool Calling</a></li>
+                <li><a href="#think-harder">Think Harder</a></li>
+                <li><a href="#async">Async</a></li>
+                <li><a href="#conversation">Conversation</a></li>
+                <li><a href="#chat-ui">Chat UI</a></li>
+                <li><a href="#models">All Models</a></li>
+                <li><a href="#types">Response Types</a></li>
+                <li><a href="#api-reference">API Reference</a></li>
+            </ul>
+        </nav>
 
-<nav id="sidebar">
-    <div class="sidebar-header">
-        <h2>fishr</h2>
-    </div>
-    <ul>
-        <li><a href="#install">Installation</a></li>
-        <li><a href="#quickstart">Quickstart</a></li>
-        <li><a href="#providers">Providers</a></li>
-        <li><a href="#completions">Completions</a></li>
-        <li><a href="#streaming">Streaming</a></li>
-        <li><a href="#web-search">Web Search</a></li>
-        <li><a href="#images">Image Generation</a></li>
-        <li><a href="#image-input">Image Input</a></li>
-        <li><a href="#audio">Audio Generation</a></li>
-        <li><a href="#agents">Agents</a></li>
-        <li><a href="#tool-calling">Tool Calling</a></li>
-        <li><a href="#think-harder">Think Harder</a></li>
-        <li><a href="#async">Async</a></li>
-        <li><a href="#conversation">Conversation</a></li>
-        <li><a href="#chat-ui">Chat UI</a></li>
-        <li><a href="#models">All Models</a></li>
-        <li><a href="#types">Response Types</a></li>
-        <li><a href="#api-reference">API Reference</a></li>
-    </ul>
-</nav>
+        <main>
+            <section id="hero">
+                <h1>fishr</h1>
+                <p class="tagline">
+                    Free LLM access from Python. No keys. No cost. No limits.
+                </p>
+                <div class="hero-install">
+                    <code>uv add fishr</code>
+                </div>
+            </section>
 
-<main>
-    <section id="hero">
-        <h1>fishr</h1>
-        <p class="tagline">Free LLM access from Python. No keys. No cost. No limits.</p>
-        <div class="hero-install">
-            <code>uv add fishr</code>
-        </div>
-    </section>
+            <section id="install">
+                <h2>Installation</h2>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-bash">uv add fishr</code></pre>
+                </div>
+                <p>
+                    Requires Python 3.11+. On Linux/macOS,
+                    <code>uvloop</code> is automatically installed for better
+                    async performance.
+                </p>
+            </section>
 
-    <section id="install">
-        <h2>Installation</h2>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-bash">uv add fishr</code></pre>
-        </div>
-        <p>Requires Python 3.11+. On Linux/macOS, <code>uvloop</code> is automatically installed for better async performance.</p>
-    </section>
-
-    <section id="quickstart">
-        <h2>Quickstart</h2>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+            <section id="quickstart">
+                <h2>Quickstart</h2>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -66,128 +78,176 @@ response = client.chat.completions.create(
     messages=[{"role": "user", "content": "Hello!"}],
 )
 print(response.text)</code></pre>
-        </div>
-    </section>
+                </div>
+            </section>
 
-    <section id="providers">
-        <h2>Providers</h2>
-        <p>Models are specified as <code>provider/name</code>. Each provider offers different models and capabilities.</p>
-        <p>The <code>provider/</code> prefix is optional — <code>"openai"</code> resolves to <code>"noxus/openai"</code>.</p>
+            <section id="providers">
+                <h2>Providers</h2>
+                <p>
+                    Models are specified as <code>provider/name</code>. Each
+                    provider offers different models and capabilities.
+                </p>
+                <p>
+                    The <code>provider/</code> prefix is optional —
+                    <code>"openai"</code> resolves to
+                    <code>"noxus/openai"</code>.
+                </p>
 
-        <div class="provider-grid">
-            <a href="providers/noxus.html" class="provider-card">
-                <h3>noxus</h3>
-                <p>8 models — GPT, Gemini, Sonnet, Grok, Perplexity, Llama, Qwen</p>
-                <div class="provider-tags">
-                    <span class="tag tag-green">Web Search</span>
-                    <span class="tag tag-blue">Images</span>
-                    <span class="tag tag-purple">Streaming</span>
+                <div class="provider-grid">
+                    <a href="providers/noxus.html" class="provider-card">
+                        <h3>noxus</h3>
+                        <p>
+                            8 models — GPT, Gemini, Sonnet, Grok, Perplexity,
+                            Llama, Qwen
+                        </p>
+                        <div class="provider-tags">
+                            <span class="tag tag-green">Web Search</span>
+                            <span class="tag tag-blue">Images</span>
+                            <span class="tag tag-purple">Streaming</span>
+                        </div>
+                    </a>
+                    <a href="providers/deepai.html" class="provider-card">
+                        <h3>deepai</h3>
+                        <p>
+                            6 models — Standard, Online, Gemma 4, Gemini Flash,
+                            DeepSeek, Image Gen
+                        </p>
+                        <div class="provider-tags">
+                            <span class="tag tag-green">Web Search</span>
+                            <span class="tag tag-blue">Image Gen</span>
+                            <span class="tag tag-purple">Streaming</span>
+                        </div>
+                    </a>
+                    <a href="providers/quillbot.html" class="provider-card">
+                        <h3>quillbot</h3>
+                        <p>2 models — Standard Chat, Web Search</p>
+                        <div class="provider-tags">
+                            <span class="tag tag-green">Web Search</span>
+                            <span class="tag tag-purple">Streaming</span>
+                        </div>
+                    </a>
+                    <a href="providers/notrack.html" class="provider-card">
+                        <h3>notrack</h3>
+                        <p>3 models — Fast, Standard, Reasoning</p>
+                        <div class="provider-tags">
+                            <span class="tag tag-purple">Streaming</span>
+                        </div>
+                    </a>
+                    <a href="providers/dphnai.html" class="provider-card">
+                        <h3>dphnai</h3>
+                        <p>
+                            2 models — Dolphin 24B, Dolphin 6B (with templates)
+                        </p>
+                        <div class="provider-tags">
+                            <span class="tag tag-purple">Streaming</span>
+                        </div>
+                    </a>
+                    <a href="providers/yqcloud.html" class="provider-card">
+                        <h3>yqcloud</h3>
+                        <p>1 model — GPT-4 chat</p>
+                        <div class="provider-tags">
+                            <span class="tag tag-purple">Streaming</span>
+                        </div>
+                    </a>
+                    <a href="providers/opera.html" class="provider-card">
+                        <h3>opera</h3>
+                        <p>1 model — Aria (image generation supported)</p>
+                        <div class="provider-tags">
+                            <span class="tag tag-blue">Image Gen</span>
+                            <span class="tag tag-purple">Streaming</span>
+                        </div>
+                    </a>
+                    <a href="providers/eris.html" class="provider-card">
+                        <h3>eris</h3>
+                        <p>
+                            5 models — DeepSeek V4 Flash/Pro, GLM 5.1, MiniMax
+                            M3, Kimi K2.6 (thinking mode)
+                        </p>
+                        <div class="provider-tags">
+                            <span class="tag tag-orange">Thinking</span>
+                            <span class="tag tag-purple">Streaming</span>
+                        </div>
+                    </a>
+                    <a href="providers/telnyx.html" class="provider-card">
+                        <h3>telnyx</h3>
+                        <p>
+                            4 models — GLM 5.2, GLM 5.1, Kimi K2.6, MiniMax M3
+                            (no-auth fast-path, thinking mode)
+                        </p>
+                        <div class="provider-tags">
+                            <span class="tag tag-orange">Thinking</span>
+                            <span class="tag tag-purple">Streaming</span>
+                        </div>
+                    </a>
+                    <a href="providers/kai.html" class="provider-card">
+                        <h3>kai</h3>
+                        <p>
+                            10 models — auto, m.1, xs-2.1, xs.2, north-mini,
+                            nemo3-ultra/super/nemo, 3.7-flash, openfree (native
+                            tool calling)
+                        </p>
+                        <div class="provider-tags">
+                            <span class="tag tag-red">Tool Calling</span>
+                            <span class="tag tag-purple">Streaming</span>
+                        </div>
+                    </a>
+                    <a href="providers/telnyx-tts.html" class="provider-card">
+                        <h3>telnyx-tts</h3>
+                        <p>
+                            5 models — NaturalHD TTS voices via no-auth
+                            fast-path (astra, luna, sol, nova, orion)
+                        </p>
+                        <div class="provider-tags">
+                            <span class="tag tag-blue">Audio Gen</span>
+                        </div>
+                    </a>
+                    <a href="providers/raphael.html" class="provider-card">
+                        <h3>raphael</h3>
+                        <p>
+                            1 model — raphael.app image generation
+                            (text-to-image & image-to-image)
+                        </p>
+                        <div class="provider-tags">
+                            <span class="tag tag-blue">Image Gen</span>
+                            <span class="tag tag-green">Img2Img</span>
+                        </div>
+                    </a>
+                    <a href="providers/fm.html" class="provider-card">
+                        <h3>fm</h3>
+                        <p>
+                            17 models — OpenAI.fm TTS (11 voices + 6 styles,
+                            transcoding)
+                        </p>
+                        <div class="provider-tags">
+                            <span class="tag tag-blue">Audio Gen</span>
+                        </div>
+                    </a>
+                    <a href="providers/make.html" class="provider-card">
+                        <h3>make</h3>
+                        <p>
+                            39 models — Qwen3 TTS voices (aura, breeze, cypress,
+                            ... willow)
+                        </p>
+                        <div class="provider-tags">
+                            <span class="tag tag-blue">Audio Gen</span>
+                        </div>
+                    </a>
                 </div>
-            </a>
-            <a href="providers/deepai.html" class="provider-card">
-                <h3>deepai</h3>
-                <p>6 models — Standard, Online, Gemma 4, Gemini Flash, DeepSeek, Image Gen</p>
-                <div class="provider-tags">
-                    <span class="tag tag-green">Web Search</span>
-                    <span class="tag tag-blue">Image Gen</span>
-                    <span class="tag tag-purple">Streaming</span>
-                </div>
-            </a>
-            <a href="providers/quillbot.html" class="provider-card">
-                <h3>quillbot</h3>
-                <p>2 models — Standard Chat, Web Search</p>
-                <div class="provider-tags">
-                    <span class="tag tag-green">Web Search</span>
-                    <span class="tag tag-purple">Streaming</span>
-                </div>
-            </a>
-            <a href="providers/notrack.html" class="provider-card">
-                <h3>notrack</h3>
-                <p>3 models — Fast, Standard, Reasoning</p>
-                <div class="provider-tags">
-                    <span class="tag tag-purple">Streaming</span>
-                </div>
-            </a>
-            <a href="providers/dphnai.html" class="provider-card">
-                <h3>dphnai</h3>
-                <p>2 models — Dolphin 24B, Dolphin 6B (with templates)</p>
-                <div class="provider-tags">
-                    <span class="tag tag-purple">Streaming</span>
-                </div>
-            </a>
-            <a href="providers/yqcloud.html" class="provider-card">
-                <h3>yqcloud</h3>
-                <p>1 model — GPT-4 chat</p>
-                <div class="provider-tags">
-                    <span class="tag tag-purple">Streaming</span>
-                </div>
-            </a>
-            <a href="providers/opera.html" class="provider-card">
-                <h3>opera</h3>
-                <p>1 model — Aria (image generation supported)</p>
-                <div class="provider-tags">
-                    <span class="tag tag-blue">Image Gen</span>
-                    <span class="tag tag-purple">Streaming</span>
-                </div>
-            </a>
-            <a href="providers/eris.html" class="provider-card">
-                <h3>eris</h3>
-                <p>5 models — DeepSeek V4 Flash/Pro, GLM 5.1, MiniMax M3, Kimi K2.6 (thinking mode)</p>
-                <div class="provider-tags">
-                    <span class="tag tag-orange">Thinking</span>
-                    <span class="tag tag-purple">Streaming</span>
-                </div>
-            </a>
-            <a href="providers/telnyx.html" class="provider-card">
-                <h3>telnyx</h3>
-                <p>4 models — GLM 5.2, GLM 5.1, Kimi K2.6, MiniMax M3 (no-auth fast-path, thinking mode)</p>
-                <div class="provider-tags">
-                    <span class="tag tag-orange">Thinking</span>
-                    <span class="tag tag-purple">Streaming</span>
-                </div>
-            </a>
-            <a href="providers/kai.html" class="provider-card">
-                <h3>kai</h3>
-                <p>10 models — auto, m.1, xs-2.1, xs.2, north-mini, nemo3-ultra/super/nemo, 3.7-flash, openfree (native tool calling)</p>
-                <div class="provider-tags">
-                    <span class="tag tag-red">Tool Calling</span>
-                    <span class="tag tag-purple">Streaming</span>
-                </div>
-            </a>
-            <a href="providers/telnyx-tts.html" class="provider-card">
-                <h3>telnyx-tts</h3>
-                <p>5 models — NaturalHD TTS voices via no-auth fast-path (astra, luna, sol, nova, orion)</p>
-                <div class="provider-tags">
-                    <span class="tag tag-blue">Audio Gen</span>
-                </div>
-            </a>
-            <a href="providers/raphael.html" class="provider-card">
-                <h3>raphael</h3>
-                <p>1 model — raphael.app image generation (text-to-image & image-to-image)</p>
-                <div class="provider-tags">
-                    <span class="tag tag-blue">Image Gen</span>
-                    <span class="tag tag-green">Img2Img</span>
-                </div>
-            </a>
-            <a href="providers/fm.html" class="provider-card">
-                <h3>fm</h3>
-                <p>17 models — OpenAI.fm TTS (11 voices + 6 styles, transcoding)</p>
-                <div class="provider-tags">
-                    <span class="tag tag-blue">Audio Gen</span>
-                </div>
-            </a>
-        </div>
 
-        <div class="alert alert-warn">
-            <strong>⚠ Not all models support every feature.</strong> Check the provider pages for details on which models support web search, image input, and image generation.
-        </div>
-    </section>
+                <div class="alert alert-warn">
+                    <strong>⚠ Not all models support every feature.</strong>
+                    Check the provider pages for details on which models support
+                    web search, image input, and image generation.
+                </div>
+            </section>
 
-    <section id="completions">
-        <h2>Chat Completions</h2>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+            <section id="completions">
+                <h2>Chat Completions</h2>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -201,12 +261,14 @@ response = client.chat.completions.create(
 
 print(response.text)
 # or: print(response.choices[0].message.content)</code></pre>
-        </div>
+                </div>
 
-        <h3>Using different providers</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <h3>Using different providers</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -239,15 +301,20 @@ response = client.chat.completions.create(
     model="dphnai/6b",
     messages=[{"role": "user", "content": "Hello!"}],
 )</code></pre>
-        </div>
-    </section>
+                </div>
+            </section>
 
-    <section id="streaming">
-        <h2>Streaming</h2>
-        <p>Set <code>stream=True</code> to receive chunks as they arrive. Works with all providers.</p>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+            <section id="streaming">
+                <h2>Streaming</h2>
+                <p>
+                    Set <code>stream=True</code> to receive chunks as they
+                    arrive. Works with all providers.
+                </p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -259,12 +326,14 @@ response = client.chat.completions.create(
 
 for chunk in response:
     print(chunk.choices[0].delta.content or "", end="")</code></pre>
-        </div>
+                </div>
 
-        <h3>DeepAI streaming</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <h3>DeepAI streaming</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -276,16 +345,21 @@ response = client.chat.completions.create(
 
 for chunk in response:
     print(chunk.choices[0].delta.content or "", end="")</code></pre>
-        </div>
-    </section>
+                </div>
+            </section>
 
-    <section id="web-search">
-        <h2>Web Search</h2>
-        <p>Pass <code>web_search=True</code> to enable live web search on supported models.</p>
+            <section id="web-search">
+                <h2>Web Search</h2>
+                <p>
+                    Pass <code>web_search=True</code> to enable live web search
+                    on supported models.
+                </p>
 
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -312,25 +386,51 @@ response = client.chat.completions.create(
     web_search=True,
 )
 print(response.text)</code></pre>
-        </div>
+                </div>
 
-        <div class="alert alert-warn">
-            <strong>⚠ Web search is not supported by all models.</strong> Noxus has 6 search-capable models, DeepAI routes to <code>deepai/online</code>, Quillbot enables it via <code>quillbot-search</code>, and NoTrack does not support web search at all.
-        </div>
-    </section>
+                <div class="alert alert-warn">
+                    <strong
+                        >⚠ Web search is not supported by all models.</strong
+                    >
+                    Noxus has 6 search-capable models, DeepAI routes to
+                    <code>deepai/online</code>, Quillbot enables it via
+                    <code>quillbot-search</code>, and NoTrack does not support
+                    web search at all.
+                </div>
+            </section>
 
-    <section id="images">
-        <h2>Image Generation</h2>
-        <p>Use <code>client.images.generate()</code> to generate images from text prompts. Two providers are available:</p>
-        <ul style="margin: 10px 0; padding-left: 1.4em; color: var(--text2); font-size: 14px; line-height: 1.9;">
-            <li><strong>DeepAI</strong> (<code>deepai/image</code>) — text-to-image via DeepAI's text2img API.</li>
-            <li><strong>Raphael</strong> (<code>raphael/image</code>) — text-to-image and image-to-image via raphael.app, with configurable aspect ratio, resolution, and quality.</li>
-        </ul>
+            <section id="images">
+                <h2>Image Generation</h2>
+                <p>
+                    Use <code>client.images.generate()</code> to generate images
+                    from text prompts. Two providers are available:
+                </p>
+                <ul
+                    style="
+                        margin: 10px 0;
+                        padding-left: 1.4em;
+                        color: var(--text2);
+                        font-size: 14px;
+                        line-height: 1.9;
+                    "
+                >
+                    <li>
+                        <strong>DeepAI</strong> (<code>deepai/image</code>) —
+                        text-to-image via DeepAI's text2img API.
+                    </li>
+                    <li>
+                        <strong>Raphael</strong> (<code>raphael/image</code>) —
+                        text-to-image and image-to-image via raphael.app, with
+                        configurable aspect ratio, resolution, and quality.
+                    </li>
+                </ul>
 
-        <h3>DeepAI</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <h3>DeepAI</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -342,12 +442,14 @@ result = client.images.generate(
 # the generated image URL
 print(result.data[0].url)
 print(result.data[0].alt)  # the prompt used</code></pre>
-        </div>
+                </div>
 
-        <h3>Raphael (text-to-image)</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <h3>Raphael (text-to-image)</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -362,13 +464,20 @@ result = client.images.generate(
 
 for img in result.data:
     print(img.url)</code></pre>
-        </div>
+                </div>
 
-        <h3>Raphael (image-to-image / img2img)</h3>
-        <p>Pass an <code>image</code> dict to transform an existing image. Supported MIME types: <code>image/webp</code>, <code>image/png</code>, <code>image/jpeg</code>, <code>image/jpg</code>.</p>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">import base64
+                <h3>Raphael (image-to-image / img2img)</h3>
+                <p>
+                    Pass an <code>image</code> dict to transform an existing
+                    image. Supported MIME types: <code>image/webp</code>,
+                    <code>image/png</code>, <code>image/jpeg</code>,
+                    <code>image/jpg</code>.
+                </p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">import base64
 from fishr import Client
 
 client = Client()
@@ -388,12 +497,14 @@ result = client.images.generate(
 )
 
 print(result.data[0].url)</code></pre>
-        </div>
+                </div>
 
-        <h3>Async</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import AsyncClient
+                <h3>Async</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import AsyncClient
 
 client = AsyncClient()
 
@@ -402,17 +513,33 @@ result = await client.images.generate(
     prompt="A futuristic city at sunset",
 )
 print(result.data[0].url)</code></pre>
-        </div>
+                </div>
 
-        <div class="alert alert-info">
-            <strong>ℹ Image generation is available via <code>deepai/image</code> and <code>raphael/image</code>.</strong> DeepAI returns a single image URL. Raphael can return multiple images and supports img2img. See the <a href="providers/deepai.html#image-gen">DeepAI</a> and <a href="providers/raphael.html">Raphael</a> provider docs for details.
-        </div>
+                <div class="alert alert-info">
+                    <strong
+                        >ℹ Image generation is available via
+                        <code>deepai/image</code> and
+                        <code>raphael/image</code>.</strong
+                    >
+                    DeepAI returns a single image URL. Raphael can return
+                    multiple images and supports img2img. See the
+                    <a href="providers/deepai.html#image-gen">DeepAI</a> and
+                    <a href="providers/raphael.html">Raphael</a> provider docs
+                    for details.
+                </div>
 
-        <h3>Via completions API</h3>
-        <p>You can also use <code>deepai/image</code> through the completions API. The response text will contain the generated image URL. (Raphael is only available via <code>client.images.generate()</code>.)</p>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <h3>Via completions API</h3>
+                <p>
+                    You can also use <code>deepai/image</code> through the
+                    completions API. The response text will contain the
+                    generated image URL. (Raphael is only available via
+                    <code>client.images.generate()</code>.)
+                </p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -421,21 +548,38 @@ response = client.chat.completions.create(
     messages=[{"role": "user", "content": "A cat riding a skateboard"}],
 )
 print(response.text)  # image URL</code></pre>
-        </div>
-    </section>
+                </div>
+            </section>
 
-    <section id="image-input">
-        <h2>Image Input</h2>
-        <p>Some models accept image attachments. Pass a base64-encoded image in the <code>image</code> key of a message with <code>mime_type</code> and <code>base64_data</code>.</p>
+            <section id="image-input">
+                <h2>Image Input</h2>
+                <p>
+                    Some models accept image attachments. Pass a base64-encoded
+                    image in the <code>image</code> key of a message with
+                    <code>mime_type</code> and <code>base64_data</code>.
+                </p>
 
-        <div class="alert alert-info">
-            <strong>ℹ Image input works with both Noxus and DeepAI.</strong> Noxus sends images directly with the message. DeepAI uploads them to its attachment API and references them by UUID. See the <a href="providers/noxus.html#images">Noxus</a> and <a href="providers/deepai.html#image-upload">DeepAI</a> provider docs for details. For image-to-image generation (img2img), use <a href="providers/raphael.html#img2img">Raphael</a> with the <code>image</code> parameter on <code>client.images.generate()</code>.
-        </div>
+                <div class="alert alert-info">
+                    <strong
+                        >ℹ Image input works with both Noxus and DeepAI.</strong
+                    >
+                    Noxus sends images directly with the message. DeepAI uploads
+                    them to its attachment API and references them by UUID. See
+                    the <a href="providers/noxus.html#images">Noxus</a> and
+                    <a href="providers/deepai.html#image-upload">DeepAI</a>
+                    provider docs for details. For image-to-image generation
+                    (img2img), use
+                    <a href="providers/raphael.html#img2img">Raphael</a> with
+                    the <code>image</code> parameter on
+                    <code>client.images.generate()</code>.
+                </div>
 
-        <h3>Noxus image input</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">import base64
+                <h3>Noxus image input</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">import base64
 from fishr import Client
 
 client = Client()
@@ -457,14 +601,19 @@ response = client.chat.completions.create(
 )
 
 print(response.text)</code></pre>
-        </div>
+                </div>
 
-        <h3>DeepAI image upload</h3>
-        <p>DeepAI chat models also support image attachments. The image is automatically uploaded and attached to the conversation.</p>
+                <h3>DeepAI image upload</h3>
+                <p>
+                    DeepAI chat models also support image attachments. The image
+                    is automatically uploaded and attached to the conversation.
+                </p>
 
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">import base64
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">import base64
 from fishr import Client
 
 client = Client()
@@ -485,20 +634,37 @@ response = client.chat.completions.create(
 )
 
 print(response.text)</code></pre>
-        </div>
+                </div>
 
-        <div class="alert alert-warn">
-            <strong>⚠ Image input is not supported by all models.</strong> See <a href="providers/noxus.html#images">Noxus</a> and <a href="providers/deepai.html#image-upload">DeepAI</a> docs for supported models. Quillbot and NoTrack do not support image input. Models marked ❌ will ignore attached images.
-        </div>
-    </section>
+                <div class="alert alert-warn">
+                    <strong
+                        >⚠ Image input is not supported by all models.</strong
+                    >
+                    See <a href="providers/noxus.html#images">Noxus</a> and
+                    <a href="providers/deepai.html#image-upload">DeepAI</a> docs
+                    for supported models. Quillbot and NoTrack do not support
+                    image input. Models marked ❌ will ignore attached images.
+                </div>
+            </section>
 
-    <section id="audio">
-        <h2>Audio Generation</h2>
-        <p>Use <code>client.audio.speech.create(...)</code> to generate speech from text. fishr supports two TTS providers: <strong>fm</strong> (OpenAI.fm) and <strong>telnyx-tts</strong> (Telnyx NaturalHD via the no-auth fast-path demo). Both mirror the OpenAI text-to-speech API and return raw audio bytes in <code>result.data[0].audio</code>.</p>
+            <section id="audio">
+                <h2>Audio Generation</h2>
+                <p>
+                    Use <code>client.audio.speech.create(...)</code> to generate
+                    speech from text. fishr supports three TTS providers:
+                    <strong>fm</strong> (OpenAI.fm),
+                    <strong>telnyx-tts</strong> (Telnyx NaturalHD via the
+                    no-auth fast-path demo), and <strong>make</strong> (Qwen3
+                    TTS, 39 voices). All mirror the OpenAI text-to-speech API
+                    and return raw audio bytes in
+                    <code>result.data[0].audio</code>.
+                </p>
 
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -514,17 +680,32 @@ result = client.audio.speech.create(
     input="Hello from Telnyx.",
 )
 
-# result.data[0].audio is raw MP3 bytes
-with open("out.mp3", "wb") as fh:
+# Make (Qwen3 TTS, 39 voices)
+result = client.audio.speech.create(
+    model="make/aura",
+    input="Hello from Make.",
+)
+
+# result.data[0].audio is raw audio bytes (MP3 for fm/telnyx-tts, WAV for make)
+# use format="mp3" to transcode make's WAV to MP3
+with open("out.wav", "wb") as fh:
     fh.write(result.data[0].audio)</code></pre>
-        </div>
+                </div>
 
-        <h3>fm — voices &amp; styles</h3>
-        <p>FM offers 11 voices and 6 preset styles. Voices (e.g. <code>fm/coral</code>) only select the voice. Styles (e.g. <code>fm/cowboy</code>) fill in <code>instructions</code> for you and use the default voice unless you override <code>voice=...</code>.</p>
+                <h3>fm — voices &amp; styles</h3>
+                <p>
+                    FM offers 11 voices and 6 preset styles. Voices (e.g.
+                    <code>fm/coral</code>) only select the voice. Styles (e.g.
+                    <code>fm/cowboy</code>) fill in
+                    <code>instructions</code> for you and use the default voice
+                    unless you override <code>voice=...</code>.
+                </p>
 
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -547,14 +728,24 @@ result = client.audio.speech.create(
     input="Hello world.",
     instructions="Speak softly and slowly.",
 )</code></pre>
-        </div>
+                </div>
 
-        <h3>telnyx-tts — voice-as-model</h3>
-        <p>Telnyx TTS exposes five NaturalHD voices. Each model id <em>is</em> a voice — there is no separate style layer. You can still override the voice on top of any model with <code>voice=...</code>. Voices: <code>telnyx-tts/astra</code> (default), <code>telnyx-tts/luna</code>, <code>telnyx-tts/sol</code>, <code>telnyx-tts/nova</code>, <code>telnyx-tts/orion</code>.</p>
+                <h3>telnyx-tts — voice-as-model</h3>
+                <p>
+                    Telnyx TTS exposes five NaturalHD voices. Each model id
+                    <em>is</em> a voice — there is no separate style layer. You
+                    can still override the voice on top of any model with
+                    <code>voice=...</code>. Voices:
+                    <code>telnyx-tts/astra</code> (default),
+                    <code>telnyx-tts/luna</code>, <code>telnyx-tts/sol</code>,
+                    <code>telnyx-tts/nova</code>, <code>telnyx-tts/orion</code>.
+                </p>
 
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -583,14 +774,61 @@ result = client.audio.speech.create(
     input="Bonjour.",
     voice="astra",
 )</code></pre>
-        </div>
+                </div>
 
-        <h3>Formats &amp; transcoding</h3>
-        <p>Both providers only emit MP3. Pass <code>format=...</code> to transcode to other formats using the bundled <code>static-ffmpeg</code> binary — no system ffmpeg install needed. Supported formats: <code>mp3</code>, <code>ogg</code>, <code>wav</code>, <code>flac</code>, <code>opus</code>, <code>aac</code>, <code>m4a</code>.</p>
+                <h3>make — 39 voices</h3>
+                <p>
+                    Make offers 39 Qwen3 TTS voices named after natural elements
+                    and textures: <code>make/aura</code> (default),
+                    <code>make/breeze</code>, <code>make/cypress</code>, ...
+                    <code>make/willow</code>. Each model id is a voice. Make
+                    emits <strong>WAV</strong> by default — use
+                    <code>format=...</code> to transcode.
+                </p>
 
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# default voice (aura)
+result = client.audio.speech.create(
+    model="make/aura",
+    input="Hello from aura.",
+)
+
+# different voice via model
+result = client.audio.speech.create(
+    model="make/breeze",
+    input="Hello from breeze.",
+)
+
+# transcode WAV to MP3
+result = client.audio.speech.create(
+    model="make/mist",
+    input="Transcode me.",
+    format="mp3",
+)</code></pre>
+                </div>
+
+                <h3>Formats &amp; transcoding</h3>
+                <p>
+                    fm and telnyx-tts emit MP3; make emits WAV. Pass
+                    <code>format=...</code> to transcode to other formats using
+                    the bundled <code>static-ffmpeg</code> binary — no system
+                    ffmpeg install needed. Supported formats: <code>mp3</code>,
+                    <code>ogg</code>, <code>wav</code>, <code>flac</code>,
+                    <code>opus</code>, <code>aac</code>, <code>m4a</code>.
+                </p>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -600,12 +838,14 @@ result = client.audio.speech.create(
     format="wav",
 )
 print(result.data[0].mime_type)  # audio/wav</code></pre>
-        </div>
+                </div>
 
-        <h3>Async</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import AsyncClient
+                <h3>Async</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import AsyncClient
 
 client = AsyncClient()
 
@@ -614,13 +854,21 @@ result = await client.audio.speech.create(
     input="Hello from the async high level client.",
 )
 print(result.data[0].voice)</code></pre>
-        </div>
+                </div>
 
-        <h3>Direct usage</h3>
-        <p>You can also use either provider directly without the <code>Client</code> wrapper. The low-level <code>speak()</code> methods return raw MP3 bytes — use the high-level client if you need <code>format=</code> transcoding.</p>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import OpenAIFM, TelnyxAudio
+                <h3>Direct usage</h3>
+                <p>
+                    You can also use any provider directly without the
+                    <code>Client</code> wrapper. The low-level
+                    <code>speak()</code> methods return raw audio bytes — use
+                    the high-level client if you need
+                    <code>format=</code> transcoding.
+                </p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import OpenAIFM, TelnyxAudio, MusicMake
 
 fm = OpenAIFM()
 result = fm.speak("Hello world.")
@@ -628,23 +876,35 @@ print(result.voice, len(result.audio))
 
 ta = TelnyxAudio()
 result = ta.speak("Hello from Telnyx.", model="telnyx-tts/luna")
-print(result.model, result.voice, len(result.audio))</code></pre>
-        </div>
+print(result.model, result.voice, len(result.audio))
 
-        <div class="alert alert-info">
-            <strong>ℹ See the provider pages for full details:</strong>
-            <a href="providers/fm.html">FM (OpenAI.fm)</a> ·
-            <a href="providers/telnyx-tts.html">Telnyx TTS</a>.
-        </div>
-    </section>
+mm = MusicMake()
+result = mm.speak("Hello from Make.", model="make/aura")
+print(result.voice, len(result.audio))</code></pre>
+                </div>
 
-    <section id="agents">
-        <h2>Agents</h2>
-        <p>Use <code>client.agents.run()</code> to run a multi-step agent loop. The agent iteratively calls the LLM with tool results until it produces a final answer or reaches the step limit.</p>
+                <div class="alert alert-info">
+                    <strong>ℹ See the provider pages for full details:</strong>
+                    <a href="providers/fm.html">FM (OpenAI.fm)</a> ·
+                    <a href="providers/telnyx-tts.html">Telnyx TTS</a> ·
+                    <a href="providers/make.html">Make</a>.
+                </div>
+            </section>
 
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+            <section id="agents">
+                <h2>Agents</h2>
+                <p>
+                    Use <code>client.agents.run()</code> to run a multi-step
+                    agent loop. The agent iteratively calls the LLM with tool
+                    results until it produces a final answer or reaches the step
+                    limit.
+                </p>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -657,12 +917,14 @@ result = client.agents.run(
 )
 
 print(result.content)</code></pre>
-        </div>
+                </div>
 
-        <h3>Async</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import AsyncClient
+                <h3>Async</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import AsyncClient
 
 client = AsyncClient()
 
@@ -675,29 +937,59 @@ result = await client.agents.run(
 )
 
 print(result.content)</code></pre>
-        </div>
+                </div>
 
-        <h3>AgentStep</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>role</code></td><td><code>str</code></td><td>Always <code>"assistant"</code></td></tr>
-                    <tr><td><code>content</code></td><td><code>str</code></td><td>Final response text</td></tr>
-                    <tr><td><code>tool</code></td><td><code>str</code></td><td>Tool name if a tool was called</td></tr>
-                    <tr><td><code>tool_input</code></td><td><code>str</code></td><td>Tool input if a tool was called</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
+                <h3>AgentStep</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>role</code></td>
+                                <td><code>str</code></td>
+                                <td>Always <code>"assistant"</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>content</code></td>
+                                <td><code>str</code></td>
+                                <td>Final response text</td>
+                            </tr>
+                            <tr>
+                                <td><code>tool</code></td>
+                                <td><code>str</code></td>
+                                <td>Tool name if a tool was called</td>
+                            </tr>
+                            <tr>
+                                <td><code>tool_input</code></td>
+                                <td><code>str</code></td>
+                                <td>Tool input if a tool was called</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-    <section id="tool-calling">
-        <h2>Tool Calling</h2>
-        <p>The <code>kai/*</code> provider is the only fishr provider with <strong>native OpenAI-style tool calling</strong>. Pass <code>tools</code> (a list of OpenAI tool definitions) and the model returns structured <code>tool_calls</code> on the assistant message.</p>
+            <section id="tool-calling">
+                <h2>Tool Calling</h2>
+                <p>
+                    The <code>kai/*</code> provider is the only fishr provider
+                    with <strong>native OpenAI-style tool calling</strong>. Pass
+                    <code>tools</code> (a list of OpenAI tool definitions) and
+                    the model returns structured <code>tool_calls</code> on the
+                    assistant message.
+                </p>
 
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -723,22 +1015,41 @@ resp = client.chat.completions.create(
 for tc in resp.choices[0].message.tool_calls:
     print(tc.function.name, tc.function.arguments)
 # get_weather {"location": "Tokyo"}</code></pre>
-        </div>
+                </div>
 
-        <p>Use <code>tool_choice</code> to steer tool selection: <code>"auto"</code> (default), <code>"none"</code>, <code>"required"</code>, or <code>{"type": "function", "function": {"name": "..."}}</code> to force a specific function.</p>
+                <p>
+                    Use <code>tool_choice</code> to steer tool selection:
+                    <code>"auto"</code> (default), <code>"none"</code>,
+                    <code>"required"</code>, or
+                    <code
+                        >{"type": "function", "function": {"name": "..."}}</code
+                    >
+                    to force a specific function.
+                </p>
 
-        <div class="alert alert-info">
-            <strong>ℹ See the <a href="providers/kai.html">Kai provider page</a> for multi-turn tool use, streaming tool calls, and direct usage.</strong>
-        </div>
-    </section>
+                <div class="alert alert-info">
+                    <strong
+                        >ℹ See the
+                        <a href="providers/kai.html">Kai provider page</a> for
+                        multi-turn tool use, streaming tool calls, and direct
+                        usage.</strong
+                    >
+                </div>
+            </section>
 
-    <section id="think-harder">
-        <h2>Think Harder</h2>
-        <p>Use <code>think_harder=True</code> with Eris or Opera Aria to enable reasoning mode. When streaming, reasoning tokens appear in <code>chunk.choices[0].delta.thinking</code>.</p>
+            <section id="think-harder">
+                <h2>Think Harder</h2>
+                <p>
+                    Use <code>think_harder=True</code> with Eris or Opera Aria
+                    to enable reasoning mode. When streaming, reasoning tokens
+                    appear in <code>chunk.choices[0].delta.thinking</code>.
+                </p>
 
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -757,12 +1068,14 @@ response = client.chat.completions.create(
     think_harder=True,
 )
 print(response.text)</code></pre>
-        </div>
+                </div>
 
-        <h3>Streaming with thinking</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <h3>Streaming with thinking</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -778,15 +1091,17 @@ for chunk in response:
         print(chunk.choices[0].delta.thinking, end="")
     elif chunk.choices[0].delta.content:
         print(chunk.choices[0].delta.content, end="")</code></pre>
-        </div>
-    </section>
+                </div>
+            </section>
 
-    <section id="async">
-        <h2>Async</h2>
-        <p>Use <code>AsyncClient</code> for non-blocking calls.</p>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">import asyncio
+            <section id="async">
+                <h2>Async</h2>
+                <p>Use <code>AsyncClient</code> for non-blocking calls.</p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">import asyncio
 from fishr import AsyncClient
 
 async def main():
@@ -808,17 +1123,23 @@ async def main():
         print(chunk.choices[0].delta.content or "", end="")
 
 asyncio.run(main())</code></pre>
-        </div>
-    </section>
+                </div>
+            </section>
 
-    <section id="conversation">
-        <h2>Multi-turn Conversation</h2>
-        <p>Conversations maintain history automatically. Works with all providers — Noxus, DeepAI, Quillbot, NoTrack, DphnAI, Opera Aria, and Eris.</p>
+            <section id="conversation">
+                <h2>Multi-turn Conversation</h2>
+                <p>
+                    Conversations maintain history automatically. Works with all
+                    providers — Noxus, DeepAI, Quillbot, NoTrack, DphnAI, Opera
+                    Aria, and Eris.
+                </p>
 
-        <h3>Sync</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import Client
+                <h3>Sync</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import Client
 
 client = Client()
 
@@ -851,12 +1172,14 @@ conv = client.conversation(model="eris/deepseek-v4-flash")
 conv.ask("Hello!")
 
 conv.clear()  # reset history</code></pre>
-        </div>
+                </div>
 
-        <h3>Async</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-            <pre><code class="language-python">from fishr import AsyncClient
+                <h3>Async</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr import AsyncClient
 
 client = AsyncClient()
 conv = client.conversation(model="noxus/openai")
@@ -864,635 +1187,1825 @@ conv = client.conversation(model="noxus/openai")
 await conv.ask("Remember: 42")
 reply = await conv.ask("What number did I say?")
 print(reply)</code></pre>
-        </div>
+                </div>
 
-        <h3>Methods</h3>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr><th>Method</th><th>Description</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td><code>ask(prompt, **kwargs)</code></td><td>Send a message and return the response</td></tr>
-                    <tr><td><code>system(content)</code></td><td>Add a system message to history</td></tr>
-                    <tr><td><code>clear()</code></td><td>Reset conversation history</td></tr>
-                    <tr><td><code>len(conv)</code></td><td>Number of messages in history</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
+                <h3>Methods</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>ask(prompt, **kwargs)</code></td>
+                                <td>Send a message and return the response</td>
+                            </tr>
+                            <tr>
+                                <td><code>system(content)</code></td>
+                                <td>Add a system message to history</td>
+                            </tr>
+                            <tr>
+                                <td><code>clear()</code></td>
+                                <td>Reset conversation history</td>
+                            </tr>
+                            <tr>
+                                <td><code>len(conv)</code></td>
+                                <td>Number of messages in history</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-    <section id="chat-ui">
-        <h2>Built-in Chat UI</h2>
-        <p>fishr ships with a built-in web chat UI for testing models interactively. It's a single-page app served from <code>fishr.chat</code> that streams responses over SSE, with no separate frontend build step.</p>
+            <section id="chat-ui">
+                <h2>Built-in Chat UI</h2>
+                <p>
+                    fishr ships with a built-in web chat UI for testing models
+                    interactively. It's a single-page app served from
+                    <code>fishr.chat</code> that streams responses over SSE,
+                    with no separate frontend build step.
+                </p>
 
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<pre><code class="language-python">from fishr.chat import Run
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-python">from fishr.chat import Run
 
 Run(host="127.0.0.1", port=8000)</code></pre>
-        </div>
+                </div>
 
-        <p>Then open <code>http://127.0.0.1:8000</code> in your browser.</p>
+                <p>
+                    Then open <code>http://127.0.0.1:8000</code> in your
+                    browser.
+                </p>
 
-        <h3>Features</h3>
-        <ul style="margin: 10px 0; padding-left: 1.4em; color: var(--text2); font-size: 14px; line-height: 1.9;">
-            <li><strong>Model selector</strong> — grouped by provider prefix (e.g. <code>noxus/</code>, <code>eris/</code>).</li>
-            <li><strong>Streaming</strong> — responses stream token-by-token over SSE.</li>
-            <li><strong>Thinking blocks</strong> — collapsible reasoning output for Eris and Opera Aria when <em>Think Harder</em> is on.</li>
-            <li><strong>Web search</strong> toggle for models that support it.</li>
-            <li><strong>Image generation</strong> for DeepAI and Opera Aria models.</li>
-            <li><strong>File attachments</strong> for vision-capable models.</li>
-            <li><strong>System prompts</strong> — optional per-conversation.</li>
-            <li><strong>Markdown rendering</strong> with syntax highlighting (highlight.js) and inline image URLs.</li>
-            <li><strong>Multi-provider Compare</strong> — send the same prompt to 2–4 models at once and view responses side-by-side.</li>
-        </ul>
+                <h3>Features</h3>
+                <ul
+                    style="
+                        margin: 10px 0;
+                        padding-left: 1.4em;
+                        color: var(--text2);
+                        font-size: 14px;
+                        line-height: 1.9;
+                    "
+                >
+                    <li>
+                        <strong>Model selector</strong> — grouped by provider
+                        prefix (e.g. <code>noxus/</code>, <code>eris/</code>).
+                    </li>
+                    <li>
+                        <strong>Streaming</strong> — responses stream
+                        token-by-token over SSE.
+                    </li>
+                    <li>
+                        <strong>Thinking blocks</strong> — collapsible reasoning
+                        output for Eris and Opera Aria when
+                        <em>Think Harder</em> is on.
+                    </li>
+                    <li>
+                        <strong>Web search</strong> toggle for models that
+                        support it.
+                    </li>
+                    <li>
+                        <strong>Image generation</strong> for DeepAI and Opera
+                        Aria models.
+                    </li>
+                    <li>
+                        <strong>File attachments</strong> for vision-capable
+                        models.
+                    </li>
+                    <li>
+                        <strong>System prompts</strong> — optional
+                        per-conversation.
+                    </li>
+                    <li>
+                        <strong>Markdown rendering</strong> with syntax
+                        highlighting (highlight.js) and inline image URLs.
+                    </li>
+                    <li>
+                        <strong>Multi-provider Compare</strong> — send the same
+                        prompt to 2–4 models at once and view responses
+                        side-by-side.
+                    </li>
+                </ul>
 
-        <h3>Compare Mode</h3>
-        <p>Toggle <strong>Compare</strong> in the header to switch into comparison mode. Pick 2–4 models from the dropdowns (use the <code>2→3→4</code> button to cycle the column count), type one prompt, and hit send. A full-screen grid opens with each model streaming into its own panel. Per-panel status indicators (<code>⏳ ✍️ ❌ ✅</code>) track each stream.</p>
+                <h3>Compare Mode</h3>
+                <p>
+                    Toggle <strong>Compare</strong> in the header to switch into
+                    comparison mode. Pick 2–4 models from the dropdowns (use the
+                    <code>2→3→4</code> button to cycle the column count), type
+                    one prompt, and hit send. A full-screen grid opens with each
+                    model streaming into its own panel. Per-panel status
+                    indicators (<code>⏳ ✍️ ❌ ✅</code>) track each stream.
+                </p>
 
-        <div class="alert alert-info">
-            <strong>ℹ How it works.</strong> The UI POSTs the prompt to <code>/api/chat/compare</code>, which runs each model concurrently on the server via <code>asyncio.gather</code> and multiplexes their chunks into a single SSE stream tagged with a panel index. No browser-side concurrency limits are hit because it's one HTTP connection.
-        </div>
+                <div class="alert alert-info">
+                    <strong>ℹ How it works.</strong> The UI POSTs the prompt to
+                    <code>/api/chat/compare</code>, which runs each model
+                    concurrently on the server via
+                    <code>asyncio.gather</code> and multiplexes their chunks
+                    into a single SSE stream tagged with a panel index. No
+                    browser-side concurrency limits are hit because it's one
+                    HTTP connection.
+                </div>
 
-        <h3>HTTP Endpoints</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>GET</code></td><td><code>/</code></td><td>Serves the single-page chat UI (<code>ui.html</code>)</td></tr>
-                    <tr><td><code>GET</code></td><td><code>/api/models</code></td><td>Lists all registered models from <code>fishr.Types.models</code></td></tr>
-                    <tr><td><code>POST</code></td><td><code>/api/chat</code></td><td>Stream a single-model completion (SSE)</td></tr>
-                    <tr><td><code>POST</code></td><td><code>/api/chat/compare</code></td><td>Stream 2–4 models concurrently into one multiplexed SSE stream</td></tr>
-                    <tr><td><code>POST</code></td><td><code>/api/images</code></td><td>Generate an image (DeepAI or Opera Aria)</td></tr>
-                    <tr><td><code>POST</code></td><td><code>/api/audio</code></td><td>Generate speech via FM (returns raw audio bytes)</td></tr>
-                </tbody>
-            </table>
-        </div>
+                <h3>HTTP Endpoints</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Path</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>GET</code></td>
+                                <td><code>/</code></td>
+                                <td>
+                                    Serves the single-page chat UI
+                                    (<code>ui.html</code>)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>GET</code></td>
+                                <td><code>/api/models</code></td>
+                                <td>
+                                    Lists all registered models from
+                                    <code>fishr.Types.models</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>POST</code></td>
+                                <td><code>/api/chat</code></td>
+                                <td>Stream a single-model completion (SSE)</td>
+                            </tr>
+                            <tr>
+                                <td><code>POST</code></td>
+                                <td><code>/api/chat/compare</code></td>
+                                <td>
+                                    Stream 2–4 models concurrently into one
+                                    multiplexed SSE stream
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>POST</code></td>
+                                <td><code>/api/images</code></td>
+                                <td>
+                                    Generate an image (DeepAI or Opera Aria)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>POST</code></td>
+                                <td><code>/api/audio</code></td>
+                                <td>
+                                    Generate speech via FM (returns raw audio
+                                    bytes)
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-        <h3>Compare Request Body</h3>
-        <div class="code-block">
-            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<pre><code class="language-json">{
+                <h3>Compare Request Body</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">
+                        Copy
+                    </button>
+                    <pre><code class="language-json">{
   "models": ["noxus/openai", "eris/deepseek-v4-flash", "opera/aria"],
   "messages": [{"role": "user", "content": "Hello!"}],
   "web_search": false,
   "think_harder": false
 }</code></pre>
-        </div>
-
-        <p>Each SSE <code>data:</code> frame is tagged with <code>idx</code> (the panel index) and a <code>type</code> of <code>thinking</code>, <code>content</code>, <code>error</code>, or <code>done</code>. The stream closes with <code>data: [DONE]</code> once all models finish.</p>
-    </section>
-
-    <section id="models">
-        <h2>All Models</h2>
-
-        <h3>Noxus</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>History</th></tr></thead>
-                <tbody>
-                    <tr><td><code>noxus/openai</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>noxus/google</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>noxus/sonnet-4.6</code></td><td>✅</td><td class="no">❌</td><td>✅</td></tr>
-                    <tr><td><code>noxus/sonnet-3.5</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>noxus/grok-4.3</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>noxus/perplexity</code></td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>noxus/metaai</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
-                    <tr><td><code>noxus/qwen</code></td><td>✅</td><td class="no">❌</td><td>✅</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>DeepAI</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>Image Gen</th><th>History</th></tr></thead>
-                <tbody>
-                    <tr><td><code>deepai/standard</code></td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>deepai/online</code></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>deepai/gemma-4</code></td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>deepai/gemini-2.5-flash-lite</code></td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>deepai/deepseek-v3.2</code></td><td class="no">❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>deepai/image</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td class="no">❌</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Quillbot</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>History</th></tr></thead>
-                <tbody>
-                    <tr><td><code>quillbot/quillbot</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
-                    <tr><td><code>quillbot/quillbot-search</code></td><td>✅</td><td class="no">❌</td><td>✅</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>NoTrack</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>History</th></tr></thead>
-                <tbody>
-                    <tr><td><code>notrack/fast</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
-                    <tr><td><code>notrack/standard</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
-                    <tr><td><code>notrack/reasoning</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>DphnAI</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>History</th></tr></thead>
-                <tbody>
-                    <tr><td><code>dphnai/24b</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
-                    <tr><td><code>dphnai/6b</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Yqcloud</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>History</th></tr></thead>
-                <tbody>
-                    <tr><td><code>yqcloud/gpt-4</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Opera Aria</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Web Search</th><th>Image Gen</th><th>History</th></tr></thead>
-                <tbody>
-                    <tr><td><code>opera/aria</code></td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Eris</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Web Search</th><th>Image Input</th><th>Thinking</th><th>History</th></tr></thead>
-                <tbody>
-                    <tr><td><code>eris/deepseek-v4-flash</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>eris/deepseek-v4-pro</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>eris/glm-5.1</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>eris/minimax-m3</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>eris/kimi-k2.6</code></td><td class="no">❌</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Telnyx</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Context</th><th>Thinking</th><th>History</th></tr></thead>
-                <tbody>
-                    <tr><td><code>telnyx/glm-5.2</code></td><td>968K</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>telnyx/glm-5.1</code></td><td>168K</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>telnyx/kimi-k2.6</code></td><td>224K</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>telnyx/minimax-m3</code></td><td>168K</td><td>✅</td><td>✅</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Kai</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Tool Calling</th><th>Image Input</th><th>History</th><th>System</th></tr></thead>
-                <tbody>
-                    <tr><td><code>kai/auto</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>kai/m.1</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>kai/xs-2.1</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>kai/xs.2</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>kai/north-mini</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>kai/nemo3-ultra</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>kai/nemo3-super</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>kai/nemo3-nemo</code></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>kai/3.7-flash</code></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>kai/openfree</code></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Telnyx TTS</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Voice</th><th>Notes</th></tr></thead>
-                <tbody>
-                    <tr><td><code>telnyx-tts/astra</code></td><td>astra</td><td>default voice</td></tr>
-                    <tr><td><code>telnyx-tts/luna</code></td><td>luna</td><td>—</td></tr>
-                    <tr><td><code>telnyx-tts/sol</code></td><td>sol</td><td>—</td></tr>
-                    <tr><td><code>telnyx-tts/nova</code></td><td>nova</td><td>—</td></tr>
-                    <tr><td><code>telnyx-tts/orion</code></td><td>orion</td><td>—</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>FM (OpenAI.fm TTS)</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Type</th><th>Notes</th></tr></thead>
-                <tbody>
-                    <tr><td><code>fm/alloy</code></td><td>voice</td><td>—</td></tr>
-                    <tr><td><code>fm/ash</code></td><td>voice</td><td>—</td></tr>
-                    <tr><td><code>fm/ballad</code></td><td>voice</td><td>—</td></tr>
-                    <tr><td><code>fm/cedar</code></td><td>voice</td><td>—</td></tr>
-                    <tr><td><code>fm/coral</code></td><td>voice</td><td>default voice</td></tr>
-                    <tr><td><code>fm/fable</code></td><td>voice</td><td>—</td></tr>
-                    <tr><td><code>fm/marin</code></td><td>voice</td><td>—</td></tr>
-                    <tr><td><code>fm/nova</code></td><td>voice</td><td>—</td></tr>
-                    <tr><td><code>fm/onyx</code></td><td>voice</td><td>—</td></tr>
-                    <tr><td><code>fm/sage</code></td><td>voice</td><td>—</td></tr>
-                    <tr><td><code>fm/verse</code></td><td>voice</td><td>—</td></tr>
-                    <tr><td><code>fm/friendly</code></td><td>style</td><td>cheerful guide</td></tr>
-                    <tr><td><code>fm/patient_teacher</code></td><td>style</td><td>warm art instructor</td></tr>
-                    <tr><td><code>fm/noir_detective</code></td><td>style</td><td>noir detective</td></tr>
-                    <tr><td><code>fm/cowboy</code></td><td>style</td><td>laid-back cowboy</td></tr>
-                    <tr><td><code>fm/calm</code></td><td>style</td><td>calm, reassuring</td></tr>
-                    <tr><td><code>fm/scientific_style</code></td><td>style</td><td>academic, precise</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Raphael</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Model</th><th>Upstream</th><th>Image Gen</th><th>Img2Img</th></tr></thead>
-                <tbody>
-                    <tr><td><code>raphael/image</code></td><td>raphael-basic</td><td>✅</td><td>✅</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <section id="types">
-        <h2>Response Types</h2>
-
-        <h3>ChatCompletion</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>id</code></td><td><code>str</code></td><td>Completion ID</td></tr>
-                    <tr><td><code>model</code></td><td><code>str</code></td><td>Model used</td></tr>
-                    <tr><td><code>choices</code></td><td><code>tuple[Choice, ...]</code></td><td>Response choices</td></tr>
-                    <tr><td><code>usage</code></td><td><code>Usage</code></td><td>Token usage info</td></tr>
-                    <tr><td><code>text</code></td><td><code>str</code></td><td>Shortcut for <code>choices[0].message.content</code></td></tr>
-                    <tr><td><code>tool_calls</code></td><td><code>tuple[ToolCall, ...]</code></td><td>Shortcut for <code>choices[0].message.tool_calls</code> (Kai only)</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>ImageResponse</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>created</code></td><td><code>int</code></td><td>Unix timestamp</td></tr>
-                    <tr><td><code>data</code></td><td><code>tuple[ImageUrl, ...]</code></td><td>Generated images</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>ImageUrl</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>url</code></td><td><code>str</code></td><td>URL of the generated image</td></tr>
-                    <tr><td><code>alt</code></td><td><code>str</code></td><td>Prompt used to generate</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>AudioResponse</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>created</code></td><td><code>int</code></td><td>Unix timestamp</td></tr>
-                    <tr><td><code>data</code></td><td><code>tuple[AudioData, ...]</code></td><td>Generated audio (one item)</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>AudioData</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>voice</code></td><td><code>str</code></td><td>Voice used</td></tr>
-                    <tr><td><code>model</code></td><td><code>str</code></td><td>Model name resolved (voice or style)</td></tr>
-                    <tr><td><code>audio</code></td><td><code>bytes</code></td><td>Raw audio bytes</td></tr>
-                    <tr><td><code>mime_type</code></td><td><code>str</code></td><td>MIME type, e.g. <code>audio/mpeg</code>, <code>audio/ogg</code></td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>AgentStep</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>role</code></td><td><code>str</code></td><td>Always <code>"assistant"</code></td></tr>
-                    <tr><td><code>content</code></td><td><code>str</code></td><td>Final response text</td></tr>
-                    <tr><td><code>tool</code></td><td><code>str</code></td><td>Tool name if a tool was called</td></tr>
-                    <tr><td><code>tool_input</code></td><td><code>str</code></td><td>Tool input if a tool was called</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Choice</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th></tr></thead>
-                <tbody>
-                    <tr><td><code>index</code></td><td><code>int</code></td></tr>
-                    <tr><td><code>message</code></td><td><code>Message</code></td></tr>
-                    <tr><td><code>finish_reason</code></td><td><code>str</code></td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Message</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th></tr></thead>
-                <tbody>
-                    <tr><td><code>role</code></td><td><code>str</code></td></tr>
-                    <tr><td><code>content</code></td><td><code>str</code></td></tr>
-                    <tr><td><code>tool_calls</code></td><td><code>tuple[ToolCall, ...]</code></td></tr>
-                    <tr><td><code>tool_call_id</code></td><td><code>str</code></td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>ChatCompletionChunk (streaming)</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th></tr></thead>
-                <tbody>
-                    <tr><td><code>id</code></td><td><code>str</code></td></tr>
-                    <tr><td><code>model</code></td><td><code>str</code></td></tr>
-                    <tr><td><code>choices</code></td><td><code>tuple[ChunkChoice, ...]</code></td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>ChunkChoice</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th></tr></thead>
-                <tbody>
-                    <tr><td><code>index</code></td><td><code>int</code></td></tr>
-                    <tr><td><code>delta</code></td><td><code>Delta</code></td></tr>
-                    <tr><td><code>finish_reason</code></td><td><code>str</code></td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Delta</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th></tr></thead>
-                <tbody>
-                    <tr><td><code>role</code></td><td><code>str</code></td></tr>
-                    <tr><td><code>content</code></td><td><code>str</code></td></tr>
-                    <tr><td><code>thinking</code></td><td><code>str</code></td></tr>
-                    <tr><td><code>tool_calls</code></td><td><code>tuple[ToolCallDelta, ...]</code></td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>ToolCall</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>id</code></td><td><code>str</code></td><td>Tool call ID (e.g. <code>call-9a2c1024-...</code>)</td></tr>
-                    <tr><td><code>type</code></td><td><code>str</code></td><td>Always <code>"function"</code></td></tr>
-                    <tr><td><code>function</code></td><td><code>FunctionCall</code></td><td>Function name + arguments</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>FunctionCall</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>name</code></td><td><code>str</code></td><td>Function name</td></tr>
-                    <tr><td><code>arguments</code></td><td><code>str</code></td><td>JSON-encoded arguments</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>ToolCallDelta (streaming)</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>index</code></td><td><code>int</code></td><td>Position in the tool_calls array</td></tr>
-                    <tr><td><code>id</code></td><td><code>str</code></td><td>Tool call ID (may arrive incrementally)</td></tr>
-                    <tr><td><code>type</code></td><td><code>str</code></td><td>Always <code>"function"</code></td></tr>
-                    <tr><td><code>function</code></td><td><code>FunctionCall</code></td><td>Name + arguments (accumulated across chunks)</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Usage</h3>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Field</th><th>Type</th></tr></thead>
-                <tbody>
-                    <tr><td><code>prompt_tokens</code></td><td><code>int</code></td></tr>
-                    <tr><td><code>completion_tokens</code></td><td><code>int</code></td></tr>
-                    <tr><td><code>total_tokens</code></td><td><code>int</code></td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <section id="api-reference">
-        <h2>API Reference</h2>
-
-        <h3>Client</h3>
-        <div class="ref-card">
-            <code>Client()</code>
-            <p>Creates a synchronous fishr client.</p>
-        </div>
-
-        <h3>AsyncClient</h3>
-        <div class="ref-card">
-            <code>AsyncClient()</code>
-            <p>Creates an asynchronous fishr client. All <code>.create()</code> and <code>.generate()</code> calls must be awaited.</p>
-        </div>
-
-        <h3>client.chat.completions.create()</h3>
-        <div class="ref-card">
-            <div class="params">
-                <div class="param">
-                    <code>model</code> <span class="type">str</span> <span class="required">required</span>
-                    <p>Model name in <code>provider/name</code> format, e.g. <code>"noxus/openai"</code>, <code>"deepai/standard"</code>, <code>"quillbot/quillbot"</code>, <code>"notrack/fast"</code>, <code>"dphnai/6b"</code>. Noxus prefix is optional.</p>
                 </div>
-                <div class="param">
-                    <code>messages</code> <span class="type">list[dict]</span> <span class="required">required</span>
-                    <p>List of <code>{"role": ..., "content": ...}</code> dicts. Some providers support <code>"image"</code> with <code>{"mime_type": ..., "base64_data": ...}</code> — see <a href="#image-input">Image Input</a>.</p>
-                </div>
-                <div class="param">
-                    <code>web_search</code> <span class="type">bool</span> <span class="default">default: False</span>
-                    <p>Enable web search for supported models.</p>
-                </div>
-                <div class="param">
-                    <code>stream</code> <span class="type">bool</span> <span class="default">default: False</span>
-                    <p>Return an iterator of <code>ChatCompletionChunk</code> instead of a single <code>ChatCompletion</code>.</p>
-                </div>
-                <div class="param">
-                    <code>think_harder</code> <span class="type">bool</span> <span class="default">default: False</span>
-                    <p>Enable reasoning mode for Eris and Opera Aria models. When streaming, reasoning tokens appear in <code>chunk.choices[0].delta.thinking</code>.</p>
-                </div>
-                <div class="param">
-                    <code>tools</code> <span class="type">list[dict] | None</span> <span class="default">default: None</span>
-                    <p>OpenAI-style tool definitions. <strong>Kai only</strong> — the only provider with native tool calling. Other providers silently ignore this.</p>
-                </div>
-                <div class="param">
-                    <code>tool_choice</code> <span class="type">str | dict | None</span> <span class="default">default: None</span>
-                    <p>Tool selection strategy: <code>"auto"</code>, <code>"none"</code>, <code>"required"</code>, or <code>{"type": "function", "function": {"name": "..."}}</code>. <strong>Kai only.</strong></p>
-                </div>
-                <div class="param">
-                    <code>max_tokens</code> <span class="type">int | None</span> <span class="default">default: None</span>
-                    <p>Maximum tokens to generate. Forwarded to Kai and Telnyx; silently ignored by other providers. Telnyx defaults to the model's context cap (kimi=224K, glm-5.2=968K, glm-5.1=168K, minimax=168K); Kai defaults to 16384.</p>
-                </div>
-                <div class="param">
-                    <code>temperature</code> <span class="type">float | None</span> <span class="default">default: None</span>
-                    <p>Sampling temperature (0–2). <strong>Kai only.</strong> Other providers silently ignore this.</p>
-                </div>
-            </div>
-        </div>
 
-        <h3>client.images.generate()</h3>
-        <div class="ref-card">
-            <div class="params">
-                <div class="param">
-                    <code>model</code> <span class="type">str</span> <span class="default">default: "deepai/image"</span>
-                    <p>Image generation model. <code>deepai/image</code> uses DeepAI's text2img API. <code>raphael/image</code> uses raphael.app (supports text-to-image and image-to-image via the <code>image</code> parameter).</p>
-                </div>
-                <div class="param">
-                    <code>prompt</code> <span class="type">str</span> <span class="required">required</span>
-                    <p>Text prompt describing the image to generate.</p>
-                </div>
-                <div class="param">
-                    <code>number_of_images</code> <span class="type">int</span> <span class="default">default: 1</span>
-                    <p>Number of images to generate. <strong>Raphael only.</strong> Ignored by DeepAI.</p>
-                </div>
-                <div class="param">
-                    <code>aspect</code> <span class="type">str</span> <span class="default">default: "1:1"</span>
-                    <p>Aspect ratio. <strong>Raphael only.</strong> One of <code>1:1</code>, <code>4:3</code>, <code>3:4</code>, <code>16:9</code>, <code>9:16</code>, <code>auto</code>.</p>
-                </div>
-                <div class="param">
-                    <code>resolution</code> <span class="type">str</span> <span class="default">default: "0.5k"</span>
-                    <p>Resolution. <strong>Raphael only.</strong> One of <code>0.5k</code>, <code>1k</code>, <code>2k</code>.</p>
-                </div>
-                <div class="param">
-                    <code>quality</code> <span class="type">str</span> <span class="default">default: "low"</span>
-                    <p>Quality. <strong>Raphael only.</strong> One of <code>low</code>, <code>medium</code>, <code>high</code>.</p>
-                </div>
-                <div class="param">
-                    <code>fast_mode</code> <span class="type">bool</span> <span class="default">default: False</span>
-                    <p>Fast generation mode. <strong>Raphael only.</strong></p>
-                </div>
-                <div class="param">
-                    <code>high_quality</code> <span class="type">bool</span> <span class="default">default: False</span>
-                    <p>Request high-quality output. <strong>Raphael only.</strong></p>
-                </div>
-                <div class="param">
-                    <code>image</code> <span class="type">dict | None</span> <span class="default">default: None</span>
-                    <p>Reference image for image-to-image (img2img). <strong>Raphael only.</strong> Dict with <code>mime_type</code> (<code>image/webp</code>, <code>image/png</code>, <code>image/jpeg</code>, <code>image/jpg</code>) and <code>base64_data</code>.</p>
-                </div>
-            </div>
-            <p>Returns an <code>ImageResponse</code> with <code>data</code> containing <code>ImageUrl</code> objects (one per generated image). <code>data[i].url</code> is the image URL, <code>data[i].alt</code> is the prompt.</p>
-        </div>
+                <p>
+                    Each SSE <code>data:</code> frame is tagged with
+                    <code>idx</code> (the panel index) and a
+                    <code>type</code> of <code>thinking</code>,
+                    <code>content</code>, <code>error</code>, or
+                    <code>done</code>. The stream closes with
+                    <code>data: [DONE]</code> once all models finish.
+                </p>
+            </section>
 
-        <h3>client.audio.speech.create()</h3>
-        <div class="ref-card">
-            <div class="params">
-                <div class="param">
-                    <code>model</code> <span class="type">str</span> <span class="default">default: "fm/coral"</span>
-                    <p>Audio model. <code>fm/*</code> routes to OpenAI.fm (voice or style). <code>telnyx-tts/*</code> routes to the Telnyx no-auth fast-path demo — each model id is a voice (e.g. <code>telnyx-tts/astra</code>, <code>telnyx-tts/luna</code>, <code>telnyx-tts/sol</code>, <code>telnyx-tts/nova</code>, <code>telnyx-tts/orion</code>).</p>
-                </div>
-                <div class="param">
-                    <code>input</code> <span class="type">str</span> <span class="required">required</span>
-                    <p>Text to synthesize.</p>
-                </div>
-                <div class="param">
-                    <code>voice</code> <span class="type">str | None</span> <span class="default">default: None</span>
-                    <p>Override the voice. For <code>fm/*</code>, falls back to the voice resolved from <code>model</code> (or <code>coral</code> for a style). For <code>telnyx-tts/*</code>, falls back to the voice embedded in the model id.</p>
-                </div>
-                <div class="param">
-                    <code>instructions</code> <span class="type">str | None</span> <span class="default">default: None</span>
-                    <p>Steer how the voice speaks (tone, pacing, emotion). <code>fm/*</code> only — ignored by <code>telnyx-tts/*</code>. Falls back to the style's preset instructions when <code>model</code> is a style.</p>
-                </div>
-                <div class="param">
-                    <code>format</code> <span class="type">str | None</span> <span class="default">default: None</span>
-                    <p>Output container: <code>mp3</code> (default, no transcoding), <code>ogg</code>, <code>wav</code>, <code>flac</code>, <code>opus</code>, <code>aac</code>, <code>m4a</code>. Non-MP3 formats are transcoded from the upstream MP3 via the bundled <code>static-ffmpeg</code> binary. Applies to both <code>fm/*</code> and <code>telnyx-tts/*</code>.</p>
-                </div>
-            </div>
-            <p>Returns an <code>AudioResponse</code> with <code>data[0].audio</code> containing the raw audio bytes and <code>data[0].mime_type</code> the MIME type.</p>
-        </div>
+            <section id="models">
+                <h2>All Models</h2>
 
-        <h3>client.agents.run()</h3>
-        <div class="ref-card">
-            <div class="params">
-                <div class="param">
-                    <code>model</code> <span class="type">str</span> <span class="default">default: "noxus/openai"</span>
-                    <p>Model to use for the agent. Supports Noxus and DeepAI providers.</p>
+                <h3>Noxus</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Web Search</th>
+                                <th>Image Input</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>noxus/openai</code></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>noxus/google</code></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>noxus/sonnet-4.6</code></td>
+                                <td>✅</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>noxus/sonnet-3.5</code></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>noxus/grok-4.3</code></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>noxus/perplexity</code></td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>noxus/metaai</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>noxus/qwen</code></td>
+                                <td>✅</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="param">
-                    <code>instructions</code> <span class="type">str</span> <span class="default">default: ""</span>
-                    <p>System instructions for the agent.</p>
-                </div>
-                <div class="param">
-                    <code>prompt</code> <span class="type">str</span> <span class="required">required</span>
-                    <p>The user prompt to start the agent loop.</p>
-                </div>
-                <div class="param">
-                    <code>tools</code> <span class="type">list[dict] | None</span> <span class="default">default: None</span>
-                    <p>List of tools the agent can use. Currently supports <code>{"type": "web_search"}</code>.</p>
-                </div>
-                <div class="param">
-                    <code>max_steps</code> <span class="type">int</span> <span class="default">default: 5</span>
-                    <p>Maximum number of agent iterations before returning.</p>
-                </div>
-            </div>
-            <p>Returns an <code>AgentStep</code> with the final response in <code>content</code>.</p>
-        </div>
 
-        <h3>client.conversation()</h3>
-        <div class="ref-card">
-            <div class="params">
-                <div class="param">
-                    <code>model</code> <span class="type">str</span> <span class="default">default: "noxus/openai"</span>
-                    <p>Model to use for the conversation. Works with all providers — Noxus, DeepAI, Quillbot, NoTrack, and DphnAI.</p>
+                <h3>DeepAI</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Web Search</th>
+                                <th>Image Input</th>
+                                <th>Image Gen</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>deepai/standard</code></td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>deepai/online</code></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>deepai/gemma-4</code></td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>deepai/gemini-2.5-flash-lite</code>
+                                </td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>deepai/deepseek-v3.2</code></td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>deepai/image</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td class="no">❌</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            <p>Returns a <code>Conversation</code> (sync) or <code>AsyncConversation</code> (async) instance.</p>
-        </div>
-    </section>
 
-    <footer>
-        <p>fishr — Free LLM access from Python</p>
-    </footer>
-</main>
+                <h3>Quillbot</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Web Search</th>
+                                <th>Image Input</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>quillbot/quillbot</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>quillbot/quillbot-search</code></td>
+                                <td>✅</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
-<script src="js/script.js"></script>
-<script>hljs.highlightAll();</script>
-</body>
+                <h3>NoTrack</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Web Search</th>
+                                <th>Image Input</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>notrack/fast</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>notrack/standard</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>notrack/reasoning</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>DphnAI</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Web Search</th>
+                                <th>Image Input</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>dphnai/24b</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>dphnai/6b</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Yqcloud</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Web Search</th>
+                                <th>Image Input</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>yqcloud/gpt-4</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Opera Aria</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Web Search</th>
+                                <th>Image Gen</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>opera/aria</code></td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Eris</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Web Search</th>
+                                <th>Image Input</th>
+                                <th>Thinking</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>eris/deepseek-v4-flash</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>eris/deepseek-v4-pro</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>eris/glm-5.1</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>eris/minimax-m3</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>eris/kimi-k2.6</code></td>
+                                <td class="no">❌</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Telnyx</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Context</th>
+                                <th>Thinking</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>telnyx/glm-5.2</code></td>
+                                <td>968K</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>telnyx/glm-5.1</code></td>
+                                <td>168K</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>telnyx/kimi-k2.6</code></td>
+                                <td>224K</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>telnyx/minimax-m3</code></td>
+                                <td>168K</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Kai</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Tool Calling</th>
+                                <th>Image Input</th>
+                                <th>History</th>
+                                <th>System</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>kai/auto</code></td>
+                                <td>✅</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>kai/m.1</code></td>
+                                <td>✅</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>kai/xs-2.1</code></td>
+                                <td>✅</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>kai/xs.2</code></td>
+                                <td>✅</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>kai/north-mini</code></td>
+                                <td>✅</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>kai/nemo3-ultra</code></td>
+                                <td>✅</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>kai/nemo3-super</code></td>
+                                <td>✅</td>
+                                <td class="no">❌</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>kai/nemo3-nemo</code></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>kai/3.7-flash</code></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>kai/openfree</code></td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Telnyx TTS</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Voice</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>telnyx-tts/astra</code></td>
+                                <td>astra</td>
+                                <td>default voice</td>
+                            </tr>
+                            <tr>
+                                <td><code>telnyx-tts/luna</code></td>
+                                <td>luna</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>telnyx-tts/sol</code></td>
+                                <td>sol</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>telnyx-tts/nova</code></td>
+                                <td>nova</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>telnyx-tts/orion</code></td>
+                                <td>orion</td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>FM (OpenAI.fm TTS)</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Type</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>fm/alloy</code></td>
+                                <td>voice</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/ash</code></td>
+                                <td>voice</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/ballad</code></td>
+                                <td>voice</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/cedar</code></td>
+                                <td>voice</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/coral</code></td>
+                                <td>voice</td>
+                                <td>default voice</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/fable</code></td>
+                                <td>voice</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/marin</code></td>
+                                <td>voice</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/nova</code></td>
+                                <td>voice</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/onyx</code></td>
+                                <td>voice</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/sage</code></td>
+                                <td>voice</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/verse</code></td>
+                                <td>voice</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/friendly</code></td>
+                                <td>style</td>
+                                <td>cheerful guide</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/patient_teacher</code></td>
+                                <td>style</td>
+                                <td>warm art instructor</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/noir_detective</code></td>
+                                <td>style</td>
+                                <td>noir detective</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/cowboy</code></td>
+                                <td>style</td>
+                                <td>laid-back cowboy</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/calm</code></td>
+                                <td>style</td>
+                                <td>calm, reassuring</td>
+                            </tr>
+                            <tr>
+                                <td><code>fm/scientific_style</code></td>
+                                <td>style</td>
+                                <td>academic, precise</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Make (Qwen3 TTS)</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>make/aura</code></td>
+                                <td>default voice</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/breeze</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/cypress</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/drift</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/echo</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/flare</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/gem</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/hazel</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/ivy</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/jazz</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/kite</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/lumen</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/mist</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/saffron</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/solstice</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/pearl</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/quartz</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/ripple</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/cobalt</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/tide</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/vale</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/wren</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/ash</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/brook</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/cedar</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/dawn</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/fern</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/glen</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/harbor</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/indigo</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/juniper</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/lotus</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/maple</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/nettle</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/opal</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/pine</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/river</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/slate</code></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>make/willow</code></td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Raphael</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Upstream</th>
+                                <th>Image Gen</th>
+                                <th>Img2Img</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>raphael/image</code></td>
+                                <td>raphael-basic</td>
+                                <td>✅</td>
+                                <td>✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="types">
+                <h2>Response Types</h2>
+
+                <h3>ChatCompletion</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>id</code></td>
+                                <td><code>str</code></td>
+                                <td>Completion ID</td>
+                            </tr>
+                            <tr>
+                                <td><code>model</code></td>
+                                <td><code>str</code></td>
+                                <td>Model used</td>
+                            </tr>
+                            <tr>
+                                <td><code>choices</code></td>
+                                <td><code>tuple[Choice, ...]</code></td>
+                                <td>Response choices</td>
+                            </tr>
+                            <tr>
+                                <td><code>usage</code></td>
+                                <td><code>Usage</code></td>
+                                <td>Token usage info</td>
+                            </tr>
+                            <tr>
+                                <td><code>text</code></td>
+                                <td><code>str</code></td>
+                                <td>
+                                    Shortcut for
+                                    <code>choices[0].message.content</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>tool_calls</code></td>
+                                <td><code>tuple[ToolCall, ...]</code></td>
+                                <td>
+                                    Shortcut for
+                                    <code>choices[0].message.tool_calls</code>
+                                    (Kai only)
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>ImageResponse</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>created</code></td>
+                                <td><code>int</code></td>
+                                <td>Unix timestamp</td>
+                            </tr>
+                            <tr>
+                                <td><code>data</code></td>
+                                <td><code>tuple[ImageUrl, ...]</code></td>
+                                <td>Generated images</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>ImageUrl</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>url</code></td>
+                                <td><code>str</code></td>
+                                <td>URL of the generated image</td>
+                            </tr>
+                            <tr>
+                                <td><code>alt</code></td>
+                                <td><code>str</code></td>
+                                <td>Prompt used to generate</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>AudioResponse</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>created</code></td>
+                                <td><code>int</code></td>
+                                <td>Unix timestamp</td>
+                            </tr>
+                            <tr>
+                                <td><code>data</code></td>
+                                <td><code>tuple[AudioData, ...]</code></td>
+                                <td>Generated audio (one item)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>AudioData</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>voice</code></td>
+                                <td><code>str</code></td>
+                                <td>Voice used</td>
+                            </tr>
+                            <tr>
+                                <td><code>model</code></td>
+                                <td><code>str</code></td>
+                                <td>Model name resolved (voice or style)</td>
+                            </tr>
+                            <tr>
+                                <td><code>audio</code></td>
+                                <td><code>bytes</code></td>
+                                <td>Raw audio bytes</td>
+                            </tr>
+                            <tr>
+                                <td><code>mime_type</code></td>
+                                <td><code>str</code></td>
+                                <td>
+                                    MIME type, e.g. <code>audio/mpeg</code>,
+                                    <code>audio/ogg</code>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>AgentStep</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>role</code></td>
+                                <td><code>str</code></td>
+                                <td>Always <code>"assistant"</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>content</code></td>
+                                <td><code>str</code></td>
+                                <td>Final response text</td>
+                            </tr>
+                            <tr>
+                                <td><code>tool</code></td>
+                                <td><code>str</code></td>
+                                <td>Tool name if a tool was called</td>
+                            </tr>
+                            <tr>
+                                <td><code>tool_input</code></td>
+                                <td><code>str</code></td>
+                                <td>Tool input if a tool was called</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Choice</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>index</code></td>
+                                <td><code>int</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>message</code></td>
+                                <td><code>Message</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>finish_reason</code></td>
+                                <td><code>str</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Message</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>role</code></td>
+                                <td><code>str</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>content</code></td>
+                                <td><code>str</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>tool_calls</code></td>
+                                <td><code>tuple[ToolCall, ...]</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>tool_call_id</code></td>
+                                <td><code>str</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>ChatCompletionChunk (streaming)</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>id</code></td>
+                                <td><code>str</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>model</code></td>
+                                <td><code>str</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>choices</code></td>
+                                <td><code>tuple[ChunkChoice, ...]</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>ChunkChoice</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>index</code></td>
+                                <td><code>int</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>delta</code></td>
+                                <td><code>Delta</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>finish_reason</code></td>
+                                <td><code>str</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Delta</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>role</code></td>
+                                <td><code>str</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>content</code></td>
+                                <td><code>str</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>thinking</code></td>
+                                <td><code>str</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>tool_calls</code></td>
+                                <td><code>tuple[ToolCallDelta, ...]</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>ToolCall</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>id</code></td>
+                                <td><code>str</code></td>
+                                <td>
+                                    Tool call ID (e.g.
+                                    <code>call-9a2c1024-...</code>)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>type</code></td>
+                                <td><code>str</code></td>
+                                <td>Always <code>"function"</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>function</code></td>
+                                <td><code>FunctionCall</code></td>
+                                <td>Function name + arguments</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>FunctionCall</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>name</code></td>
+                                <td><code>str</code></td>
+                                <td>Function name</td>
+                            </tr>
+                            <tr>
+                                <td><code>arguments</code></td>
+                                <td><code>str</code></td>
+                                <td>JSON-encoded arguments</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>ToolCallDelta (streaming)</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>index</code></td>
+                                <td><code>int</code></td>
+                                <td>Position in the tool_calls array</td>
+                            </tr>
+                            <tr>
+                                <td><code>id</code></td>
+                                <td><code>str</code></td>
+                                <td>Tool call ID (may arrive incrementally)</td>
+                            </tr>
+                            <tr>
+                                <td><code>type</code></td>
+                                <td><code>str</code></td>
+                                <td>Always <code>"function"</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>function</code></td>
+                                <td><code>FunctionCall</code></td>
+                                <td>
+                                    Name + arguments (accumulated across chunks)
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Usage</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>prompt_tokens</code></td>
+                                <td><code>int</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>completion_tokens</code></td>
+                                <td><code>int</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>total_tokens</code></td>
+                                <td><code>int</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="api-reference">
+                <h2>API Reference</h2>
+
+                <h3>Client</h3>
+                <div class="ref-card">
+                    <code>Client()</code>
+                    <p>Creates a synchronous fishr client.</p>
+                </div>
+
+                <h3>AsyncClient</h3>
+                <div class="ref-card">
+                    <code>AsyncClient()</code>
+                    <p>
+                        Creates an asynchronous fishr client. All
+                        <code>.create()</code> and
+                        <code>.generate()</code> calls must be awaited.
+                    </p>
+                </div>
+
+                <h3>client.chat.completions.create()</h3>
+                <div class="ref-card">
+                    <div class="params">
+                        <div class="param">
+                            <code>model</code> <span class="type">str</span>
+                            <span class="required">required</span>
+                            <p>
+                                Model name in <code>provider/name</code> format,
+                                e.g. <code>"noxus/openai"</code>,
+                                <code>"deepai/standard"</code>,
+                                <code>"quillbot/quillbot"</code>,
+                                <code>"notrack/fast"</code>,
+                                <code>"dphnai/6b"</code>. Noxus prefix is
+                                optional.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>messages</code>
+                            <span class="type">list[dict]</span>
+                            <span class="required">required</span>
+                            <p>
+                                List of
+                                <code>{"role": ..., "content": ...}</code>
+                                dicts. Some providers support
+                                <code>"image"</code> with
+                                <code
+                                    >{"mime_type": ..., "base64_data":
+                                    ...}</code
+                                >
+                                — see <a href="#image-input">Image Input</a>.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>web_search</code>
+                            <span class="type">bool</span>
+                            <span class="default">default: False</span>
+                            <p>Enable web search for supported models.</p>
+                        </div>
+                        <div class="param">
+                            <code>stream</code> <span class="type">bool</span>
+                            <span class="default">default: False</span>
+                            <p>
+                                Return an iterator of
+                                <code>ChatCompletionChunk</code> instead of a
+                                single <code>ChatCompletion</code>.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>think_harder</code>
+                            <span class="type">bool</span>
+                            <span class="default">default: False</span>
+                            <p>
+                                Enable reasoning mode for Eris and Opera Aria
+                                models. When streaming, reasoning tokens appear
+                                in <code>chunk.choices[0].delta.thinking</code>.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>tools</code>
+                            <span class="type">list[dict] | None</span>
+                            <span class="default">default: None</span>
+                            <p>
+                                OpenAI-style tool definitions.
+                                <strong>Kai only</strong> — the only provider
+                                with native tool calling. Other providers
+                                silently ignore this.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>tool_choice</code>
+                            <span class="type">str | dict | None</span>
+                            <span class="default">default: None</span>
+                            <p>
+                                Tool selection strategy: <code>"auto"</code>,
+                                <code>"none"</code>, <code>"required"</code>, or
+                                <code
+                                    >{"type": "function", "function": {"name":
+                                    "..."}}</code
+                                >. <strong>Kai only.</strong>
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>max_tokens</code>
+                            <span class="type">int | None</span>
+                            <span class="default">default: None</span>
+                            <p>
+                                Maximum tokens to generate. Forwarded to Kai and
+                                Telnyx; silently ignored by other providers.
+                                Telnyx defaults to the model's context cap
+                                (kimi=224K, glm-5.2=968K, glm-5.1=168K,
+                                minimax=168K); Kai defaults to 16384.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>temperature</code>
+                            <span class="type">float | None</span>
+                            <span class="default">default: None</span>
+                            <p>
+                                Sampling temperature (0–2).
+                                <strong>Kai only.</strong> Other providers
+                                silently ignore this.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>client.images.generate()</h3>
+                <div class="ref-card">
+                    <div class="params">
+                        <div class="param">
+                            <code>model</code> <span class="type">str</span>
+                            <span class="default">default: "deepai/image"</span>
+                            <p>
+                                Image generation model.
+                                <code>deepai/image</code> uses DeepAI's text2img
+                                API. <code>raphael/image</code> uses raphael.app
+                                (supports text-to-image and image-to-image via
+                                the <code>image</code> parameter).
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>prompt</code> <span class="type">str</span>
+                            <span class="required">required</span>
+                            <p>Text prompt describing the image to generate.</p>
+                        </div>
+                        <div class="param">
+                            <code>number_of_images</code>
+                            <span class="type">int</span>
+                            <span class="default">default: 1</span>
+                            <p>
+                                Number of images to generate.
+                                <strong>Raphael only.</strong> Ignored by
+                                DeepAI.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>aspect</code> <span class="type">str</span>
+                            <span class="default">default: "1:1"</span>
+                            <p>
+                                Aspect ratio. <strong>Raphael only.</strong> One
+                                of <code>1:1</code>, <code>4:3</code>,
+                                <code>3:4</code>, <code>16:9</code>,
+                                <code>9:16</code>, <code>auto</code>.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>resolution</code>
+                            <span class="type">str</span>
+                            <span class="default">default: "0.5k"</span>
+                            <p>
+                                Resolution. <strong>Raphael only.</strong> One
+                                of <code>0.5k</code>, <code>1k</code>,
+                                <code>2k</code>.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>quality</code> <span class="type">str</span>
+                            <span class="default">default: "low"</span>
+                            <p>
+                                Quality. <strong>Raphael only.</strong> One of
+                                <code>low</code>, <code>medium</code>,
+                                <code>high</code>.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>fast_mode</code>
+                            <span class="type">bool</span>
+                            <span class="default">default: False</span>
+                            <p>
+                                Fast generation mode.
+                                <strong>Raphael only.</strong>
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>high_quality</code>
+                            <span class="type">bool</span>
+                            <span class="default">default: False</span>
+                            <p>
+                                Request high-quality output.
+                                <strong>Raphael only.</strong>
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>image</code>
+                            <span class="type">dict | None</span>
+                            <span class="default">default: None</span>
+                            <p>
+                                Reference image for image-to-image (img2img).
+                                <strong>Raphael only.</strong> Dict with
+                                <code>mime_type</code> (<code>image/webp</code>,
+                                <code>image/png</code>, <code>image/jpeg</code>,
+                                <code>image/jpg</code>) and
+                                <code>base64_data</code>.
+                            </p>
+                        </div>
+                    </div>
+                    <p>
+                        Returns an <code>ImageResponse</code> with
+                        <code>data</code> containing
+                        <code>ImageUrl</code> objects (one per generated image).
+                        <code>data[i].url</code> is the image URL,
+                        <code>data[i].alt</code> is the prompt.
+                    </p>
+                </div>
+
+                <h3>client.audio.speech.create()</h3>
+                <div class="ref-card">
+                    <div class="params">
+                        <div class="param">
+                            <code>model</code> <span class="type">str</span>
+                            <span class="default">default: "fm/coral"</span>
+                            <p>
+                                Audio model. <code>fm/*</code> routes to
+                                OpenAI.fm (voice or style).
+                                <code>telnyx-tts/*</code> routes to the Telnyx
+                                no-auth fast-path demo — each model id is a
+                                voice (e.g. <code>telnyx-tts/astra</code>,
+                                <code>telnyx-tts/luna</code>,
+                                <code>telnyx-tts/sol</code>,
+                                <code>telnyx-tts/nova</code>,
+                                <code>telnyx-tts/orion</code>).
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>input</code> <span class="type">str</span>
+                            <span class="required">required</span>
+                            <p>Text to synthesize.</p>
+                        </div>
+                        <div class="param">
+                            <code>voice</code>
+                            <span class="type">str | None</span>
+                            <span class="default">default: None</span>
+                            <p>
+                                Override the voice. For <code>fm/*</code>, falls
+                                back to the voice resolved from
+                                <code>model</code> (or <code>coral</code> for a
+                                style). For <code>telnyx-tts/*</code>, falls
+                                back to the voice embedded in the model id.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>instructions</code>
+                            <span class="type">str | None</span>
+                            <span class="default">default: None</span>
+                            <p>
+                                Steer how the voice speaks (tone, pacing,
+                                emotion). <code>fm/*</code> only — ignored by
+                                <code>telnyx-tts/*</code>. Falls back to the
+                                style's preset instructions when
+                                <code>model</code> is a style.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>format</code>
+                            <span class="type">str | None</span>
+                            <span class="default">default: None</span>
+                            <p>
+                                Output container: <code>mp3</code>,
+                                <code>ogg</code>, <code>wav</code>,
+                                <code>flac</code>, <code>opus</code>,
+                                <code>aac</code>, <code>m4a</code>. If omitted,
+                                the provider's native format is used (MP3 for
+                                <code>fm/*</code> and <code>telnyx-tts/*</code>,
+                                WAV for <code>make/*</code>). Any other format
+                                is transcoded via the bundled
+                                <code>static-ffmpeg</code> binary — no system
+                                ffmpeg needed. Applies to all three TTS
+                                providers.
+                            </p>
+                        </div>
+                    </div>
+                    <p>
+                        Returns an <code>AudioResponse</code> with
+                        <code>data[0].audio</code> containing the raw audio
+                        bytes and <code>data[0].mime_type</code> the MIME type.
+                    </p>
+                </div>
+
+                <h3>client.agents.run()</h3>
+                <div class="ref-card">
+                    <div class="params">
+                        <div class="param">
+                            <code>model</code> <span class="type">str</span>
+                            <span class="default">default: "noxus/openai"</span>
+                            <p>
+                                Model to use for the agent. Supports Noxus and
+                                DeepAI providers.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>instructions</code>
+                            <span class="type">str</span>
+                            <span class="default">default: ""</span>
+                            <p>System instructions for the agent.</p>
+                        </div>
+                        <div class="param">
+                            <code>prompt</code> <span class="type">str</span>
+                            <span class="required">required</span>
+                            <p>The user prompt to start the agent loop.</p>
+                        </div>
+                        <div class="param">
+                            <code>tools</code>
+                            <span class="type">list[dict] | None</span>
+                            <span class="default">default: None</span>
+                            <p>
+                                List of tools the agent can use. Currently
+                                supports <code>{"type": "web_search"}</code>.
+                            </p>
+                        </div>
+                        <div class="param">
+                            <code>max_steps</code> <span class="type">int</span>
+                            <span class="default">default: 5</span>
+                            <p>
+                                Maximum number of agent iterations before
+                                returning.
+                            </p>
+                        </div>
+                    </div>
+                    <p>
+                        Returns an <code>AgentStep</code> with the final
+                        response in <code>content</code>.
+                    </p>
+                </div>
+
+                <h3>client.conversation()</h3>
+                <div class="ref-card">
+                    <div class="params">
+                        <div class="param">
+                            <code>model</code> <span class="type">str</span>
+                            <span class="default">default: "noxus/openai"</span>
+                            <p>
+                                Model to use for the conversation. Works with
+                                all providers — Noxus, DeepAI, Quillbot,
+                                NoTrack, and DphnAI.
+                            </p>
+                        </div>
+                    </div>
+                    <p>
+                        Returns a <code>Conversation</code> (sync) or
+                        <code>AsyncConversation</code> (async) instance.
+                    </p>
+                </div>
+            </section>
+
+            <footer>
+                <p>fishr — Free LLM access from Python</p>
+            </footer>
+        </main>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+        <script src="js/script.js"></script>
+        <script>
+            hljs.highlightAll();
+        </script>
+    </body>
 </html>

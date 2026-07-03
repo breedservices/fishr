@@ -108,6 +108,7 @@ class Client:
         "raphael",
         "openai_fm",
         "telnyx_audio",
+        "music_make",
     )
 
     def __init__(self) -> None:
@@ -124,6 +125,7 @@ class Client:
         self.raphael = Raphael()
         self.openai_fm = OpenAIFM()
         self.telnyx_audio = TelnyxAudio()
+        self.music_make = MusicMake()
         self.chat = Chat(
             self.noxus,
             self.deepai,
@@ -137,7 +139,7 @@ class Client:
             self.kai,
         )
         self.images = Images(self.deepai, self.raphael)
-        self.audio = Audio(self.openai_fm, self.telnyx_audio)
+        self.audio = Audio(self.openai_fm, self.telnyx_audio, self.music_make)
         self.agents = AgentRun(self.noxus, self.deepai)
 
     def conversation(self, model: str = "noxus/openai") -> Conversation:
@@ -213,6 +215,7 @@ class AsyncClient:
         "raphael",
         "openai_fm",
         "telnyx_audio",
+        "music_make",
     )
 
     def __init__(self) -> None:
@@ -229,6 +232,7 @@ class AsyncClient:
         self.raphael = Raphael()
         self.openai_fm = OpenAIFM()
         self.telnyx_audio = TelnyxAudio()
+        self.music_make = MusicMake()
         self.chat = AsyncChat(
             self.noxus,
             self.deepai,
@@ -242,7 +246,7 @@ class AsyncClient:
             self.kai,
         )
         self.images = AsyncImages(self.deepai, self.raphael)
-        self.audio = AsyncAudio(self.openai_fm, self.telnyx_audio)
+        self.audio = AsyncAudio(self.openai_fm, self.telnyx_audio, self.music_make)
         self.agents = AsyncAgentRun(self.noxus, self.deepai)
 
     def conversation(self, model: str = "noxus/openai") -> AsyncConversation:

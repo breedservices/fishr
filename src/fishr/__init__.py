@@ -100,6 +100,11 @@ Models are specified as ``provider/name``:
 The provider prefix is optional for noxus (default).
 """
 
+from fishr.audio.MusicMake import (
+    MusicMake,
+    MusicMakeResponse,
+    MusicMakeStream,
+)
 from fishr.audio.OpenAIFM import OpenAIFM, OpenAIFMResponse, OpenAIFMStream
 from fishr.audio.TelnyxAudio import (
     TelnyxAudio,
@@ -170,6 +175,9 @@ __all__ = [
     "OpenAIFM",
     "OpenAIFMResponse",
     "OpenAIFMStream",
+    "MusicMake",
+    "MusicMakeResponse",
+    "MusicMakeStream",
     "TelnyxAudio",
     "TelnyxAudioResponse",
     "TelnyxAudioStream",

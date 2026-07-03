@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from time import time
 
+from fishr.audio.MusicMake import (
+    MusicMake,
+    MusicMakeResponse,
+)
 from fishr.audio.OpenAIFM import (
     OpenAIFM,
     OpenAIFMResponse,
@@ -18,14 +22,21 @@ def _is_telnyx_tts(Model: str) -> bool:
     return Model.startswith("telnyx-tts/")
 
 
+def _is_musicmake(Model: str) -> bool:
+    return Model.startswith("make/")
+
+
 class Speech:
     """Generate speech via ``client.audio.speech.create(...)``.
 
-    Routes to the OpenAI.fm provider for ``fm/*`` models and to the
-    Telnyx no-auth fast-path demo endpoint for ``telnyx-tts/*`` models.
+    Routes to:
+    - OpenAI.fm for ``fm/*`` models
+    - Telnyx no-auth TTS for ``telnyx-tts/*`` models
+    - MusicMake for ``make/*`` models
 
-    ``format`` is optional. OpenAI.fm only emits MP3, so other formats
-    are produced via the bundled ``static-ffmpeg`` binary.
+    ``format`` is optional. OpenAI.fm emits MP3, Telnyx emits MP3, and
+    MusicMake emits WAV — other formats are produced via the bundled
+    ``static-ffmpeg`` binary.
 
     Usage::
 
@@ -41,11 +52,14 @@ class Speech:
         print(result.data[0].voice)```
     """
 
-    __slots__ = ("OpenAIFm", "Telnyx")
+    __slots__ = ("OpenAIFm", "Telnyx", "MusicMake")
 
-    def __init__(self, OpenAIFm: OpenAIFM, Telnyx: TelnyxAudio) -> None:
+    def __init__(
+        self, OpenAIFm: OpenAIFM, Telnyx: TelnyxAudio, MusicMake: MusicMake
+    ) -> None:
         self.OpenAIFm = OpenAIFm
         self.Telnyx = Telnyx
+        self.MusicMake = MusicMake
 
     def create(
         self,
@@ -65,6 +79,16 @@ class Speech:
             Voice = Res.voice if isinstance(Res, TelnyxAudioResponse) else (voice or "")
             ModelName = Res.model if isinstance(Res, TelnyxAudioResponse) else model
             if format is not None and format != "mp3":
+                Transcoded = Transcode(Audio, format, SourceMime=Mime)
+                if Transcoded is not None:
+                    Audio, Mime = Transcoded
+        elif _is_musicmake(model):
+            Res = self.MusicMake.speak(input, model=model, voice=voice, stream=False)
+            Audio = Res.audio if isinstance(Res, MusicMakeResponse) else b""
+            Mime = Res.mime_type if isinstance(Res, MusicMakeResponse) else "audio/wav"
+            Voice = Res.voice if isinstance(Res, MusicMakeResponse) else (voice or "")
+            ModelName = Res.model if isinstance(Res, MusicMakeResponse) else model
+            if format is not None and format != "wav":
                 Transcoded = Transcode(Audio, format, SourceMime=Mime)
                 if Transcoded is not None:
                     Audio, Mime = Transcoded
@@ -114,11 +138,14 @@ class AsyncSpeech:
         print(result.data[0].voice)```
     """
 
-    __slots__ = ("OpenAIFm", "Telnyx")
+    __slots__ = ("OpenAIFm", "Telnyx", "MusicMake")
 
-    def __init__(self, OpenAIFm: OpenAIFM, Telnyx: TelnyxAudio) -> None:
+    def __init__(
+        self, OpenAIFm: OpenAIFM, Telnyx: TelnyxAudio, MusicMake: MusicMake
+    ) -> None:
         self.OpenAIFm = OpenAIFm
         self.Telnyx = Telnyx
+        self.MusicMake = MusicMake
 
     async def create(
         self,
@@ -146,6 +173,24 @@ class AsyncSpeech:
             Voice = Res.voice if isinstance(Res, TelnyxAudioResponse) else (voice or "")
             ModelName = Res.model if isinstance(Res, TelnyxAudioResponse) else model
             if format is not None and format != "mp3":
+                Transcoded = await asyncio.to_thread(
+                    Transcode, Audio, format, SourceMime=Mime
+                )
+                if Transcoded is not None:
+                    Audio, Mime = Transcoded
+        elif _is_musicmake(model):
+            Res = await asyncio.to_thread(
+                self.MusicMake.speak,
+                input,
+                model=model,
+                voice=voice,
+                stream=False,
+            )
+            Audio = Res.audio if isinstance(Res, MusicMakeResponse) else b""
+            Mime = Res.mime_type if isinstance(Res, MusicMakeResponse) else "audio/wav"
+            Voice = Res.voice if isinstance(Res, MusicMakeResponse) else (voice or "")
+            ModelName = Res.model if isinstance(Res, MusicMakeResponse) else model
+            if format is not None and format != "wav":
                 Transcoded = await asyncio.to_thread(
                     Transcode, Audio, format, SourceMime=Mime
                 )
@@ -201,8 +246,10 @@ class Audio:
 
     __slots__ = ("speech",)
 
-    def __init__(self, OpenAIFm: OpenAIFM, Telnyx: TelnyxAudio) -> None:
-        self.speech = Speech(OpenAIFm, Telnyx)
+    def __init__(
+        self, OpenAIFm: OpenAIFM, Telnyx: TelnyxAudio, MusicMake: MusicMake
+    ) -> None:
+        self.speech = Speech(OpenAIFm, Telnyx, MusicMake)
 
 
 class AsyncAudio:
@@ -210,8 +257,10 @@ class AsyncAudio:
 
     __slots__ = ("speech",)
 
-    def __init__(self, OpenAIFm: OpenAIFM, Telnyx: TelnyxAudio) -> None:
-        self.speech = AsyncSpeech(OpenAIFm, Telnyx)
+    def __init__(
+        self, OpenAIFm: OpenAIFM, Telnyx: TelnyxAudio, MusicMake: MusicMake
+    ) -> None:
+        self.speech = AsyncSpeech(OpenAIFm, Telnyx, MusicMake)
 
 
 __all__ = [
