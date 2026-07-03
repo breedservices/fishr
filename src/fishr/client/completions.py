@@ -3,6 +3,7 @@ from typing import AsyncIterator, Iterator
 from fishr.Base.DeepAI import DeepAI, DeepAIStream
 from fishr.Base.DphnAI import DphnAI, DphnAIStream
 from fishr.Base.Eris import Eris, ErisStream
+from fishr.Base.Kai import Kai, KaiStream
 from fishr.Base.NoTrack import NoTrack, NoTrackStream
 from fishr.Base.Noxus import Image, Noxus, NoxusMessage, NoxusResponse
 from fishr.Base.OperaAria import OperaAria, OperaAriaStream
@@ -14,10 +15,10 @@ from fishr.client.streams import (
     AsyncStream,
     DeepAIAsyncStream,
     DeepAISyncStream,
-    DphnAIAsyncStream,
-    DphnAISyncStream,
     ErisAsyncStream,
     ErisSyncStream,
+    KaiAsyncStream,
+    KaiSyncStream,
     NoTrackAsyncStream,
     NoTrackSyncStream,
     OperaAriaAsyncStream,
@@ -35,7 +36,10 @@ from fishr.Types import (
     ChatCompletionChunk,
     Choice,
     Delta,
+    FunctionCall,
     Message,
+    ToolCall,
+    ToolCallDelta,
 )
 
 _ALLOWED_IMAGE_MIMES = frozenset({"image/webp", "image/png", "image/jpeg", "image/jpg"})
@@ -78,6 +82,10 @@ def _normalize_messages(messages: list[dict]) -> list[dict]:
             new_m: dict = {"role": m["role"], "content": "\n".join(text_parts)}
             if image:
                 new_m["image"] = image
+            if "tool_calls" in m and m["tool_calls"]:
+                new_m["tool_calls"] = m["tool_calls"]
+            if m.get("tool_call_id"):
+                new_m["tool_call_id"] = m["tool_call_id"]
             out.append(new_m)
         else:
             # validate the legacy image dict format — strip unsupported mimes
@@ -104,6 +112,7 @@ class Completions:
         "opera",
         "eris",
         "telnyx",
+        "kai",
     )
 
     def __init__(
@@ -117,6 +126,7 @@ class Completions:
         opera: OperaAria,
         eris: Eris,
         telnyx: Telnyx,
+        kai: Kai,
     ) -> None:
         self.noxus = noxus
         self.deepai = deepai
@@ -127,6 +137,7 @@ class Completions:
         self.opera = opera
         self.eris = eris
         self.telnyx = telnyx
+        self.kai = kai
 
     @staticmethod
     def _build_messages(messages: list[dict]) -> tuple[NoxusMessage, ...]:
@@ -402,6 +413,7 @@ class Completions:
         web_search: bool,
         stream: bool,
         think_harder: bool = False,
+        max_tokens: int | None = None,
     ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
         if stream:
             raw = self.telnyx.chat(
@@ -409,6 +421,7 @@ class Completions:
                 model=resolved,
                 stream=True,
                 enable_thinking=think_harder,
+                max_tokens=max_tokens,
             )
             if isinstance(raw, TelnyxStream):
                 return TelnyxSyncStream(raw, resolved)
@@ -418,6 +431,7 @@ class Completions:
             messages,
             model=resolved,
             enable_thinking=think_harder,
+            max_tokens=max_tokens,
         )
         if isinstance(result, TelnyxStream):
             content = "".join(c for c, _ in result if not isinstance(c, tuple))
@@ -425,6 +439,59 @@ class Completions:
             content = result.content
         msg = Message(role="assistant", content=content)
         choice = Choice(index=0, message=msg)
+        return ChatCompletion(id="", model=resolved, choices=(choice,))
+
+    def _kai_create(
+        self,
+        resolved: str,
+        messages: list[dict],
+        stream: bool,
+        tools: list[dict] | None = None,
+        tool_choice: object = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
+        if stream:
+            raw = self.kai.chat(
+                messages,
+                model=resolved,
+                stream=True,
+                tools=tools,
+                tool_choice=tool_choice,
+                max_tokens=max_tokens or 16384,
+                temperature=0.7 if temperature is None else temperature,
+            )
+            if isinstance(raw, KaiStream):
+                return KaiSyncStream(raw, resolved)
+            return SyncStream(iter([raw.content]), resolved)
+
+        result = self.kai.chat(
+            messages,
+            model=resolved,
+            tools=tools,
+            tool_choice=tool_choice,
+            max_tokens=max_tokens or 16384,
+            temperature=0.7 if temperature is None else temperature,
+        )
+        tool_call_objs = tuple(
+            ToolCall(
+                id=tc.get("id", ""),
+                type=tc.get("type", "function"),
+                function=FunctionCall(
+                    name=tc.get("name", ""),
+                    arguments=tc.get("arguments", ""),
+                ),
+            )
+            for tc in (result.tool_calls or ())
+            if isinstance(tc, dict)
+        )
+        msg = Message(
+            role="assistant",
+            content=result.content,
+            tool_calls=tool_call_objs,
+        )
+        finish = result.finish_reason or ("tool_calls" if tool_call_objs else "stop")
+        choice = Choice(index=0, message=msg, finish_reason=finish)
         return ChatCompletion(id="", model=resolved, choices=(choice,))
 
     def create(
@@ -435,6 +502,10 @@ class Completions:
         web_search: bool = False,
         stream: bool = False,
         think_harder: bool = False,
+        tools: list[dict] | None = None,
+        tool_choice: object = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
     ) -> ChatCompletion | Iterator[ChatCompletionChunk]:
         resolved = resolve_model(model)
         messages = _normalize_messages(messages)
@@ -460,7 +531,22 @@ class Completions:
             )
         if provider == "telnyx":
             return self._telnyx_create(
-                resolved, messages, web_search, stream, think_harder=think_harder
+                resolved,
+                messages,
+                web_search,
+                stream,
+                think_harder=think_harder,
+                max_tokens=max_tokens,
+            )
+        if provider == "kai":
+            return self._kai_create(
+                resolved,
+                messages,
+                stream,
+                tools=tools,
+                tool_choice=tool_choice,
+                max_tokens=max_tokens,
+                temperature=temperature,
             )
 
         return self._noxus_create(resolved, messages, web_search, stream)
@@ -479,6 +565,7 @@ class AsyncCompletions:
         "opera",
         "eris",
         "telnyx",
+        "kai",
     )
 
     def __init__(
@@ -492,6 +579,7 @@ class AsyncCompletions:
         opera: OperaAria,
         eris: Eris,
         telnyx: Telnyx,
+        kai: Kai,
     ) -> None:
         self.noxus = noxus
         self.deepai = deepai
@@ -502,6 +590,7 @@ class AsyncCompletions:
         self.opera = opera
         self.eris = eris
         self.telnyx = telnyx
+        self.kai = kai
 
     async def _noxus_create(
         self,
@@ -797,6 +886,7 @@ class AsyncCompletions:
         web_search: bool,
         stream: bool,
         think_harder: bool = False,
+        max_tokens: int | None = None,
     ) -> ChatCompletion | AsyncIterator[ChatCompletionChunk]:
         from fishr.Loop import asyncio
 
@@ -807,6 +897,7 @@ class AsyncCompletions:
                 model=resolved,
                 stream=True,
                 enable_thinking=think_harder,
+                max_tokens=max_tokens,
             )
             if isinstance(raw, TelnyxStream):
                 return TelnyxAsyncStream(raw, resolved)
@@ -817,6 +908,7 @@ class AsyncCompletions:
             messages,
             model=resolved,
             enable_thinking=think_harder,
+            max_tokens=max_tokens,
         )
         if isinstance(result, TelnyxStream):
             content = "".join(c for c, _ in result if not isinstance(c, tuple))
@@ -824,6 +916,63 @@ class AsyncCompletions:
             content = result.content
         msg = Message(role="assistant", content=content)
         choice = Choice(index=0, message=msg)
+        return ChatCompletion(id="", model=resolved, choices=(choice,))
+
+    async def _kai_create(
+        self,
+        resolved: str,
+        messages: list[dict],
+        stream: bool,
+        tools: list[dict] | None = None,
+        tool_choice: object = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> ChatCompletion | AsyncIterator[ChatCompletionChunk]:
+        from fishr.Loop import asyncio
+
+        if stream:
+            raw = await asyncio.to_thread(
+                self.kai.chat,
+                messages,
+                model=resolved,
+                stream=True,
+                tools=tools,
+                tool_choice=tool_choice,
+                max_tokens=max_tokens or 16384,
+                temperature=0.7 if temperature is None else temperature,
+            )
+            if isinstance(raw, KaiStream):
+                return KaiAsyncStream(raw, resolved)
+            return AsyncStream(iter([raw.content]), resolved)
+
+        result = await asyncio.to_thread(
+            self.kai.chat,
+            messages,
+            model=resolved,
+            tools=tools,
+            tool_choice=tool_choice,
+            max_tokens=max_tokens or 16384,
+            temperature=0.7 if temperature is None else temperature,
+        )
+        tool_call_objs = tuple(
+            ToolCall(
+                id=tc.get("id", ""),
+                type=tc.get("type", "function"),
+                function=FunctionCall(
+                    name=tc.get("name", ""),
+                    arguments=tc.get("arguments", ""),
+                ),
+            )
+            for tc in (result.tool_calls or ())
+            if isinstance(tc, dict)
+        )
+        msg = Message(
+            role="assistant",
+            content=result.content,
+            tool_calls=tool_call_objs,
+        )
+        finish = result.finish_reason or ("tool_calls" if tool_call_objs else "stop")
+        choice = Choice(index=0, message=msg, finish_reason=finish)
         return ChatCompletion(id="", model=resolved, choices=(choice,))
 
     async def create(
@@ -834,6 +983,10 @@ class AsyncCompletions:
         web_search: bool = False,
         stream: bool = False,
         think_harder: bool = False,
+        tools: list[dict] | None = None,
+        tool_choice: object = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
     ) -> ChatCompletion | AsyncIterator[ChatCompletionChunk]:
         resolved = resolve_model(model)
         messages = _normalize_messages(messages)
@@ -859,7 +1012,22 @@ class AsyncCompletions:
             )
         if provider == "telnyx":
             return await self._telnyx_create(
-                resolved, messages, web_search, stream, think_harder=think_harder
+                resolved,
+                messages,
+                web_search,
+                stream,
+                think_harder=think_harder,
+                max_tokens=max_tokens,
+            )
+        if provider == "kai":
+            return await self._kai_create(
+                resolved,
+                messages,
+                stream,
+                tools=tools,
+                tool_choice=tool_choice,
+                max_tokens=max_tokens,
+                temperature=temperature,
             )
 
         return await self._noxus_create(resolved, messages, web_search, stream)
@@ -879,9 +1047,10 @@ class Chat:
         opera: OperaAria,
         eris: Eris,
         telnyx: Telnyx,
+        kai: Kai,
     ) -> None:
         self.completions = Completions(
-            noxus, deepai, quillbot, notrack, dphnai, yqcloud, opera, eris, telnyx
+            noxus, deepai, quillbot, notrack, dphnai, yqcloud, opera, eris, telnyx, kai
         )
 
 
@@ -899,9 +1068,10 @@ class AsyncChat:
         opera: OperaAria,
         eris: Eris,
         telnyx: Telnyx,
+        kai: Kai,
     ) -> None:
         self.completions = AsyncCompletions(
-            noxus, deepai, quillbot, notrack, dphnai, yqcloud, opera, eris, telnyx
+            noxus, deepai, quillbot, notrack, dphnai, yqcloud, opera, eris, telnyx, kai
         )
 
 

@@ -1,9 +1,11 @@
+from fishr.audio.MusicMake import MusicMake
 from fishr.audio.OpenAIFM import OpenAIFM
 from fishr.audio.TelnyxAudio import TelnyxAudio
 from fishr.Base.Conversation import AsyncConversation, Conversation
 from fishr.Base.DeepAI import DeepAI
 from fishr.Base.DphnAI import DphnAI
 from fishr.Base.Eris import Eris
+from fishr.Base.Kai import Kai
 from fishr.Base.NoTrack import NoTrack
 from fishr.Base.Noxus import Noxus
 from fishr.Base.OperaAria import OperaAria
@@ -27,6 +29,8 @@ from fishr.client.streams import (
     DeepAISyncStream,
     ErisAsyncStream,
     ErisSyncStream,
+    KaiAsyncStream,
+    KaiSyncStream,
     NoTrackAsyncStream,
     NoTrackSyncStream,
     OperaAriaAsyncStream,
@@ -100,6 +104,7 @@ class Client:
         "opera",
         "eris",
         "telnyx",
+        "kai",
         "raphael",
         "openai_fm",
         "telnyx_audio",
@@ -115,6 +120,7 @@ class Client:
         self.opera = OperaAria()
         self.eris = Eris()
         self.telnyx = Telnyx()
+        self.kai = Kai()
         self.raphael = Raphael()
         self.openai_fm = OpenAIFM()
         self.telnyx_audio = TelnyxAudio()
@@ -128,6 +134,7 @@ class Client:
             self.opera,
             self.eris,
             self.telnyx,
+            self.kai,
         )
         self.images = Images(self.deepai, self.raphael)
         self.audio = Audio(self.openai_fm, self.telnyx_audio)
@@ -151,6 +158,8 @@ class Client:
             return Conversation(self.eris, model=model)
         if provider == "telnyx":
             return Conversation(self.telnyx, model=model)
+        if provider == "kai":
+            return Conversation(self.kai, model=model)
         return Conversation(self.noxus, model=model)
 
     def __repr__(self) -> str:
@@ -200,6 +209,7 @@ class AsyncClient:
         "opera",
         "eris",
         "telnyx",
+        "kai",
         "raphael",
         "openai_fm",
         "telnyx_audio",
@@ -215,6 +225,7 @@ class AsyncClient:
         self.opera = OperaAria()
         self.eris = Eris()
         self.telnyx = Telnyx()
+        self.kai = Kai()
         self.raphael = Raphael()
         self.openai_fm = OpenAIFM()
         self.telnyx_audio = TelnyxAudio()
@@ -228,6 +239,7 @@ class AsyncClient:
             self.opera,
             self.eris,
             self.telnyx,
+            self.kai,
         )
         self.images = AsyncImages(self.deepai, self.raphael)
         self.audio = AsyncAudio(self.openai_fm, self.telnyx_audio)
@@ -251,6 +263,8 @@ class AsyncClient:
             return AsyncConversation(self.eris, model=model)
         if provider == "telnyx":
             return AsyncConversation(self.telnyx, model=model)
+        if provider == "kai":
+            return AsyncConversation(self.kai, model=model)
         return AsyncConversation(self.noxus, model=model)
 
     def __repr__(self) -> str:
@@ -287,6 +301,8 @@ __all__ = [
     "ErisAsyncStream",
     "TelnyxSyncStream",
     "TelnyxAsyncStream",
+    "KaiSyncStream",
+    "KaiAsyncStream",
     "resolve_model",
     "provider_of",
 ]

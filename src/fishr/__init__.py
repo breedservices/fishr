@@ -110,6 +110,7 @@ from fishr.Base.Conversation import AsyncConversation, Conversation
 from fishr.Base.DeepAI import DeepAI, DeepAIResponse, DeepAIStream
 from fishr.Base.DphnAI import DphnAI, DphnAIResponse, DphnAIStream
 from fishr.Base.Eris import Eris, ErisResponse, ErisStream
+from fishr.Base.Kai import Kai, KaiResponse, KaiStream
 from fishr.Base.NoTrack import NoTrack, NoTrackResponse, NoTrackStream
 from fishr.Base.Noxus import Noxus, NoxusMessage, NoxusResponse
 from fishr.Base.OperaAria import OperaAria, OperaAriaResponse, OperaAriaStream
@@ -138,10 +139,13 @@ from fishr.Types import (
     Choice,
     ChunkChoice,
     Delta,
+    FunctionCall,
     ImageResponse,
     ImageUrl,
     Message,
     ModelDef,
+    ToolCall,
+    ToolCallDelta,
     Usage,
     models,
 )
@@ -190,6 +194,9 @@ __all__ = [
     "Eris",
     "ErisResponse",
     "ErisStream",
+    "Kai",
+    "KaiResponse",
+    "KaiStream",
     "Raphael",
     "RaphaelResponse",
     "Telnyx",
@@ -202,6 +209,9 @@ __all__ = [
     "Delta",
     "Message",
     "ModelDef",
+    "FunctionCall",
+    "ToolCall",
+    "ToolCallDelta",
     "Usage",
     "ImageUrl",
     "ImageResponse",

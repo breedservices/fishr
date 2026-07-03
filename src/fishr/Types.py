@@ -7,11 +7,32 @@ class ModelDef(Struct, frozen=True):
     file_attach: bool = False
     history: bool = True
     system: bool = True
+    tools: bool = False
+
+
+class FunctionCall(Struct, frozen=True):
+    name: str = ""
+    arguments: str = ""
+
+
+class ToolCall(Struct, frozen=True):
+    id: str
+    type: str = "function"
+    function: FunctionCall = FunctionCall()
+
+
+class ToolCallDelta(Struct, frozen=True):
+    index: int = 0
+    id: str = ""
+    type: str = "function"
+    function: FunctionCall = FunctionCall()
 
 
 class Message(Struct, frozen=True):
     role: str
     content: str
+    tool_calls: tuple[ToolCall, ...] = ()
+    tool_call_id: str = ""
 
 
 class Choice(Struct, frozen=True):
@@ -39,11 +60,19 @@ class ChatCompletion(Struct, frozen=True):
             return self.choices[0].message.content
         return ""
 
+    @property
+    def tool_calls(self) -> tuple[ToolCall, ...]:
+        """Shortcut for ``choices[0].message.tool_calls``."""
+        if self.choices:
+            return self.choices[0].message.tool_calls
+        return ()
+
 
 class Delta(Struct, frozen=True):
     role: str = ""
     content: str = ""
     thinking: str = ""
+    tool_calls: tuple[ToolCallDelta, ...] = ()
 
 
 class ChunkChoice(Struct, frozen=True):
@@ -232,6 +261,37 @@ models = {
     "raphael/image": ModelDef(
         web_search=False, image=True, file_attach=False, history=False, system=False
     ),
+    # kai (gateway — OpenAI-compatible, native tool calling)
+    "kai/auto": ModelDef(
+        web_search=False, image=False, history=True, system=True, tools=True
+    ),
+    "kai/m.1": ModelDef(
+        web_search=False, image=False, history=True, system=True, tools=True
+    ),
+    "kai/xs-2.1": ModelDef(
+        web_search=False, image=False, history=True, system=True, tools=True
+    ),
+    "kai/xs.2": ModelDef(
+        web_search=False, image=False, history=True, system=True, tools=True
+    ),
+    "kai/north-mini": ModelDef(
+        web_search=False, image=False, history=True, system=True, tools=True
+    ),
+    "kai/nemo3-ultra": ModelDef(
+        web_search=False, image=False, history=True, system=True, tools=True
+    ),
+    "kai/nemo3-super": ModelDef(
+        web_search=False, image=False, history=True, system=True, tools=True
+    ),
+    "kai/nemo3-nemo": ModelDef(
+        web_search=False, image=True, history=True, system=True, tools=True
+    ),
+    "kai/3.7-flash": ModelDef(
+        web_search=False, image=True, history=True, system=True, tools=True
+    ),
+    "kai/openfree": ModelDef(
+        web_search=False, image=True, history=True, system=True, tools=True
+    ),
 }
 
 __all__ = [
@@ -247,6 +307,9 @@ __all__ = [
     "ImageResponse",
     "AudioData",
     "AudioResponse",
+    "FunctionCall",
+    "ToolCall",
+    "ToolCallDelta",
     "noxus_bot_ids",
     "models",
 ]

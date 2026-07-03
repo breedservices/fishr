@@ -18,6 +18,18 @@ TELNYX_MODELS = {
 }
 DEFAULT_MODEL = "telnyx/glm-5.1"
 
+# Default max_tokens per model (based on upstream context limits):
+#   kimi-k2.6   -> 224k
+#   glm-5.2     -> 968k
+#   glm-5.1     -> 168k
+#   minimax-m3  -> 168k
+TELNYX_MAX_TOKENS = {
+    "telnyx/kimi-k2.6": 224000,
+    "telnyx/glm-5.2": 968000,
+    "telnyx/glm-5.1": 168000,
+    "telnyx/minimax-m3": 168000,
+}
+
 HEADERS = {
     "accept": "text/event-stream",
     "content-type": "application/json",
@@ -47,7 +59,7 @@ def _parse_chunk(obj: dict) -> tuple[str, str, bool]:
         Delta = Choice.get("delta") or {}
         if isinstance(Delta, dict):
             Content = Delta.get("content") or ""
-            Thinking = Delta.get("reasoning_content") or ""
+            Thinking = Delta.get("reasoning_content") or Delta.get("reasoning") or ""
     return Content, Thinking, Done
 
 
@@ -136,13 +148,15 @@ class Telnyx:
         Model: str,
         Stream: bool,
         EnableThinking: bool = False,
+        MaxTokens: int | None = None,
     ) -> bytes:
         ApiModel = TELNYX_MODELS.get(Model, TELNYX_MODELS[DEFAULT_MODEL])
+        Cap = TELNYX_MAX_TOKENS.get(Model, 16384)
         Payload = {
             "model": ApiModel,
             "messages": Messages,
             "temperature": 0.7,
-            "max_tokens": 16384,
+            "max_tokens": MaxTokens if MaxTokens is not None else Cap,
             "stream": Stream,
             "stream_options": {"include_usage": True},
             "enable_thinking": EnableThinking,
@@ -156,6 +170,7 @@ class Telnyx:
         model: str = DEFAULT_MODEL,
         stream: bool = False,
         enable_thinking: bool = False,
+        max_tokens: int | None = None,
     ) -> TelnyxResponse | TelnyxStream:
         Messages = [{"role": "user", "content": prompt}]
         return self.chat(
@@ -163,6 +178,7 @@ class Telnyx:
             model=model,
             stream=stream,
             enable_thinking=enable_thinking,
+            max_tokens=max_tokens,
         )
 
     async def ask_async(
@@ -172,6 +188,7 @@ class Telnyx:
         model: str = DEFAULT_MODEL,
         stream: bool = False,
         enable_thinking: bool = False,
+        max_tokens: int | None = None,
     ) -> TelnyxResponse | TelnyxStream:
         return await asyncio.to_thread(
             self.ask,
@@ -179,6 +196,7 @@ class Telnyx:
             model=model,
             stream=stream,
             enable_thinking=enable_thinking,
+            max_tokens=max_tokens,
         )
 
     def chat(
@@ -188,9 +206,12 @@ class Telnyx:
         model: str = DEFAULT_MODEL,
         stream: bool = False,
         enable_thinking: bool = False,
+        max_tokens: int | None = None,
     ) -> TelnyxResponse | TelnyxStream:
         Resolved = resolve_model(model)
-        Body = self._build_payload(messages, Resolved, stream, enable_thinking)
+        Body = self._build_payload(
+            messages, Resolved, stream, enable_thinking, max_tokens
+        )
 
         if stream:
             Resp = self.StreamClient.post(
@@ -238,6 +259,7 @@ class Telnyx:
         model: str = DEFAULT_MODEL,
         stream: bool = False,
         enable_thinking: bool = False,
+        max_tokens: int | None = None,
     ) -> TelnyxResponse | TelnyxStream:
         return await asyncio.to_thread(
             self.chat,
@@ -245,6 +267,7 @@ class Telnyx:
             model=model,
             stream=stream,
             enable_thinking=enable_thinking,
+            max_tokens=max_tokens,
         )
 
     def __enter__(self):

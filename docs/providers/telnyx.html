@@ -20,6 +20,7 @@
         <li><a href="#streaming">Streaming</a></li>
         <li><a href="#think-harder">Think Harder</a></li>
         <li><a href="#system-messages">System Messages</a></li>
+        <li><a href="#max-tokens">Max Tokens</a></li>
         <li><a href="#history">Conversation History</a></li>
         <li><a href="#direct-usage">Direct Usage</a></li>
         <li><a href="#async">Async</a></li>
@@ -62,10 +63,10 @@ print(response.text)</code></pre>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>telnyx/glm-5.2</code></td><td>1M</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>telnyx/glm-5.1</code></td><td>202K</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>telnyx/kimi-k2.6</code></td><td>256K</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>telnyx/minimax-m3</code></td><td>1M</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>telnyx/glm-5.2</code></td><td>968K</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>telnyx/glm-5.1</code></td><td>168K</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>telnyx/kimi-k2.6</code></td><td>224K</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>telnyx/minimax-m3</code></td><td>168K</td><td>✅</td><td>✅</td><td>✅</td></tr>
                 </tbody>
             </table>
         </div>
@@ -155,6 +156,32 @@ response = client.chat.completions.create(
     ],
 )
 print(response.text)</code></pre>
+        </div>
+    </section>
+
+    <section id="max-tokens">
+        <h2>Max Tokens</h2>
+        <p>Telnyx supports <code>max_tokens</code> via <code>create()</code>. If omitted, it defaults to the model's context cap:</p>
+        <ul style="margin: 10px 0; padding-left: 1.4em; color: var(--text2); font-size: 14px; line-height: 1.9;">
+            <li><code>telnyx/glm-5.2</code> — 968,000</li>
+            <li><code>telnyx/glm-5.1</code> — 168,000</li>
+            <li><code>telnyx/kimi-k2.6</code> — 224,000</li>
+            <li><code>telnyx/minimax-m3</code> — 168,000</li>
+        </ul>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# Cap output at 100 tokens
+response = client.chat.completions.create(
+    model="telnyx/glm-5.2",
+    messages=[{"role": "user", "content": "Tell me a long story."}],
+    max_tokens=100,
+)
+print(response.choices[0].finish_reason)  # "length" if truncated</code></pre>
         </div>
     </section>
 

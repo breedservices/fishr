@@ -1,3 +1,14 @@
+from fishr.audio.MusicMake import (
+    DefaultVoice as MusicMakeDefaultVoice,
+)
+from fishr.audio.MusicMake import (
+    MusicMake,
+    MusicMakeResponse,
+    MusicMakeStream,
+)
+from fishr.audio.MusicMake import (
+    Voices as MusicMakeVoices,
+)
 from fishr.audio.OpenAIFM import (
     DefaultVoice,
     OpenAIFM,

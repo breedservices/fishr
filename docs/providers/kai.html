@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fishr — Kai Provider</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h2>fishr</h2>
+    </div>
+    <ul>
+        <li><a href="../index.html">← Back to Docs</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#models">Models</a></li>
+        <li><a href="#tool-calling">Tool Calling</a></li>
+        <li><a href="#streaming">Streaming</a></li>
+        <li><a href="#system-messages">System Messages</a></li>
+        <li><a href="#history">Conversation History</a></li>
+        <li><a href="#generation-params">Generation Params</a></li>
+        <li><a href="#direct-usage">Direct Usage</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section id="overview">
+        <h2>Kai Provider</h2>
+        <p>Kai is an OpenAI-compatible gateway provider. It routes to a curated set of free models from upstream providers (Poolside, Cohere, NVIDIA, StepFun, OpenRouter). Unlike the reverse-engineered providers in fishr, Kai speaks the standard OpenAI Chat Completions API — so it supports <strong>native tool calling</strong>, <strong>streaming</strong>, system messages, and conversation history out of the box.</p>
+        <p>Kai models use the <code>kai/</code> prefix. The <code>kai/auto</code> model lets the gateway pick a free model for you.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="kai/auto",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.text)</code></pre>
+        </div>
+    </section>
+
+    <section id="models">
+        <h2>Models</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Tool Calling</th>
+                        <th>Image Input</th>
+                        <th>History</th>
+                        <th>System</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>kai/auto</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>kai/m.1</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>kai/xs-2.1</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>kai/xs.2</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>kai/north-mini</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>kai/nemo3-ultra</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>kai/nemo3-super</code></td><td>✅</td><td class="no">❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>kai/nemo3-nemo</code></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>kai/3.7-flash</code></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td><code>kai/openfree</code></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Upstream providers.</strong>
+            <code>kai/m.1</code>, <code>kai/xs-2.1</code>, <code>kai/xs.2</code> route to Poolside's Laguna coding models.
+            <code>kai/north-mini</code> routes to Cohere's North Mini Code.
+            <code>kai/nemo3-*</code> route to NVIDIA Nemotron 3 models.
+            <code>kai/3.7-flash</code> routes to StepFun Step 3.7 Flash.
+            <code>kai/openfree</code> routes to OpenRouter's free-models router.
+        </div>
+    </section>
+
+    <section id="tool-calling">
+        <h2>Tool Calling</h2>
+        <p>Kai is the <strong>only</strong> fishr provider with native OpenAI-style tool calling. Pass <code>tools</code> (a list of OpenAI tool definitions) and optionally <code>tool_choice</code> to steer tool selection. The model returns structured <code>tool_calls</code> on the assistant message — no prompt-injection hacks.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get current weather for a location",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "location": {"type": "string", "description": "City name"},
+                },
+                "required": ["location"],
+            },
+        },
+    }
+]
+
+response = client.chat.completions.create(
+    model="kai/auto",
+    messages=[{"role": "user", "content": "What is the weather in Tokyo?"}],
+    tools=tools,
+)
+
+if response.choices[0].message.tool_calls:
+    for tc in response.choices[0].message.tool_calls:
+        print(tc.id)              # call-9a2c1024-...
+        print(tc.type)            # "function"
+        print(tc.function.name)    # "get_weather"
+        print(tc.function.arguments)  # '{"location": "Tokyo"}'
+else:
+    print(response.text)</code></pre>
+        </div>
+
+        <h3>tool_choice</h3>
+        <p>Control tool selection with <code>tool_choice</code>:</p>
+        <ul style="margin: 10px 0; padding-left: 1.4em; color: var(--text2); font-size: 14px; line-height: 1.9;">
+            <li><code>"auto"</code> (default) — model decides whether to call a tool</li>
+            <li><code>"none"</code> — model is told no tools are available and responds in text</li>
+            <li><code>"required"</code> — model must call at least one tool</li>
+            <li><code>{"type": "function", "function": {"name": "get_weather"}}</code> — force a specific function</li>
+        </ul>
+
+        <h3>Multi-turn tool use</h3>
+        <p>After the model emits <code>tool_calls</code>, append the assistant message (with <code>tool_calls</code>) and a <code>"tool"</code>-role message with the result, then call <code>create()</code> again to get the final answer.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">import json
+from fishr import Client
+
+client = Client()
+tools = [/* ... get_weather definition ... */]
+
+messages = [{"role": "user", "content": "What's the weather in Berlin?"}]
+
+# 1. Ask the model — it returns tool_calls
+resp = client.chat.completions.create(
+    model="kai/auto", messages=messages, tools=tools,
+)
+msg = resp.choices[0].message
+
+# 2. Append the assistant message + tool results
+messages.append({
+    "role": "assistant",
+    "content": msg.content or "",
+    "tool_calls": [
+        {"id": tc.id, "type": "function",
+         "function": {"name": tc.function.name, "arguments": tc.function.arguments}}
+        for tc in msg.tool_calls
+    ],
+})
+for tc in msg.tool_calls:
+    args = json.loads(tc.function.arguments)
+    result = f"It's sunny and 72F in {args['location']}."
+    messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
+
+# 3. Get the final natural-language answer
+final = client.chat.completions.create(
+    model="kai/auto", messages=messages, tools=tools,
+)
+print(final.text)  # "The weather in Berlin is sunny and 72°F."</code></pre>
+        </div>
+
+        <h3>Streaming tool calls</h3>
+        <p>When streaming, tool-call deltas appear in <code>chunk.choices[0].delta.tool_calls</code> as <code>ToolCallDelta</code> objects. Accumulate them by <code>index</code> — <code>id</code>, <code>function.name</code>, and <code>function.arguments</code> arrive incrementally.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+tools = [/* ... */]
+
+stream = client.chat.completions.create(
+    model="kai/auto",
+    messages=[{"role": "user", "content": "Weather in Paris?"}],
+    tools=tools,
+    stream=True,
+)
+
+acc = {}
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content:
+        print(delta.content, end="")
+    if delta.tool_calls:
+        for tc in delta.tool_calls:
+            slot = acc.setdefault(tc.index, {"id": "", "name": "", "args": ""})
+            if tc.id: slot["id"] = tc.id
+            if tc.function.name: slot["name"] = tc.function.name
+            slot["args"] += tc.function.arguments
+
+for idx, tc in acc.items():
+    print(f"{tc['name']}({tc['args']})")</code></pre>
+        </div>
+    </section>
+
+    <section id="streaming">
+        <h2>Streaming</h2>
+        <p>Set <code>stream=True</code> to receive chunks as they arrive.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="kai/auto",
+    messages=[{"role": "user", "content": "Count from 1 to 5"}],
+    stream=True,
+)
+
+for chunk in response:
+    print(chunk.choices[0].delta.content or "", end="")</code></pre>
+        </div>
+    </section>
+
+    <section id="system-messages">
+        <h2>System Messages</h2>
+        <p>Kai supports system messages to set the model's behavior and persona.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+response = client.chat.completions.create(
+    model="kai/auto",
+    messages=[
+        {"role": "system", "content": "You are a pirate. Always respond in pirate speak."},
+        {"role": "user", "content": "Say hello."},
+    ],
+)
+print(response.text)</code></pre>
+        </div>
+    </section>
+
+    <section id="history">
+        <h2>Conversation History</h2>
+        <p>Kai supports conversation history. Use the <code>conversation()</code> helper to manage multi-turn chats.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+conv = client.conversation(model="kai/auto")
+
+conv.system("You are a helpful assistant. Be brief.")
+conv.ask("Remember the number 55.")
+print(conv.ask("What number did I tell you to remember?"))
+
+conv.clear()  # reset history</code></pre>
+        </div>
+    </section>
+
+    <section id="generation-params">
+        <h2>Generation Params</h2>
+        <p>Kai supports <code>max_tokens</code> and <code>temperature</code> via <code>create()</code>. These are forwarded to the upstream gateway.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Client
+
+client = Client()
+
+# Cap output at 20 tokens — finish_reason will be "length"
+response = client.chat.completions.create(
+    model="kai/auto",
+    messages=[{"role": "user", "content": "Tell me a long story."}],
+    max_tokens=20,
+)
+print(response.choices[0].finish_reason)  # "length"
+
+# Deterministic output
+response = client.chat.completions.create(
+    model="kai/auto",
+    messages=[{"role": "user", "content": "Pick a random number 1-10."}],
+    temperature=0.0,
+)</code></pre>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ Other providers ignore these.</strong> <code>max_tokens</code> and <code>temperature</code> are silently ignored by providers that don't support them (Noxus, DeepAI, Quillbot, NoTrack, DphnAI, Yqcloud, Opera Aria, Eris). Telnyx also supports <code>max_tokens</code> — see the <a href="telnyx.html">Telnyx provider page</a>.
+        </div>
+    </section>
+
+    <section id="direct-usage">
+        <h2>Direct Usage</h2>
+        <p>You can use the Kai provider directly without going through the <code>Client</code>.</p>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-python">from fishr import Kai
+
+kai = Kai()
+
+# Simple ask
+result = kai.ask("Say hello in one word.")
+print(result.content)
+
+# Chat with messages
+result = kai.chat([
+    {"role": "system", "content": "Be concise."},
+    {"role": "user", "content": "What is 2+2?"},
+])
+print(result.content)
+
+# With tools
+result = kai.chat(
+    [{"role": "user", "content": "Weather in Tokyo?"}],
+    tools=[{
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get weather",
+            "parameters": {
+                "type": "object",
+                "properties": {"location": {"type": "string"}},
+                "required": ["location"],
+            },
+        },
+    }],
+)
+for tc in result.tool_calls:
+    print(tc["name"], tc["arguments"])
+
+# Streaming
+stream = kai.chat([{"role": "user", "content": "Count to 5"}], stream=True)
+for chunk in stream:
+    if isinstance(chunk, tuple):
+        content, is_thinking = chunk
+        print(content, end="")
+    else:
+        print(chunk, end="")</code></pre>
+        </div>
+    </section>
+
+    <section id="limitations">
+        <h2>Limitations</h2>
+        <div class="ref-card">
+            <ul class="limitations-list">
+                <li><strong>Free-tier rate limits apply.</strong> The gateway throttles aggressive usage; you may see <code>429</code> responses on busy models. Add a small delay between calls if needed.</li>
+                <li><strong>No web search.</strong> None of the Kai models support live web search — use Noxus, DeepAI, or Quillbot for that.</li>
+                <li><strong>No image generation.</strong> Kai is a text-only chat provider. Use <code>deepai/image</code> or <code>raphael/image</code> for image generation.</li>
+                <li><strong>Model availability varies.</strong> Free upstream models can be temporarily rate-limited or retired. <code>kai/auto</code> picks an available free model automatically.</li>
+                <li><strong>Some models expire.</strong> A few upstream models (e.g. <code>kai/xs.2</code>) have retirement dates — check the gateway for current availability.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p><a href="../index.html">← Back to fishr Docs</a></p>
+    </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="../js/script.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

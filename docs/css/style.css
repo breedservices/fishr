@@ -466,6 +466,12 @@ td.no {
     border: 1px solid #f9731625;
 }
 
+.tag-red {
+    background: #ef444412;
+    color: #ef4444;
+    border: 1px solid #ef444425;
+}
+
 /* ── api reference cards ─────────────────────────── */
 
 .ref-card {

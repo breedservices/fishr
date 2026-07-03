@@ -54,6 +54,27 @@ result = client.agents.run(
 )
 print(result.content)
 
+# Tool calling (kai/* models support native OpenAI-style tools)
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "description": "Get weather for a location",
+        "parameters": {
+            "type": "object",
+            "properties": {"location": {"type": "string"}},
+            "required": ["location"],
+        },
+    },
+}]
+resp = client.chat.completions.create(
+    model="kai/auto",
+    messages=[{"role": "user", "content": "What is the weather in Tokyo?"}],
+    tools=tools,
+)
+for tc in resp.choices[0].message.tool_calls:
+    print(tc.function.name, tc.function.arguments)
+
 # Multi-turn conversation
 conv = client.conversation(model="noxus/openai")
 conv.system("You are a helpful assistant.")
@@ -117,6 +138,7 @@ Models are specified as `provider/name`:
 | **DphnAI** | `dphnai/24b`, `dphnai/6b` | History, system messages |
 | **Yqcloud** | `yqcloud/gpt-4` | History, system messages |
 | **Opera Aria** | `opera/aria` | Images, history, system messages |
+| **Kai** | `kai/auto`, `kai/m.1`, `kai/xs-2.1`, `kai/xs.2`, `kai/north-mini`, `kai/nemo3-ultra`, `kai/nemo3-super`, `kai/nemo3-nemo`, `kai/3.7-flash`, `kai/openfree` | **Tool calling**, history, system messages (some support images) |
 
 The provider prefix is optional for Noxus (default).
 

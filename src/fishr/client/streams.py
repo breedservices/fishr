@@ -3,6 +3,7 @@ from typing import AsyncIterator, Iterator
 from fishr.Base.DeepAI import DeepAIStream
 from fishr.Base.DphnAI import DphnAIStream
 from fishr.Base.Eris import ErisStream
+from fishr.Base.Kai import KaiStream
 from fishr.Base.NoTrack import NoTrackStream
 from fishr.Base.OperaAria import OperaAriaStream
 from fishr.Base.Quillbot import QuillbotStream
@@ -12,6 +13,8 @@ from fishr.Types import (
     ChatCompletionChunk,
     ChunkChoice,
     Delta,
+    FunctionCall,
+    ToolCallDelta,
 )
 
 
@@ -460,6 +463,97 @@ class TelnyxAsyncStream:
         )
 
 
+class KaiSyncStream:
+    __slots__ = ("inner", "model")
+
+    def __init__(self, raw: KaiStream, model: str) -> None:
+        self.inner = iter(raw)
+        self.model = model
+
+    def __iter__(self) -> Iterator[ChatCompletionChunk]:
+        return self
+
+    def __next__(self) -> ChatCompletionChunk:
+        item = next(self.inner)
+        if isinstance(item, tuple) and len(item) == 2 and item[1] == "tool_calls":
+            tcs, _ = item
+            deltas = tuple(
+                ToolCallDelta(
+                    index=tc.get("index", 0),
+                    id=tc.get("id", ""),
+                    type=tc.get("type", "function"),
+                    function=FunctionCall(
+                        name=tc.get("name", ""),
+                        arguments=tc.get("arguments", ""),
+                    ),
+                )
+                for tc in tcs
+                if isinstance(tc, dict)
+            )
+            delta = Delta(role="assistant", tool_calls=deltas)
+        elif isinstance(item, tuple):
+            content, is_thinking = item
+            if is_thinking:
+                delta = Delta(role="assistant", thinking=content)
+            else:
+                delta = Delta(role="assistant", content=content)
+        else:
+            delta = Delta(role="assistant", content=item)
+        choice = ChunkChoice(index=0, delta=delta)
+        return ChatCompletionChunk(
+            id="",
+            model=self.model,
+            choices=(choice,),
+        )
+
+
+class KaiAsyncStream:
+    __slots__ = ("inner", "model")
+
+    def __init__(self, raw: KaiStream, model: str) -> None:
+        self.inner = raw.__aiter__() if hasattr(raw, "__aiter__") else raw
+        self.model = model
+
+    def __aiter__(self) -> AsyncIterator[ChatCompletionChunk]:
+        return self
+
+    async def __anext__(self) -> ChatCompletionChunk:
+        try:
+            item = await self.inner.__anext__()
+        except StopAsyncIteration:
+            raise
+        if isinstance(item, tuple) and len(item) == 2 and item[1] == "tool_calls":
+            tcs, _ = item
+            deltas = tuple(
+                ToolCallDelta(
+                    index=tc.get("index", 0),
+                    id=tc.get("id", ""),
+                    type=tc.get("type", "function"),
+                    function=FunctionCall(
+                        name=tc.get("name", ""),
+                        arguments=tc.get("arguments", ""),
+                    ),
+                )
+                for tc in tcs
+                if isinstance(tc, dict)
+            )
+            delta = Delta(role="assistant", tool_calls=deltas)
+        elif isinstance(item, tuple):
+            content, is_thinking = item
+            if is_thinking:
+                delta = Delta(role="assistant", thinking=content)
+            else:
+                delta = Delta(role="assistant", content=content)
+        else:
+            delta = Delta(role="assistant", content=item)
+        choice = ChunkChoice(index=0, delta=delta)
+        return ChatCompletionChunk(
+            id="",
+            model=self.model,
+            choices=(choice,),
+        )
+
+
 __all__ = [
     "SyncStream",
     "AsyncStream",
@@ -479,4 +573,6 @@ __all__ = [
     "ErisAsyncStream",
     "TelnyxSyncStream",
     "TelnyxAsyncStream",
+    "KaiSyncStream",
+    "KaiAsyncStream",
 ]
