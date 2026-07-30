@@ -16,11 +16,13 @@ KAI_MODELS = {
     "kai/m.1": "poolside/laguna-m.1:free",
     "kai/xs-2.1": "poolside/laguna-xs-2.1:free",
     "kai/xs.2": "poolside/laguna-xs.2:free",
+    "kai/s-2.1": "poolside/laguna-s-2.1:free",
     "kai/north-mini": "cohere/north-mini-code:free",
     "kai/nemo3-ultra": "nvidia/nemotron-3-ultra-550b-a55b:free",
     "kai/nemo3-super": "nvidia/nemotron-3-super-120b-a12b:free",
     "kai/nemo3-nemo": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
     "kai/3.7-flash": "stepfun/step-3.7-flash:free",
+    "kai/ling-3.0-flash": "inclusionai/ling-3.0-flash:free",
     "kai/openfree": "openrouter/free",
 }
 DEFAULT_MODEL = "kai/auto"
